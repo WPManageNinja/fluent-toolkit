@@ -5,7 +5,7 @@ Fluent Toolkit is a dedicated plugin for beta testers of Fluent Plugins. It prov
 
 
 ### How to Use the plugin
-- Download from Releases tab of this repo
+- Download from Releases tab of this repo or [click here to download](https://github.com/WPManageNinja/fluent-toolkit/releases/download/1.0.0/fluent-toolkit.zip)
 - Install on your WordPress site (Staging prefered)
 - Activate the plugin
 - Go to the Dashboard -> Fluent Toolkit menu in the WordPress admin panel
