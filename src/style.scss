@@ -1,0 +1,102 @@
+@import "~element-plus/theme-chalk/el-notification.css";
+@import "~element-plus/theme-chalk/el-loading.css";
+@import "~element-plus/theme-chalk/el-message-box.css";
+
+.fbeta_dashboard {
+  max-width: 960px;
+  margin: 50px auto;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+
+  * {
+    box-sizing: border-box;
+  }
+
+  .fluent_header {
+    border-bottom: 1px solid #eaeaea;
+    padding: 10px 20px;
+
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    p {
+      margin: 0;
+      font-size: 14px;
+      color: #666;
+    }
+  }
+
+  .fluent_content {
+    padding: 20px 20px;
+  }
+
+  .fluent_plugin {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    margin: 0 -20px;
+    padding: 15px 20px;
+    gap: 10px;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.02);
+    }
+
+    .fluent_plugin_statuses {
+      margin-top: 5px;
+
+      > * {
+        margin-right: 10px;
+        margin-bottom: 10px;
+      }
+    }
+
+    &:first-child {
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .fluent_plugin_name {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+
+      img {
+        width: 64px;
+        height: 64px;
+        border-radius: 10%;
+      }
+
+      h3 {
+        font-size: 18px;
+        color: #333;
+        margin: 0;
+      }
+
+      p {
+        font-size: 14px;
+        color: #666;
+        margin: 0;
+      }
+    }
+
+    // css for max width 667px
+    @media (max-width: 667px) {
+      flex-direction: column;
+      align-items: flex-start;
+      .fluent_plugin_name {
+        margin-bottom: 10px;
+        img {
+          width: 48px;
+          height: 48px;
+        }
+      }
+    }
+  }
+
+}
