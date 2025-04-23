@@ -84,18 +84,9 @@ class FluentToolkitBootstrap
         // get current plugin info
         $allPlugins = get_plugins();
         $fullSlug = $pluginSlug . '/' . $pluginSlug . '.php';
-
         require_once __DIR__ . '/Classes/ToolkitHelper.php';
-        $betaVersions = \FluentToolkit\Classes\ToolkitHelper::getVersions(true);
 
-        if (empty($betaVersions)) {
-            wp_send_json([
-                'message' => __('No beta version found.', 'fluent-toolkit'),
-                'status'  => false,
-            ], 500);
-        }
-
-        if ($pluginSlug == 'fluent-toolkit') {
+        if ($fullSlug == 'fluent-toolkit/fluent-toolkit.php') {
             $cachedSettings = get_option('__fluent_toolkit_versions', []);
             if ($cachedSettings) {
                 $targetBeta = $cachedSettings['toolkit'];
@@ -106,6 +97,15 @@ class FluentToolkitBootstrap
                 ], 422);
             }
         } else {
+            $betaVersions = \FluentToolkit\Classes\ToolkitHelper::getVersions(true);
+
+            if (empty($betaVersions)) {
+                wp_send_json([
+                    'message' => __('No beta version found.', 'fluent-toolkit'),
+                    'status'  => false,
+                ], 500);
+            }
+
             $targetBeta = array_filter($betaVersions, function ($beta) use ($pluginSlug) {
                 return $beta['slug'] === $pluginSlug;
             });

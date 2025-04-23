@@ -119,7 +119,9 @@ export default {
         },
         updateToolkit() {
             this.installing = true;
-            this.installPlugin('fluent-toolkit');
+            this.installPlugin({
+                slug: 'fluent-toolkit'
+            });
         },
         hideLicenseKey(licenseKey) {
             if (!licenseKey) {
