@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Fluent Toolkit
  * Description: A plugin dedicated to test beta features and functionalities before go live.
- * Version: 0.9
+ * Version: 1.0.0
  * Author: WPManageNinja
  * Text Domain: fluent-toolkit
  */
@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('FLUENT_TOOLKIT_VERSION', '0.9');
+define('FLUENT_TOOLKIT_VERSION', '1.0.0');
 define('FLUENT_BETA_TESTING_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('FLUENT_BETA_TESTING_PLUGIN_URL', plugin_dir_url(__FILE__));
 
