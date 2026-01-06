@@ -23,6 +23,14 @@ class FluentToolkitBootstrap
         add_action('admin_menu', array($this, 'admin_menu'));
         add_action('wp_ajax_fluent-beta-install', array($this, 'installBetaPlugin'));
         add_action('wp_ajax_fluent_beta_get_beta_versions', array($this, 'getBetaVersions'));
+
+        // add plugin menu link to plugins page
+        add_filter('plugin_action_links_' . plugin_basename(__FILE__), function ($links) {
+            $settings_link = '<a href="' . admin_url('index.php?page=fluent-plugins-toolkit') . '">' . __('Settings', 'fluent-toolkit') . '</a>';
+            array_unshift($links, $settings_link);
+            return $links;
+        });
+
     }
 
     public function admin_menu()
