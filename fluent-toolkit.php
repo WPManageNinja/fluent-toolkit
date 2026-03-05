@@ -35,13 +35,13 @@ class FluentToolkitBootstrap
 
     public function admin_menu()
     {
-        add_submenu_page(
-            'index.php',
+        add_menu_page(
             __('Fluent Toolkit', 'fluent-toolkit'),
             __('Fluent Toolkit', 'fluent-toolkit'),
             'manage_options',
             'fluent-plugins-toolkit',
             array($this, 'settingsPage'),
+            '',
             100
         );
     }
