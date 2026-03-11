@@ -1,0 +1,16 @@
+{
+    "name": "wpmanageninja/fluent-toolkit",
+    "description": "Toolkit plugin for beta features and AI integrations across Fluent plugins.",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "autoload": {
+        "psr-4": {
+            "FluentToolkit\\": "app/",
+            "FluentToolkit\\Classes\\": "Classes/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    }
+}

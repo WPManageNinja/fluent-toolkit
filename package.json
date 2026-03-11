@@ -1,10 +1,14 @@
 {
-  "name": "fluent-security",
+  "name": "fluent-toolkit",
   "version": "1.0.0",
-  "description": "",
+  "description": "Toolkit plugin for beta releases and AI integrations across Fluent plugins.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build:admin": "mix --production",
+    "watch:admin": "mix watch",
+    "build:ai-widget": "vite build --config vite.ai-widget.config.mjs",
+    "watch:ai-widget": "vite build --config vite.ai-widget.config.mjs --watch",
+    "build": "npm run build:admin && npm run build:ai-widget"
   },
   "keywords": [],
   "author": "",
@@ -17,13 +21,20 @@
     "vue-router": "^4.5.0"
   },
   "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^3.0.1",
     "@vue/compiler-sfc": "^3.5.13",
+    "autoprefixer": "^10.4.17",
     "laravel-mix": "^6.0.49",
+    "postcss": "^8.4.35",
     "resolve-url-loader": "^5.0.0",
     "sass": "^1.85.1",
+    "sass-embedded": "^1.97.2",
     "sass-loader": "^16.0.5",
+    "svelte": "^4.2.9",
+    "tailwindcss": "^3.4.1",
     "unplugin-auto-import": "^0.16.7",
     "unplugin-vue-components": "^0.25.2",
+    "vite": "^5.1.0",
     "vue-loader": "^17.4.2"
   }
 }

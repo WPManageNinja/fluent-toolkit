@@ -1,0 +1,167 @@
+
+#fluent-ai-root {
+  @tailwind base;
+  @tailwind components;
+  @tailwind utilities;
+}
+
+.fluent-ai-widget {
+
+  .message-plain-content {
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .message-rich-content {
+    color: inherit;
+    line-height: 1.6;
+    overflow-x: auto;
+
+    > * + * {
+      margin-top: 0.75rem;
+    }
+
+    p {
+      margin: 0;
+    }
+
+    ul,
+    ol {
+      margin: 0.75rem 0;
+      padding-left: 1.25rem;
+    }
+
+    ul {
+      list-style: disc;
+    }
+
+    ol {
+      list-style: decimal;
+    }
+
+    li + li {
+      margin-top: 0.25rem;
+    }
+
+    blockquote {
+      margin: 0.75rem 0;
+      padding-left: 0.875rem;
+      border-left: 3px solid #dbeafe;
+      color: #4b5563;
+    }
+
+    code {
+      display: inline-block;
+      padding: 0.1rem 0.35rem;
+      border-radius: 0.375rem;
+      background: #eff6ff;
+      color: #1d4ed8;
+      font-size: 0.85em;
+    }
+
+    pre {
+      margin: 0.75rem 0;
+      padding: 0.875rem;
+      overflow-x: auto;
+      border-radius: 0.75rem;
+      background: #111827;
+      color: #f9fafb;
+
+      code {
+        display: block;
+        padding: 0;
+        background: transparent;
+        color: inherit;
+      }
+    }
+
+    a {
+      color: #2563eb;
+      text-decoration: underline;
+    }
+
+    hr {
+      margin: 0.75rem 0;
+      border-color: #e5e7eb;
+    }
+  }
+
+  .table_wrapper {
+    overflow: auto;
+    display: block;
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border-radius: 0.375rem;
+    background: #f0f0f1;
+    font-size: 90%;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    thead {
+      background: #f9fafb;
+
+      th {
+        text-align: left;
+        font-weight: 600;
+        color: #374151;
+        padding: 5px;
+
+        @media (min-width: 640px) {
+          font-size: 0.875rem;
+        }
+      }
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #f3f4f6;
+      transition: background-color 0.15s ease;
+
+      &:hover {
+        background: rgba(249, 250, 251, 0.8);
+      }
+
+      &:nth-child(even) {
+        background: #ffffff;
+      }
+
+      td {
+        padding: 1rem 1.25rem;
+        white-space: nowrap;
+        color: #374151;
+
+        &:first-child {
+          font-weight: 500;
+          color: #111827;
+        }
+
+        &:last-child {
+          text-align: right;
+          font-weight: 500;
+        }
+      }
+    }
+
+    tfoot {
+      background: rgba(249, 250, 251, 0.7);
+      font-weight: 600;
+
+      td {
+        text-align: right;
+        color: #1f2937;
+      }
+
+      tr:last-child {
+        border-top: 2px solid #d1d5db;
+        font-size: 1.125rem;
+
+        td:last-child {
+          color: #4338ca; // indigo-700
+        }
+      }
+    }
+  }
+}

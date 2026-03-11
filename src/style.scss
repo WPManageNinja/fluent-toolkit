@@ -35,6 +35,22 @@
     padding: 20px 20px;
   }
 
+  .panel_header {
+    margin-bottom: 20px;
+
+    h3, h4 {
+      margin: 0 0 8px;
+      color: #2d2f32;
+    }
+
+    p {
+      margin: 0;
+      color: #5f6b76;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+  }
+
   .fluent_plugin {
     display: flex;
     justify-content: space-between;
@@ -96,6 +112,126 @@
           height: 48px;
         }
       }
+    }
+  }
+
+  .ai_settings_grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.9fr);
+    gap: 20px;
+    align-items: start;
+
+    @media (max-width: 900px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .ai_settings_panel,
+  .ai_status_panel {
+    border: 1px solid #e6eaf0;
+    border-radius: 12px;
+    padding: 20px;
+    background: #fff;
+  }
+
+  .ai_form {
+    margin-top: 20px;
+  }
+
+  .field_hint {
+    margin-top: 8px;
+    color: #667085;
+    font-size: 12px;
+    line-height: 1.5;
+
+    code {
+      background: #f4f6f8;
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+  }
+
+  .config_managed_box {
+    width: 100%;
+    background: #f8fafc;
+    border: 1px solid #dbe4ee;
+    border-radius: 10px;
+    padding: 14px 16px;
+    color: #475467;
+
+    strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #1f2937;
+    }
+
+    p {
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    p + p {
+      margin-top: 8px;
+    }
+
+    code {
+      background: #eef2f6;
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+  }
+
+  .panel_actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .status_tags {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .driver_list {
+    display: grid;
+    gap: 12px;
+  }
+
+  .driver_card {
+    border: 1px solid #e9edf3;
+    border-radius: 10px;
+    padding: 14px 16px;
+    background: #fafbfd;
+
+    p {
+      margin: 10px 0 0;
+      color: #5f6b76;
+      line-height: 1.5;
+    }
+  }
+
+  .driver_card_header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .override_list {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #edf0f4;
+
+    ul {
+      margin: 12px 0 0;
+      padding-left: 18px;
+      color: #48505a;
+    }
+
+    li {
+      margin-bottom: 8px;
     }
   }
 
