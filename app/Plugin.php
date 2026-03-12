@@ -179,6 +179,7 @@ class Plugin
             'enabled'                  => sanitize_text_field(wp_unslash($_POST['enabled'] ?? 'no')),
             'openai_api_key'           => wp_unslash($_POST['openai_api_key'] ?? ''),
             'openai_model'             => sanitize_text_field(wp_unslash($_POST['openai_model'] ?? '')),
+            'system_prompt'            => wp_unslash($_POST['system_prompt'] ?? ''),
             'sql_fallback'             => sanitize_text_field(wp_unslash($_POST['sql_fallback'] ?? 'yes')),
             'store_provider_responses' => sanitize_text_field(wp_unslash($_POST['store_provider_responses'] ?? 'yes')),
             'clear_api_key'            => sanitize_text_field(wp_unslash($_POST['clear_api_key'] ?? 'no')),

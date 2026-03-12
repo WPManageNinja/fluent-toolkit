@@ -58,6 +58,7 @@ class Module
                 'enabled'                  => $this->settings->isEnabled(),
                 'openai_api_key'           => '',
                 'openai_model'             => $this->settings->getOpenAiModel(),
+                'system_prompt'            => $this->settings->getSystemPrompt(),
                 'sql_fallback'             => $this->settings->isSqlFallbackEnabled(),
                 'store_provider_responses' => $this->settings->shouldStoreProviderResponses(),
                 'clear_api_key'            => false,
@@ -114,15 +115,22 @@ class Module
     private function hasStandalonePluginConflict(): bool
     {
         $activePlugins = (array) get_option('active_plugins', []);
+        $currentPlugin = plugin_basename(FLUENT_TOOLKIT_PLUGIN_FILE);
+        $standalonePlugins = array_filter([
+            'fluent-cart-ai/fluent-cart-ai.php',
+            'fluent-toolkit/fluent-cart-ai.php',
+        ], static function (string $plugin) use ($currentPlugin): bool {
+            return $plugin !== $currentPlugin;
+        });
 
-        if (in_array('fluent-cart-ai/fluent-cart-ai.php', $activePlugins, true)) {
+        if (array_intersect($standalonePlugins, $activePlugins)) {
             return true;
         }
 
         if (is_multisite()) {
             $networkPlugins = array_keys((array) get_site_option('active_sitewide_plugins', []));
 
-            return in_array('fluent-cart-ai/fluent-cart-ai.php', $networkPlugins, true);
+            return (bool) array_intersect($standalonePlugins, $networkPlugins);
         }
 
         return false;

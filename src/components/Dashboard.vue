@@ -82,155 +82,273 @@
                 </el-tab-pane>
 
                 <el-tab-pane label="AI Addon" name="ai">
-                    <div class="ai_settings_grid">
-                        <div class="ai_settings_panel">
-                            <div class="panel_header">
-                                <h3>AI Addon Settings</h3>
-                                <p>Enable Fluent AI and define the credentials used by supported plugin drivers like FluentCart.</p>
+                    <div class="toolkit_settings">
+                        <div class="toolkit_settings_header">
+                            <div>
+                                <h3>AI Assistant</h3>
+                                <p>Configure the shared AI addon for supported Fluent plugins like FluentCart.</p>
                             </div>
-
-                            <el-alert
-                                v-if="aiState.status?.blocked_by_standalone_plugin"
-                                title="The standalone fluent-cart-ai plugin is active. Disable it before booting AI from Fluent Toolkit to avoid duplicate widgets and routes."
-                                type="warning"
-                                :closable="false"
-                                show-icon
-                            />
-
-                            <el-alert
-                                v-else-if="aiState.status?.boot_ready"
-                                title="AI is ready to boot into active supported plugins."
-                                type="success"
-                                :closable="false"
-                                show-icon
-                            />
-
-                            <el-alert
-                                v-else-if="aiState.settings?.enabled && !aiState.status?.has_credentials"
-                                title="AI is enabled, but credentials are still missing."
-                                type="warning"
-                                :closable="false"
-                                show-icon
-                            />
-
-                            <el-alert
-                                v-else-if="aiState.settings?.enabled && !hasAvailableDrivers"
-                                title="AI is enabled, but no supported Fluent plugin is active on this site yet."
-                                type="info"
-                                :closable="false"
-                                show-icon
-                            />
-
-                            <el-form label-position="top" class="ai_form">
-                                <el-form-item label="Activate AI addon">
-                                    <el-switch v-model="aiForm.enabled"/>
-                                </el-form-item>
-
-                                <el-form-item v-if="!isAiFieldLocked('openai_api_key')" label="OpenAI API Key">
-                                    <el-input
-                                        v-model="aiForm.openai_api_key"
-                                        type="password"
-                                        show-password
-                                        placeholder="Leave blank to keep the current key"
-                                    />
-                                    <div class="field_hint">
-                                        <span v-if="aiState.api_key?.configured">
-                                            Current source: {{ aiState.api_key.source }}<span v-if="aiState.api_key.preview"> ({{ aiState.api_key.preview }})</span>
-                                        </span>
-                                        <span v-else>No API key configured yet.</span>
-                                    </div>
-                                    <div v-if="isAiFieldLocked('openai_api_key')" class="field_hint">
-                                        This value is overridden by <code>FLUENT_TOOLKIT_AI_OPENAI_API_KEY</code>.
-                                    </div>
-                                    <el-checkbox
-                                        v-if="canClearStoredApiKey"
-                                        v-model="aiForm.clear_api_key"
-                                    >
-                                        Clear the saved database key
-                                    </el-checkbox>
-                                </el-form-item>
-
-                                <el-form-item v-else label="OpenAI API Key">
-                                    <div class="config_managed_box">
-                                        <strong>Managed by wp-config.php</strong>
-                                        <p>
-                                            This site is using <code>FLUENT_TOOLKIT_AI_OPENAI_API_KEY</code>, so the API key is not editable from Fluent Toolkit.
-                                        </p>
-                                        <p v-if="aiState.api_key?.preview">
-                                            Current value: {{ aiState.api_key.preview }}
-                                        </p>
-                                    </div>
-                                </el-form-item>
-
-                                <el-form-item label="OpenAI Model">
-                                    <el-input
-                                        v-model="aiForm.openai_model"
-                                        :disabled="isAiFieldLocked('openai_model')"
-                                        placeholder="gpt-4.1-mini"
-                                    />
-                                    <div v-if="isAiFieldLocked('openai_model')" class="field_hint">
-                                        This value is overridden by <code>FLUENT_TOOLKIT_AI_OPENAI_MODEL</code>.
-                                    </div>
-                                </el-form-item>
-
-                                <el-form-item label="Enable SQL fallback">
-                                    <el-switch v-model="aiForm.sql_fallback" :disabled="isAiFieldLocked('sql_fallback')"/>
-                                    <div class="field_hint">Use guarded read-only SQL only when normal AI tools are insufficient.</div>
-                                </el-form-item>
-
-                                <el-form-item label="Store provider responses">
-                                    <el-switch v-model="aiForm.store_provider_responses" :disabled="isAiFieldLocked('store_provider_responses')"/>
-                                    <div class="field_hint">Keep provider response references available for tool continuation and traceability.</div>
-                                </el-form-item>
-
-                                <div class="panel_actions">
-                                    <el-button type="primary" :loading="aiSaving" @click="saveAiSettings">
-                                        Save AI Settings
-                                    </el-button>
-                                    <el-button :disabled="aiSaving" @click="resetAiForm">Reset</el-button>
-                                </div>
-                            </el-form>
+                            <div class="panel_actions">
+                                <el-button type="primary" :loading="aiSaving" @click="saveAiSettings">
+                                    Save Settings
+                                </el-button>
+                                <el-button :disabled="aiSaving" @click="resetAiForm">Reset</el-button>
+                            </div>
                         </div>
 
-                        <div class="ai_status_panel">
-                            <div class="panel_header">
-                                <h3>Runtime Status</h3>
-                                <p>The AI widget loads only when the addon is enabled, credentials exist, and a supported plugin driver is active.</p>
-                            </div>
-
-                            <div class="status_tags">
-                                <el-tag :type="aiState.settings?.enabled ? 'success' : 'info'">
-                                    {{ aiState.settings?.enabled ? 'Enabled' : 'Disabled' }}
-                                </el-tag>
-                                <el-tag :type="aiState.status?.has_credentials ? 'success' : 'warning'">
-                                    {{ aiState.status?.has_credentials ? 'Credentials Ready' : 'Missing Credentials' }}
-                                </el-tag>
-                                <el-tag :type="aiState.status?.boot_ready ? 'success' : 'info'">
-                                    {{ aiState.status?.boot_ready ? 'Boot Ready' : 'Waiting' }}
-                                </el-tag>
-                            </div>
-
-                            <div class="driver_list">
-                                <div v-for="driver in aiState.drivers" :key="driver.slug" class="driver_card">
-                                    <div class="driver_card_header">
-                                        <strong>{{ driver.label }}</strong>
-                                        <el-tag :type="driver.available ? 'success' : 'info'">
-                                            {{ driver.available ? 'Active' : 'Inactive' }}
-                                        </el-tag>
+                        <div class="toolkit_settings_body">
+                            <div class="toolkit_settings_section">
+                                <div class="toolkit_settings_section_content toolkit_rounded_top">
+                                    <div class="toolkit_setting_switch">
+                                        <div class="toolkit_switch">
+                                            <el-switch v-model="aiForm.enabled"/>
+                                        </div>
+                                        <div class="toolkit_switch_label">
+                                            <p>Enable AI Addon</p>
+                                            <span>When enabled, Fluent Toolkit will inject the AI assistant into supported plugins that have valid credentials.</span>
+                                        </div>
                                     </div>
-                                    <p>{{ driver.message }}</p>
                                 </div>
                             </div>
 
-                            <div class="override_list" v-if="hasAnyOverrides">
-                                <h4>Constant Overrides</h4>
-                                <ul>
-                                    <li v-if="aiState.overrides?.openai_api_key"><code>FLUENT_TOOLKIT_AI_OPENAI_API_KEY</code></li>
-                                    <li v-if="aiState.overrides?.openai_model"><code>FLUENT_TOOLKIT_AI_OPENAI_MODEL</code></li>
-                                    <li v-if="aiState.overrides?.sql_fallback"><code>FLUENT_TOOLKIT_AI_ENABLE_SQL_FALLBACK</code></li>
-                                    <li v-if="aiState.overrides?.store_provider_responses"><code>FLUENT_TOOLKIT_AI_STORE_PROVIDER_RESPONSES</code></li>
-                                </ul>
-                            </div>
+                            <template v-if="aiForm.enabled">
+                                <div class="toolkit_status_alerts">
+                                    <el-alert
+                                        v-if="aiState.status?.blocked_by_standalone_plugin"
+                                        title="A standalone FluentCart AI plugin is active. Disable it before booting AI from Fluent Toolkit to avoid duplicate widgets and routes."
+                                        type="warning"
+                                        :closable="false"
+                                        show-icon
+                                    />
+
+                                    <el-alert
+                                        v-else-if="aiState.status?.boot_ready"
+                                        title="AI is ready to boot into active supported plugins."
+                                        type="success"
+                                        :closable="false"
+                                        show-icon
+                                    />
+
+                                    <el-alert
+                                        v-else-if="!aiState.status?.has_credentials"
+                                        title="AI is enabled, but credentials are still missing."
+                                        type="warning"
+                                        :closable="false"
+                                        show-icon
+                                    />
+
+                                    <el-alert
+                                        v-else-if="!hasAvailableDrivers"
+                                        title="AI is enabled, but no supported Fluent plugin is active on this site yet."
+                                        type="info"
+                                        :closable="false"
+                                        show-icon
+                                    />
+                                </div>
+
+                                <div class="toolkit_settings_section">
+                                    <div class="toolkit_settings_section_header">
+                                        <h4>AI Provider</h4>
+                                    </div>
+                                    <div class="toolkit_settings_section_content">
+                                        <div class="toolkit_setting_option">
+                                            <div class="toolkit_select_option_label">
+                                                <p>Provider</p>
+                                                <span>Fluent Toolkit currently boots the native AI addon with OpenAI.</span>
+                                            </div>
+                                            <div class="toolkit_select_option">
+                                                <el-select v-model="aiForm.provider" size="large" class="toolkit_select" disabled>
+                                                    <el-option v-for="provider in providerOptions" :key="provider.value" :label="provider.label" :value="provider.value"/>
+                                                </el-select>
+                                            </div>
+                                        </div>
+
+                                        <div class="toolkit_setting_option">
+                                            <div class="toolkit_select_option_label">
+                                                <p>Model</p>
+                                                <span>Choose the OpenAI model used for native AI requests.</span>
+                                            </div>
+                                            <div class="toolkit_select_option">
+                                                <el-select
+                                                    v-model="aiForm.openai_model"
+                                                    size="large"
+                                                    class="toolkit_select"
+                                                    filterable
+                                                    allow-create
+                                                    default-first-option
+                                                    :disabled="isAiFieldLocked('openai_model')"
+                                                >
+                                                    <el-option
+                                                        v-for="model in openAiModels"
+                                                        :key="model.value"
+                                                        :label="model.label"
+                                                        :value="model.value"
+                                                    />
+                                                </el-select>
+                                                <div v-if="isAiFieldLocked('openai_model')" class="field_hint">
+                                                    This value is overridden by <code>FLUENT_TOOLKIT_AI_OPENAI_MODEL</code>.
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="toolkit_setting_option">
+                                            <div class="toolkit_select_option_label">
+                                                <p>Store Provider Responses</p>
+                                                <span>Keep provider response references for continuation, retries, and tool loops.</span>
+                                            </div>
+                                            <div class="toolkit_select_option">
+                                                <el-switch v-model="aiForm.store_provider_responses" :disabled="isAiFieldLocked('store_provider_responses')"/>
+                                            </div>
+                                        </div>
+
+                                        <div class="toolkit_setting_option">
+                                            <div class="toolkit_select_option_label">
+                                                <p>Enable SQL Fallback</p>
+                                                <span>Use guarded read-only SQL only when the normal AI tools and aggregates are insufficient.</span>
+                                            </div>
+                                            <div class="toolkit_select_option">
+                                                <el-switch v-model="aiForm.sql_fallback" :disabled="isAiFieldLocked('sql_fallback')"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="toolkit_settings_section">
+                                    <div class="toolkit_settings_section_header">
+                                        <h4>API Key</h4>
+                                    </div>
+                                    <div class="toolkit_settings_section_content">
+                                        <div class="toolkit_setting_option">
+                                            <div class="toolkit_select_option_label">
+                                                <p>OpenAI API Key</p>
+                                                <span v-if="!isAiFieldLocked('openai_api_key')">Enter your OpenAI API key. Leave the field empty to keep the current saved key.</span>
+                                                <span v-else>The API key is being managed from <code>wp-config.php</code>.</span>
+                                            </div>
+                                            <div class="toolkit_select_option">
+                                                <template v-if="!isAiFieldLocked('openai_api_key')">
+                                                    <el-input
+                                                        v-model="aiForm.openai_api_key"
+                                                        size="large"
+                                                        type="password"
+                                                        show-password
+                                                        autocomplete="off"
+                                                        data-1p-ignore
+                                                        data-lpignore="true"
+                                                        data-bwignore
+                                                        placeholder="Enter OpenAI API Key"
+                                                    />
+                                                    <div class="field_hint">
+                                                        <span v-if="aiState.api_key?.configured">
+                                                            Current source: {{ aiState.api_key.source }}<span v-if="aiState.api_key.preview"> ({{ aiState.api_key.preview }})</span>
+                                                        </span>
+                                                        <span v-else>No API key configured yet.</span>
+                                                    </div>
+                                                    <el-checkbox v-if="canClearStoredApiKey" v-model="aiForm.clear_api_key">
+                                                        Clear the saved database key
+                                                    </el-checkbox>
+                                                </template>
+                                                <div v-else class="config_managed_box">
+                                                    <strong>Managed by wp-config.php</strong>
+                                                    <p>This site is using <code>FLUENT_TOOLKIT_AI_OPENAI_API_KEY</code>, so the API key is not editable from Fluent Toolkit.</p>
+                                                    <p v-if="aiState.api_key?.preview">Current value: {{ aiState.api_key.preview }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="toolkit_settings_section">
+                                    <div class="toolkit_settings_section_header">
+                                        <h4>Custom Instructions</h4>
+                                    </div>
+                                    <div class="toolkit_settings_section_content">
+                                        <div class="toolkit_setting_option">
+                                            <div class="toolkit_select_option_label">
+                                                <p>Custom System Prompt</p>
+                                                <span>These instructions will be included with every AI request. Use this to set brand voice, guardrails, or store-specific guidance.</span>
+                                            </div>
+                                            <div class="toolkit_select_option">
+                                                <el-input
+                                                    v-model="aiForm.system_prompt"
+                                                    type="textarea"
+                                                    :rows="5"
+                                                    :disabled="isAiFieldLocked('system_prompt')"
+                                                    placeholder="e.g. Keep answers concise. Always format grouped data in tables. Use the store’s brand tone."
+                                                    style="width: 100%;"
+                                                />
+                                                <div v-if="isAiFieldLocked('system_prompt')" class="field_hint">
+                                                    This value is overridden by <code>FLUENT_TOOLKIT_AI_SYSTEM_PROMPT</code>.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="toolkit_settings_section">
+                                    <div class="toolkit_settings_section_header">
+                                        <h4>Runtime Status</h4>
+                                    </div>
+                                    <div class="toolkit_settings_section_content">
+                                        <div class="toolkit_setting_option">
+                                            <div class="toolkit_select_option_label">
+                                                <p>Current Status</p>
+                                                <span>The widget boots only when credentials exist, the addon is enabled, and a supported plugin driver is active.</span>
+                                            </div>
+                                            <div class="toolkit_select_option">
+                                                <div class="status_tags">
+                                                    <el-tag :type="aiState.settings?.enabled ? 'success' : 'info'">
+                                                        {{ aiState.settings?.enabled ? 'Enabled' : 'Disabled' }}
+                                                    </el-tag>
+                                                    <el-tag :type="aiState.status?.has_credentials ? 'success' : 'warning'">
+                                                        {{ aiState.status?.has_credentials ? 'Credentials Ready' : 'Missing Credentials' }}
+                                                    </el-tag>
+                                                    <el-tag :type="aiState.status?.boot_ready ? 'success' : 'info'">
+                                                        {{ aiState.status?.boot_ready ? 'Boot Ready' : 'Waiting' }}
+                                                    </el-tag>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="toolkit_setting_option">
+                                            <div class="toolkit_select_option_label">
+                                                <p>Supported Integrations</p>
+                                                <span>These drivers are available to host the AI widget.</span>
+                                            </div>
+                                            <div class="toolkit_select_option">
+                                                <div class="driver_list">
+                                                    <div v-for="driver in aiState.drivers" :key="driver.slug" class="driver_card">
+                                                        <div class="driver_card_header">
+                                                            <strong>{{ driver.label }}</strong>
+                                                            <el-tag :type="driver.available ? 'success' : 'info'">
+                                                                {{ driver.available ? 'Active' : 'Inactive' }}
+                                                            </el-tag>
+                                                        </div>
+                                                        <p>{{ driver.message }}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div v-if="hasAnyOverrides" class="toolkit_setting_option">
+                                            <div class="toolkit_select_option_label">
+                                                <p>Constant Overrides</p>
+                                                <span>These values are being controlled from code and override the saved UI values.</span>
+                                            </div>
+                                            <div class="toolkit_select_option">
+                                                <div class="override_list inline_override_list">
+                                                    <ul>
+                                                        <li v-if="aiState.overrides?.openai_api_key"><code>FLUENT_TOOLKIT_AI_OPENAI_API_KEY</code></li>
+                                                        <li v-if="aiState.overrides?.openai_model"><code>FLUENT_TOOLKIT_AI_OPENAI_MODEL</code></li>
+                                                        <li v-if="aiState.overrides?.system_prompt"><code>FLUENT_TOOLKIT_AI_SYSTEM_PROMPT</code></li>
+                                                        <li v-if="aiState.overrides?.sql_fallback"><code>FLUENT_TOOLKIT_AI_ENABLE_SQL_FALLBACK</code></li>
+                                                        <li v-if="aiState.overrides?.store_provider_responses"><code>FLUENT_TOOLKIT_AI_STORE_PROVIDER_RESPONSES</code></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
                         </div>
                     </div>
                 </el-tab-pane>
@@ -247,6 +365,7 @@ const defaultAiPayload = () => ({
         enabled: false,
         openai_api_key: '',
         openai_model: 'gpt-4.1-mini',
+        system_prompt: '',
         sql_fallback: true,
         store_provider_responses: true,
         clear_api_key: false
@@ -265,11 +384,20 @@ const defaultAiPayload = () => ({
     overrides: {
         openai_api_key: false,
         openai_model: false,
+        system_prompt: false,
         sql_fallback: false,
         store_provider_responses: false
     },
     drivers: []
 });
+
+const OPENAI_MODELS = [
+    { value: 'gpt-4.1-mini', label: 'GPT-4.1 Mini' },
+    { value: 'gpt-4.1', label: 'GPT-4.1' },
+    { value: 'gpt-4o-mini', label: 'GPT-4o Mini' },
+    { value: 'gpt-4o', label: 'GPT-4o' },
+    { value: 'gpt-5-mini', label: 'GPT-5 Mini' }
+];
 
 export default {
     name: 'Dashboard',
@@ -282,10 +410,16 @@ export default {
             loading: false,
             aiSaving: false,
             aiState: defaultAiPayload(),
+            providerOptions: [
+                { value: 'openai', label: 'OpenAI' }
+            ],
+            openAiModels: OPENAI_MODELS,
             aiForm: {
                 enabled: false,
+                provider: 'openai',
                 openai_api_key: '',
                 openai_model: 'gpt-4.1-mini',
+                system_prompt: '',
                 sql_fallback: true,
                 store_provider_responses: true,
                 clear_api_key: false
@@ -313,8 +447,10 @@ export default {
             const settings = this.aiState.settings || {};
             this.aiForm = {
                 enabled: !!settings.enabled,
+                provider: 'openai',
                 openai_api_key: '',
                 openai_model: settings.openai_model || 'gpt-4.1-mini',
+                system_prompt: settings.system_prompt || '',
                 sql_fallback: !!settings.sql_fallback,
                 store_provider_responses: !!settings.store_provider_responses,
                 clear_api_key: false
@@ -381,6 +517,7 @@ export default {
                 enabled: this.aiForm.enabled ? 'yes' : 'no',
                 openai_api_key: this.aiForm.openai_api_key,
                 openai_model: this.aiForm.openai_model,
+                system_prompt: this.aiForm.system_prompt,
                 sql_fallback: this.aiForm.sql_fallback ? 'yes' : 'no',
                 store_provider_responses: this.aiForm.store_provider_responses ? 'yes' : 'no',
                 clear_api_key: this.aiForm.clear_api_key ? 'yes' : 'no'

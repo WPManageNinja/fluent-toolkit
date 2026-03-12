@@ -12,6 +12,7 @@ class Settings
             'enabled'                  => 'no',
             'openai_api_key'           => '',
             'openai_model'             => 'gpt-4.1-mini',
+            'system_prompt'            => '',
             'sql_fallback'             => 'yes',
             'store_provider_responses' => 'yes',
         ];
@@ -38,6 +39,10 @@ class Settings
         if (!$this->hasOverride('openai_model')) {
             $model = trim((string) ($input['openai_model'] ?? ''));
             $payload['openai_model'] = $model !== '' ? sanitize_text_field($model) : $existing['openai_model'];
+        }
+
+        if (!$this->hasOverride('system_prompt')) {
+            $payload['system_prompt'] = sanitize_textarea_field((string) ($input['system_prompt'] ?? $existing['system_prompt']));
         }
 
         if (!$this->hasOverride('sql_fallback')) {
@@ -131,11 +136,16 @@ class Settings
 
     public function getSystemPrompt(): string
     {
-        if (!defined('FLUENT_TOOLKIT_AI_SYSTEM_PROMPT')) {
-            return '';
+        if (defined('FLUENT_TOOLKIT_AI_SYSTEM_PROMPT')) {
+            return trim((string) FLUENT_TOOLKIT_AI_SYSTEM_PROMPT);
         }
 
-        return trim((string) FLUENT_TOOLKIT_AI_SYSTEM_PROMPT);
+        $envValue = getenv('FLUENT_TOOLKIT_AI_SYSTEM_PROMPT');
+        if ($envValue) {
+            return trim((string) $envValue);
+        }
+
+        return trim((string) $this->all()['system_prompt']);
     }
 
     public function isSqlFallbackEnabled(): bool
@@ -227,6 +237,7 @@ class Settings
         return [
             'openai_api_key'           => $this->hasOverride('openai_api_key'),
             'openai_model'             => $this->hasOverride('openai_model'),
+            'system_prompt'            => $this->hasOverride('system_prompt'),
             'sql_fallback'             => $this->hasOverride('sql_fallback'),
             'store_provider_responses' => $this->hasOverride('store_provider_responses'),
         ];
@@ -237,6 +248,7 @@ class Settings
         return match ($field) {
             'openai_api_key' => defined('FLUENT_TOOLKIT_AI_OPENAI_API_KEY') || getenv('FLUENT_TOOLKIT_AI_OPENAI_API_KEY') !== false,
             'openai_model' => defined('FLUENT_TOOLKIT_AI_OPENAI_MODEL') || getenv('FLUENT_TOOLKIT_AI_OPENAI_MODEL') !== false,
+            'system_prompt' => defined('FLUENT_TOOLKIT_AI_SYSTEM_PROMPT') || getenv('FLUENT_TOOLKIT_AI_SYSTEM_PROMPT') !== false,
             'sql_fallback' => defined('FLUENT_TOOLKIT_AI_ENABLE_SQL_FALLBACK') || getenv('FLUENT_TOOLKIT_AI_ENABLE_SQL_FALLBACK') !== false,
             'store_provider_responses' => defined('FLUENT_TOOLKIT_AI_STORE_PROVIDER_RESPONSES') || getenv('FLUENT_TOOLKIT_AI_STORE_PROVIDER_RESPONSES') !== false,
             default => false,

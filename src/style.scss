@@ -35,22 +35,6 @@
     padding: 20px 20px;
   }
 
-  .panel_header {
-    margin-bottom: 20px;
-
-    h3, h4 {
-      margin: 0 0 8px;
-      color: #2d2f32;
-    }
-
-    p {
-      margin: 0;
-      color: #5f6b76;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-  }
-
   .fluent_plugin {
     display: flex;
     justify-content: space-between;
@@ -115,27 +99,129 @@
     }
   }
 
-  .ai_settings_grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.9fr);
-    gap: 20px;
-    align-items: start;
+  .toolkit_settings {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+  }
 
-    @media (max-width: 900px) {
+  .toolkit_settings_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px 24px;
+    border-bottom: 1px solid #eef2f6;
+
+    h3 {
+      margin: 0 0 6px;
+      font-size: 22px;
+      color: #111827;
+    }
+
+    p {
+      margin: 0;
+      color: #667085;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 767px) {
+      flex-direction: column;
+    }
+  }
+
+  .toolkit_settings_body {
+    padding: 24px;
+    background: #f8fafc;
+  }
+
+  .toolkit_settings_section {
+    margin-bottom: 20px;
+  }
+
+  .toolkit_settings_section_header {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-bottom: 0;
+    border-radius: 12px 12px 0 0;
+    padding: 14px 18px;
+
+    h4 {
+      margin: 0;
+      font-size: 15px;
+      color: #0f172a;
+      font-weight: 600;
+    }
+  }
+
+  .toolkit_settings_section_content {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0 0 12px 12px;
+    padding: 0;
+  }
+
+  .toolkit_rounded_top {
+    border-radius: 12px;
+  }
+
+  .toolkit_setting_switch,
+  .toolkit_setting_option {
+    display: grid;
+    grid-template-columns: minmax(240px, 0.95fr) minmax(0, 1.25fr);
+    gap: 24px;
+    padding: 18px;
+    align-items: start;
+    border-bottom: 1px solid #eef2f6;
+
+    &:last-child {
+      border-bottom: 0;
+    }
+
+    @media (max-width: 767px) {
       grid-template-columns: 1fr;
     }
   }
 
-  .ai_settings_panel,
-  .ai_status_panel {
-    border: 1px solid #e6eaf0;
-    border-radius: 12px;
-    padding: 20px;
-    background: #fff;
+  .toolkit_switch {
+    padding-top: 2px;
   }
 
-  .ai_form {
-    margin-top: 20px;
+  .toolkit_switch_label,
+  .toolkit_select_option_label {
+    p {
+      margin: 0 0 6px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    span {
+      display: block;
+      color: #667085;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    code {
+      background: #eef2f6;
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+  }
+
+  .toolkit_select_option {
+    min-width: 0;
+  }
+
+  .toolkit_select {
+    width: 100%;
+  }
+
+  .toolkit_status_alerts {
+    margin-bottom: 20px;
   }
 
   .field_hint {
@@ -220,12 +306,8 @@
   }
 
   .override_list {
-    margin-top: 24px;
-    padding-top: 20px;
-    border-top: 1px solid #edf0f4;
-
     ul {
-      margin: 12px 0 0;
+      margin: 0;
       padding-left: 18px;
       color: #48505a;
     }
@@ -233,6 +315,12 @@
     li {
       margin-bottom: 8px;
     }
+  }
+
+  .inline_override_list {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
   }
 
 }
