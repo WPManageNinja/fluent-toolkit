@@ -55,6 +55,54 @@
             </div>
         </section>
 
+        <!-- MCP -->
+        <section class="ft-mcp-panel" v-loading="mcpLoading">
+            <div class="ft-mcp-header">
+                <div>
+                    <div class="ft-hero-eyebrow">MCP Connection</div>
+                    <h2>FluentCRM MCP OAuth</h2>
+                    <p>OAuth protected access for the FluentCRM MCP endpoint.</p>
+                </div>
+                <div class="ft-mcp-actions">
+                    <a
+                        v-if="mcpStatus && mcpStatus.oauth_settings_url && !mcpStatus.standalone_oauth_bridge_active"
+                        :href="mcpStatus.oauth_settings_url"
+                        class="ft-btn ft-btn-ghost"
+                    >Manage</a>
+                    <el-switch
+                        v-if="mcpStatus"
+                        :model-value="mcpStatus.oauth_enabled"
+                        :disabled="mcpStatus.standalone_oauth_bridge_active"
+                        :loading="mcpSaving"
+                        @change="toggleMcpOAuth"
+                    />
+                </div>
+            </div>
+
+            <div v-if="mcpStatus && mcpStatus.standalone_oauth_bridge_active" class="ft-mcp-warning">
+                Deactivate and remove the standalone FluentCRM MCP OAuth Bridge plugin before enabling Toolkit MCP OAuth.
+            </div>
+
+            <div v-if="mcpStatus" class="ft-mcp-grid">
+                <div>
+                    <span>Adapter</span>
+                    <strong>{{ mcpStatus.adapter_available ? adapterProviderLabel : 'Unavailable' }}</strong>
+                </div>
+                <div>
+                    <span>Abilities API</span>
+                    <strong>{{ mcpStatus.abilities_available ? 'Loaded' : 'Missing' }}</strong>
+                </div>
+                <div>
+                    <span>MCP URL</span>
+                    <code>{{ mcpStatus.mcp_url }}</code>
+                </div>
+                <div>
+                    <span>Dynamic registration</span>
+                    <code>{{ mcpStatus.registration_endpoint }}</code>
+                </div>
+            </div>
+        </section>
+
         <!-- Toolbar -->
         <div class="ft-toolbar">
             <div class="ft-channels" role="tablist">
@@ -172,6 +220,9 @@ export default {
             betaPlugins: [],
             installing: false,
             loading: false,
+            mcpLoading: false,
+            mcpSaving: false,
+            mcpStatus: null,
             activeChannel: 'all',
             searchQuery: '',
         };
@@ -185,6 +236,21 @@ export default {
         },
         betaCount() {
             return this.betaPlugins.filter(p => p.has_beta_update || p.beta_version || p.is_beta).length;
+        },
+        adapterProviderLabel() {
+            if (!this.mcpStatus) {
+                return '';
+            }
+
+            if (this.mcpStatus.adapter_provider === 'plugin') {
+                return 'External plugin';
+            }
+
+            if (this.mcpStatus.adapter_provider === 'toolkit') {
+                return 'Toolkit fallback';
+            }
+
+            return 'Available';
         },
         filteredPlugins() {
             let plugins = this.betaPlugins;
@@ -230,6 +296,36 @@ export default {
                     this.loading = false;
                 });
         },
+        getMcpStatus() {
+            this.mcpLoading = true;
+            this.$get('fluent_toolkit_mcp_status')
+                .then(response => {
+                    this.mcpStatus = response;
+                })
+                .catch(error => {
+                    this.$handleError(error);
+                })
+                .finally(() => {
+                    this.mcpLoading = false;
+                });
+        },
+        toggleMcpOAuth(enabled) {
+            this.mcpSaving = true;
+            this.$post('fluent_toolkit_mcp_oauth_toggle', {
+                enabled: enabled ? 'yes' : 'no'
+            })
+                .then(response => {
+                    this.$notify.success(response.message);
+                    this.getMcpStatus();
+                })
+                .catch(error => {
+                    this.$handleError(error);
+                    this.getMcpStatus();
+                })
+                .finally(() => {
+                    this.mcpSaving = false;
+                });
+        },
         installPlugin(plugin, beta = '') {
             let licenseKey = plugin.license_key;
             if (plugin.require_license == 'yes' && !plugin.license_key) {
@@ -271,6 +367,7 @@ export default {
     },
     mounted() {
         this.getBetaPlugins();
+        this.getMcpStatus();
     },
     created() {
         jQuery('.update-nag,.notice, #wpbody-content > .updated, #wpbody-content > .error').remove();

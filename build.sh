@@ -25,6 +25,11 @@ cp index.php          "${BUILD_DIR}/"
 # Whole Classes dir (index.php included)
 cp -r Classes "${BUILD_DIR}/Classes"
 
+# PHP modules + Composer dependencies
+cp -r includes "${BUILD_DIR}/includes"
+cp composer.json composer.lock "${BUILD_DIR}/"
+cp -r vendor "${BUILD_DIR}/vendor"
+
 # Compiled assets + security index
 mkdir -p "${BUILD_DIR}/dist"
 cp dist/app.js "${BUILD_DIR}/dist/"

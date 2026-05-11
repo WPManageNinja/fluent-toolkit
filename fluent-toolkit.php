@@ -2,9 +2,10 @@
 /**
  * Plugin Name: Fluent Toolkit
  * Description: A plugin dedicated to test beta features and functionalities before go live.
- * Version: 1.1.0
+ * Version: 1.2.0
  * Author: WPManageNinja
  * Text Domain: fluent-toolkit
+ * Requires PHP: 7.4
  */
 
 // Exit if accessed directly
@@ -12,9 +13,126 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('FLUENT_TOOLKIT_VERSION', '1.1.0');
+define('FLUENT_TOOLKIT_VERSION', '1.2.0');
 define('FLUENT_BETA_TESTING_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('FLUENT_BETA_TESTING_PLUGIN_URL', plugin_dir_url(__FILE__));
+define('FLUENT_TOOLKIT_PLUGIN_FILE', __FILE__);
+
+spl_autoload_register(function ($class) {
+    if (strpos($class, 'FluentToolkit\\Classes\\') === 0) {
+        $relative = substr($class, strlen('FluentToolkit\\Classes\\'));
+        $file = FLUENT_BETA_TESTING_PLUGIN_PATH . 'Classes/' . str_replace('\\', '/', $relative) . '.php';
+        if (is_readable($file)) {
+            require_once $file;
+        }
+        return;
+    }
+
+    if (strpos($class, 'FluentToolkit\\Mcp\\') === 0) {
+        $relative = substr($class, strlen('FluentToolkit\\Mcp\\'));
+        $file = FLUENT_BETA_TESTING_PLUGIN_PATH . 'includes/Mcp/' . str_replace('\\', '/', $relative) . '.php';
+        if (is_readable($file)) {
+            require_once $file;
+        }
+    }
+});
+
+function fluent_toolkit_load_autoloader()
+{
+    $composerAutoloader = FLUENT_BETA_TESTING_PLUGIN_PATH . 'vendor/autoload.php';
+    if (is_readable($composerAutoloader)) {
+        require_once $composerAutoloader;
+    }
+}
+
+fluent_toolkit_load_autoloader();
+
+add_action('plugins_loaded', function () {
+    if (class_exists('\FluentToolkit\Mcp\AdapterBootstrap')) {
+        \FluentToolkit\Mcp\AdapterBootstrap::boot();
+    }
+}, 1);
+
+register_activation_hook(__FILE__, function () {
+    fluent_toolkit_load_autoloader();
+
+    if (class_exists('\FluentToolkit\Mcp\OAuth\Settings')) {
+        \FluentToolkit\Mcp\OAuth\Settings::installDefaults();
+        \FluentToolkit\Mcp\OAuth\Plugin::addRewriteRules();
+        flush_rewrite_rules();
+    }
+});
+
+register_deactivation_hook(__FILE__, function () {
+    flush_rewrite_rules();
+});
+
+add_action('plugins_loaded', function () {
+    if (
+        class_exists('\FluentToolkit\Classes\McpStatus')
+        && \FluentToolkit\Classes\McpStatus::standaloneOAuthBridgeActive()
+    ) {
+        return;
+    }
+
+    if (class_exists('\FluentToolkit\Mcp\OAuth\Plugin')) {
+        \FluentToolkit\Mcp\OAuth\Plugin::boot();
+    }
+}, 5);
+
+add_action('admin_notices', function () {
+    if (
+        !current_user_can('manage_options')
+        || !class_exists('\FluentToolkit\Classes\McpStatus')
+        || !\FluentToolkit\Classes\McpStatus::standaloneOAuthBridgeActive()
+    ) {
+        return;
+    }
+
+    echo '<div class="notice notice-error"><p>' .
+        esc_html__('Fluent Toolkit now includes the FluentCRM MCP OAuth bridge. Deactivate and remove the standalone FluentCRM MCP OAuth Bridge plugin before enabling Toolkit MCP OAuth.', 'fluent-toolkit') .
+        '</p></div>';
+});
+
+function fluent_toolkit_has_standalone_mcp_oauth_bridge()
+{
+    $pluginFiles = [
+        'fluentCRM-MCP-OAuth-Bridge/fluentcrm-mcp-oauth-bridge.php',
+        'fluentcrm-mcp-oauth-bridge/fluentcrm-mcp-oauth-bridge.php',
+    ];
+
+    $activePlugins = (array) get_option('active_plugins', []);
+    foreach ($pluginFiles as $pluginFile) {
+        if (in_array($pluginFile, $activePlugins, true)) {
+            return true;
+        }
+    }
+
+    if (is_multisite()) {
+        $networkPlugins = (array) get_site_option('active_sitewide_plugins', []);
+        foreach ($pluginFiles as $pluginFile) {
+            if (isset($networkPlugins[$pluginFile])) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+if (!fluent_toolkit_has_standalone_mcp_oauth_bridge() && !function_exists('fluentcrm_mcp_oauth_bridge_validate_token')) {
+    function fluentcrm_mcp_oauth_bridge_validate_token($token, $resource = '')
+    {
+        if (!class_exists('\FluentToolkit\Mcp\OAuth\TokenStore')) {
+            return false;
+        }
+
+        return \FluentToolkit\Mcp\OAuth\TokenStore::validateAccessToken(
+            $token,
+            $resource ?: \FluentToolkit\Mcp\OAuth\Settings::resourceUrl()
+        );
+    }
+}
 
 class FluentToolkitBootstrap
 {
@@ -23,6 +141,8 @@ class FluentToolkitBootstrap
         add_action('admin_menu', array($this, 'admin_menu'));
         add_action('wp_ajax_fluent-beta-install', array($this, 'installBetaPlugin'));
         add_action('wp_ajax_fluent_beta_get_beta_versions', array($this, 'getBetaVersions'));
+        add_action('wp_ajax_fluent_toolkit_mcp_status', array($this, 'getMcpStatus'));
+        add_action('wp_ajax_fluent_toolkit_mcp_oauth_toggle', array($this, 'toggleMcpOAuth'));
 
         // add plugin menu link to plugins page
         add_filter('plugin_action_links_' . plugin_basename(__FILE__), function ($links) {
@@ -79,6 +199,62 @@ class FluentToolkitBootstrap
 
         wp_send_json([
             'beta_versions' => $betaVersions,
+        ], 200);
+    }
+
+    public function getMcpStatus()
+    {
+        $this->verifyAjaxRequest();
+
+        $settingsAvailable = class_exists('\FluentToolkit\Mcp\OAuth\Settings');
+        $statusClass = '\FluentToolkit\Classes\McpStatus';
+        $standaloneOAuthBridgeActive = class_exists($statusClass) && $statusClass::standaloneOAuthBridgeActive();
+
+        wp_send_json([
+            'adapter_available'                  => class_exists('\WP\MCP\Core\McpAdapter') && function_exists('wp_register_ability'),
+            'adapter_provider'                   => class_exists($statusClass) ? $statusClass::adapterProvider() : 'missing',
+            'bundled_adapter_disabled'           => class_exists($statusClass) ? $statusClass::bundledAdapterDisabled() : false,
+            'standalone_oauth_bridge_active'     => $standaloneOAuthBridgeActive,
+            'abilities_available'                => function_exists('wp_register_ability'),
+            'oauth_enabled'                      => $settingsAvailable && !$standaloneOAuthBridgeActive ? \FluentToolkit\Mcp\OAuth\Settings::enabled() : false,
+            'mcp_url'                            => $settingsAvailable ? \FluentToolkit\Mcp\OAuth\Settings::resourceUrl() : rest_url('fluent-crm/mcp'),
+            'authorization_metadata_url'         => home_url('/.well-known/oauth-authorization-server'),
+            'protected_resource_metadata_url'    => home_url('/.well-known/oauth-protected-resource'),
+            'authorization_endpoint'             => rest_url('fluentcrm-mcp-oauth/v1/authorize'),
+            'token_endpoint'                     => rest_url('fluentcrm-mcp-oauth/v1/token'),
+            'registration_endpoint'              => rest_url('fluentcrm-mcp-oauth/v1/register'),
+            'oauth_settings_url'                 => $standaloneOAuthBridgeActive ? '' : admin_url('admin.php?page=fluent-toolkit-mcp-oauth'),
+        ], 200);
+    }
+
+    public function toggleMcpOAuth()
+    {
+        $this->verifyAjaxRequest();
+
+        if (!class_exists('\FluentToolkit\Mcp\OAuth\Settings')) {
+            wp_send_json([
+                'message' => __('OAuth module is not available.', 'fluent-toolkit'),
+                'status'  => false,
+            ], 500);
+        }
+
+        if (
+            class_exists('\FluentToolkit\Classes\McpStatus')
+            && \FluentToolkit\Classes\McpStatus::standaloneOAuthBridgeActive()
+        ) {
+            wp_send_json([
+                'message' => __('Deactivate and remove the standalone FluentCRM MCP OAuth Bridge plugin before enabling Toolkit MCP OAuth.', 'fluent-toolkit'),
+                'status'  => false,
+            ], 409);
+        }
+
+        \FluentToolkit\Mcp\OAuth\Settings::update([
+            'enabled' => !empty($_POST['enabled']) && $_POST['enabled'] === 'yes',
+        ]);
+
+        wp_send_json([
+            'message' => __('MCP OAuth setting updated.', 'fluent-toolkit'),
+            'status'  => true,
         ], 200);
     }
 

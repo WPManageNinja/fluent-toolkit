@@ -1,0 +1,26 @@
+{
+  "name": "wpmanageninja/fluent-toolkit",
+  "description": "Toolkit for Fluent beta builds, add-ons, and MCP support.",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "require": {
+    "php": ">=7.4",
+    "wordpress/mcp-adapter": "^0.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "FluentToolkit\\Classes\\": "Classes/",
+      "FluentToolkit\\Mcp\\": "includes/Mcp/"
+    }
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true,
+    "allow-plugins": {
+      "composer/installers": true
+    }
+  },
+  "scripts": {
+    "build:autoload": "composer dump-autoload -o"
+  }
+}
