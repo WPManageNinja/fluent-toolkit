@@ -19,6 +19,7 @@ class Plugin
         add_action('admin_post_fcrm_mcp_oauth_bridge_authorize', [AuthorizationServer::class, 'handleAuthorize']);
         add_action('admin_post_nopriv_fcrm_mcp_oauth_bridge_authorize', [AuthorizationServer::class, 'handleAuthorize']);
         add_action('admin_menu', [AdminPage::class, 'register']);
+        AdminPage::registerAjax();
     }
 
     public static function addRewriteRules()

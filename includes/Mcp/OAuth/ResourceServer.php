@@ -18,7 +18,7 @@ class ResourceServer
 
         $route = isset($GLOBALS['wp']->query_vars['rest_route']) ? (string) $GLOBALS['wp']->query_vars['rest_route'] : '';
 
-        if (untrailingslashit($route) !== Settings::mcpRoute()) {
+        if (!Settings::isProtectedRoute($route)) {
             return $result;
         }
 
@@ -28,7 +28,7 @@ class ResourceServer
             return self::unauthorized();
         }
 
-        $record = TokenStore::validateAccessToken($token, Settings::resourceUrl());
+        $record = TokenStore::validateAccessToken($token, Settings::resourceUrl($route));
 
         if (!$record) {
             return self::unauthorized();

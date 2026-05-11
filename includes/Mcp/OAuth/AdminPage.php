@@ -9,13 +9,28 @@ class AdminPage
     public static function register()
     {
         add_submenu_page(
-            'fluent-plugins-toolkit',
-            __('FluentCRM MCP OAuth', 'fluent-toolkit'),
-            __('FluentCRM MCP OAuth', 'fluent-toolkit'),
+            'fluent-toolkit',
+            __('MCP Auth Bridge', 'fluent-toolkit'),
+            __('MCP Auth Bridge', 'fluent-toolkit'),
             'manage_options',
-            'fluent-toolkit-mcp-oauth',
+            'fluent-toolkit#/mcp-oauth',
             [__CLASS__, 'render']
         );
+    }
+
+    public static function registerAjax()
+    {
+        add_action('wp_ajax_fluent_toolkit_mcp_oauth_get', [__CLASS__, 'ajaxGet']);
+        add_action('wp_ajax_fluent_toolkit_mcp_oauth_save', [__CLASS__, 'ajaxSave']);
+        add_action('wp_ajax_fluent_toolkit_mcp_oauth_revoke_client', [__CLASS__, 'ajaxRevokeClient']);
+        add_action('wp_ajax_fluent_toolkit_mcp_oauth_revoke_token', [__CLASS__, 'ajaxRevokeToken']);
+        add_action('wp_ajax_fluent_toolkit_mcp_oauth_clear_clients', [__CLASS__, 'ajaxClearClients']);
+        add_action('wp_ajax_fluent_toolkit_mcp_oauth_clear_tokens', [__CLASS__, 'ajaxClearTokens']);
+    }
+
+    public static function url()
+    {
+        return admin_url('admin.php?page=fluent-toolkit#/mcp-oauth');
     }
 
     public static function render()
@@ -24,232 +39,353 @@ class AdminPage
             wp_die(esc_html__('You do not have permission to manage this OAuth bridge.', 'fluent-toolkit'));
         }
 
-        if (!empty($_POST['fcrm_mcp_oauth_bridge_action'])) {
-            check_admin_referer('fcrm_mcp_oauth_bridge_admin');
-            $action = sanitize_text_field(wp_unslash($_POST['fcrm_mcp_oauth_bridge_action']));
+        wp_safe_redirect(self::url());
+        exit;
+    }
 
-            if ($action === 'save') {
-                Settings::update([
-                    'enabled' => !empty($_POST['enabled']),
-                    'required_capability' => wp_unslash($_POST['required_capability'] ?? 'manage_options'),
-                    'access_token_lifetime_value' => wp_unslash($_POST['access_token_lifetime_value'] ?? 30),
-                    'access_token_lifetime_unit' => wp_unslash($_POST['access_token_lifetime_unit'] ?? 'days'),
-                ]);
-                echo '<div class="notice notice-success"><p>' . esc_html__('Settings saved.', 'fluent-toolkit') . '</p></div>';
-            }
+    public static function ajaxGet()
+    {
+        self::verifyAjaxRequest();
+        wp_send_json(self::data());
+    }
 
-            if ($action === 'revoke_client') {
-                $clientId = sanitize_text_field(wp_unslash($_POST['client_id'] ?? ''));
-                TokenStore::revokeClientTokens($clientId);
-                ClientStore::delete($clientId);
-                echo '<div class="notice notice-success"><p>' . esc_html__('Client access revoked.', 'fluent-toolkit') . '</p></div>';
-            }
+    public static function ajaxSave()
+    {
+        self::verifyAjaxRequest();
 
-            if ($action === 'revoke_token') {
-                $tokenHash = sanitize_text_field(wp_unslash($_POST['token_hash'] ?? ''));
-                TokenStore::revokeToken($tokenHash);
-                echo '<div class="notice notice-success"><p>' . esc_html__('Approval token revoked.', 'fluent-toolkit') . '</p></div>';
-            }
+        Settings::update([
+            'enabled' => !empty($_POST['enabled']) && $_POST['enabled'] === 'yes',
+            'protected_routes' => isset($_POST['protected_routes']) ? (array) wp_unslash($_POST['protected_routes']) : [],
+            'required_capability' => wp_unslash($_POST['required_capability'] ?? 'manage_options'),
+            'access_token_lifetime_value' => wp_unslash($_POST['access_token_lifetime_value'] ?? 30),
+            'access_token_lifetime_unit' => wp_unslash($_POST['access_token_lifetime_unit'] ?? 'days'),
+        ]);
 
-            if ($action === 'clear_clients') {
-                ClientStore::clear();
-                TokenStore::clearTokens();
-                echo '<div class="notice notice-success"><p>' . esc_html__('Registered OAuth clients cleared.', 'fluent-toolkit') . '</p></div>';
-            }
+        wp_send_json([
+            'message' => __('Settings saved.', 'fluent-toolkit'),
+            'data' => self::data(),
+        ]);
+    }
 
-            if ($action === 'clear_tokens') {
-                TokenStore::clearTokens();
-                echo '<div class="notice notice-success"><p>' . esc_html__('OAuth access tokens cleared.', 'fluent-toolkit') . '</p></div>';
+    public static function ajaxRevokeClient()
+    {
+        self::verifyAjaxRequest();
+
+        $clientId = sanitize_text_field(wp_unslash($_POST['client_id'] ?? ''));
+        TokenStore::revokeClientTokens($clientId);
+        ClientStore::delete($clientId);
+
+        wp_send_json([
+            'message' => __('Client access revoked.', 'fluent-toolkit'),
+            'data' => self::data(),
+        ]);
+    }
+
+    public static function ajaxRevokeToken()
+    {
+        self::verifyAjaxRequest();
+
+        $tokenHash = sanitize_text_field(wp_unslash($_POST['token_hash'] ?? ''));
+        TokenStore::revokeToken($tokenHash);
+
+        wp_send_json([
+            'message' => __('Approval token revoked.', 'fluent-toolkit'),
+            'data' => self::data(),
+        ]);
+    }
+
+    public static function ajaxClearClients()
+    {
+        self::verifyAjaxRequest();
+
+        ClientStore::clear();
+        TokenStore::clearTokens();
+
+        wp_send_json([
+            'message' => __('Registered OAuth clients cleared.', 'fluent-toolkit'),
+            'data' => self::data(),
+        ]);
+    }
+
+    public static function ajaxClearTokens()
+    {
+        self::verifyAjaxRequest();
+
+        TokenStore::clearTokens();
+
+        wp_send_json([
+            'message' => __('OAuth access tokens cleared.', 'fluent-toolkit'),
+            'data' => self::data(),
+        ]);
+    }
+
+    private static function data()
+    {
+        $settings = Settings::all();
+        $lifetime = Settings::lifetimeInput();
+        $routes = Settings::registeredRoutes();
+        $protectedRoutes = Settings::protectedRoutes();
+        $protectedKeys = Settings::protectedRouteKeys();
+        $clients = ClientStore::all();
+        $tokens = TokenStore::allAccessTokens();
+        $isEnabled = !empty($settings['enabled']);
+        $isActive = $isEnabled && count($protectedRoutes) > 0;
+
+        return [
+            'settings' => [
+                'enabled' => $isEnabled,
+                'required_capability' => $settings['required_capability'],
+                'access_token_lifetime_value' => $lifetime['value'],
+                'access_token_lifetime_unit' => $lifetime['unit'],
+                'access_token_ttl' => (int) $settings['access_token_ttl'],
+                'access_token_ttl_label' => Settings::formatLifetime($settings['access_token_ttl']),
+                'protected_routes' => $protectedKeys,
+            ],
+            'status' => [
+                'enabled' => $isActive,
+                'label' => self::statusLabel($isEnabled, count($protectedRoutes)),
+                'protected_count' => count($protectedRoutes),
+                'route_count' => count($routes),
+                'route_label' => self::routeLabel($isEnabled, $protectedRoutes, $routes),
+            ],
+            'routes' => array_values(array_map(function ($route) use ($protectedKeys) {
+                $route['selected'] = in_array($route['key'], $protectedKeys, true) && !empty($route['available']);
+                return $route;
+            }, $routes)),
+            'endpoints' => self::endpointRows($protectedRoutes),
+            'discovery_endpoints' => [
+                [
+                    'label' => __('Authorization metadata', 'fluent-toolkit'),
+                    'url' => home_url('/.well-known/oauth-authorization-server'),
+                    'icon' => 'globe',
+                ],
+                [
+                    'label' => __('Protected resource', 'fluent-toolkit'),
+                    'url' => home_url('/.well-known/oauth-protected-resource'),
+                    'icon' => 'shield',
+                ],
+            ],
+            'clients' => self::formatClients($clients),
+            'tokens' => self::formatTokens($tokens),
+            'counts' => [
+                'clients' => count($clients),
+                'tokens' => count($tokens),
+            ],
+            'connection' => self::connectionStatus(),
+            'dashboard_url' => admin_url('admin.php?page=fluent-toolkit'),
+        ];
+    }
+
+    private static function connectionStatus()
+    {
+        $statusClass = '\FluentToolkit\Classes\McpStatus';
+        $settingsAvailable = class_exists(__NAMESPACE__ . '\Settings');
+        $adapterProvider = class_exists($statusClass) ? $statusClass::adapterProvider() : 'missing';
+        $standaloneOAuthBridgeActive = class_exists($statusClass) && $statusClass::standaloneOAuthBridgeActive();
+        $protectedRoutes = $settingsAvailable ? Settings::protectedRoutes() : [];
+        $resourceUrls = $settingsAvailable ? Settings::resourceUrls() : [];
+        $crmMcpEnabled = $settingsAvailable ? Settings::fluentCrmMcpEnabled() : false;
+
+        return [
+            'adapter_available' => class_exists('\WP\MCP\Core\McpAdapter') && function_exists('wp_register_ability'),
+            'adapter_provider' => $adapterProvider,
+            'adapter_provider_label' => self::adapterProviderLabel($adapterProvider),
+            'bundled_adapter_disabled' => class_exists($statusClass) ? $statusClass::bundledAdapterDisabled() : false,
+            'standalone_oauth_bridge_active' => $standaloneOAuthBridgeActive,
+            'abilities_available' => function_exists('wp_register_ability'),
+            'crm_mcp_enabled' => $crmMcpEnabled,
+            'oauth_enabled' => $settingsAvailable && !$standaloneOAuthBridgeActive && Settings::enabled() && count($protectedRoutes) > 0,
+            'mcp_url' => $resourceUrls ? reset($resourceUrls) : '',
+            'authorization_metadata_url' => home_url('/.well-known/oauth-authorization-server'),
+            'protected_resource_metadata_url' => home_url('/.well-known/oauth-protected-resource'),
+            'authorization_endpoint' => Metadata::authorizationEndpoint(),
+            'token_endpoint' => Metadata::tokenEndpoint(),
+            'registration_endpoint' => Metadata::registrationEndpoint(),
+            'route_notice' => $crmMcpEnabled ? '' : __('Enable MCP for AI Agents in FluentCRM before connecting this OAuth bridge.', 'fluent-toolkit'),
+        ];
+    }
+
+    private static function statusLabel($bridgeEnabled, $protectedRouteCount)
+    {
+        if (!$bridgeEnabled) {
+            return __('Bridge disabled', 'fluent-toolkit');
+        }
+
+        if ($protectedRouteCount < 1) {
+            return __('No MCP route available', 'fluent-toolkit');
+        }
+
+        return __('Bridge active', 'fluent-toolkit');
+    }
+
+    private static function routeLabel($bridgeEnabled, array $protectedRoutes, array $routes)
+    {
+        if (!$bridgeEnabled) {
+            return __('Bridge is off', 'fluent-toolkit');
+        }
+
+        $protectedCount = count($protectedRoutes);
+
+        if ($protectedCount > 0) {
+            return sprintf(
+                _n('%d route guarded', '%d routes guarded', $protectedCount, 'fluent-toolkit'),
+                $protectedCount
+            );
+        }
+
+        foreach ($routes as $route) {
+            if (!empty($route['status_label'])) {
+                return $route['status_label'];
             }
         }
 
-        $settings = Settings::all();
-        $lifetime = Settings::lifetimeInput();
-        $clients = ClientStore::all();
-        $tokens = TokenStore::allAccessTokens();
-        ?>
-        <div class="wrap">
-            <h1><?php echo esc_html__('Fluent Toolkit MCP OAuth', 'fluent-toolkit'); ?></h1>
-            <p><?php echo esc_html__('Adds OAuth 2.1 connect flow in front of your existing WordPress MCP adapter endpoint.', 'fluent-toolkit'); ?></p>
+        return __('No route guarded', 'fluent-toolkit');
+    }
 
-            <form method="post" style="max-width: 960px;">
-                <?php wp_nonce_field('fcrm_mcp_oauth_bridge_admin'); ?>
-                <input type="hidden" name="fcrm_mcp_oauth_bridge_action" value="save">
-                <table class="form-table" role="presentation">
-                    <tbody>
-                    <tr>
-                        <th scope="row"><?php echo esc_html__('Enable OAuth bridge', 'fluent-toolkit'); ?></th>
-                        <td>
-                            <label>
-                                <input type="checkbox" name="enabled" value="1" <?php checked(!empty($settings['enabled'])); ?>>
-                                <?php echo esc_html__('Authenticate bearer tokens for the configured MCP route.', 'fluent-toolkit'); ?>
-                            </label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row"><label for="mcp_rest_route"><?php echo esc_html__('MCP REST route', 'fluent-toolkit'); ?></label></th>
-                        <td>
-                            <input id="mcp_rest_route" type="text" class="regular-text code" value="<?php echo esc_attr(Settings::mcpRoute()); ?>" readonly>
-                            <p class="description"><?php echo esc_html__('Locked to the FluentCRM MCP endpoint so OAuth cannot expose other WordPress REST routes.', 'fluent-toolkit'); ?></p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row"><label for="required_capability"><?php echo esc_html__('Required capability', 'fluent-toolkit'); ?></label></th>
-                        <td>
-                            <input name="required_capability" id="required_capability" type="text" class="regular-text code" value="<?php echo esc_attr($settings['required_capability']); ?>">
-                            <p class="description"><?php echo esc_html__('Only users with this capability can authorize and use OAuth tokens.', 'fluent-toolkit'); ?></p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row"><label for="access_token_ttl"><?php echo esc_html__('Access token lifetime', 'fluent-toolkit'); ?></label></th>
-                        <td>
-                            <input name="access_token_lifetime_value" id="access_token_ttl" type="number" min="1" max="90" value="<?php echo esc_attr($lifetime['value']); ?>" style="width: 90px;">
-                            <select name="access_token_lifetime_unit" aria-label="<?php echo esc_attr__('Lifetime unit', 'fluent-toolkit'); ?>">
-                                <option value="minutes" <?php selected($lifetime['unit'], 'minutes'); ?>><?php echo esc_html__('minutes', 'fluent-toolkit'); ?></option>
-                                <option value="hours" <?php selected($lifetime['unit'], 'hours'); ?>><?php echo esc_html__('hours', 'fluent-toolkit'); ?></option>
-                                <option value="days" <?php selected($lifetime['unit'], 'days'); ?>><?php echo esc_html__('days', 'fluent-toolkit'); ?></option>
-                            </select>
-                            <p class="description"><?php echo esc_html__('Maximum lifetime is 90 days. Current effective lifetime: ', 'fluent-toolkit') . esc_html(Settings::formatLifetime($settings['access_token_ttl'])); ?></p>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-                <?php submit_button(__('Save Settings', 'fluent-toolkit')); ?>
-            </form>
+    private static function adapterProviderLabel($provider)
+    {
+        if ($provider === 'plugin') {
+            return __('Standalone MCP Adapter plugin', 'fluent-toolkit');
+        }
 
-            <h2><?php echo esc_html__('Connector URLs', 'fluent-toolkit'); ?></h2>
-            <table class="widefat striped" style="max-width: 960px; margin: 20px 0;">
-                <tbody>
-                <tr>
-                    <th scope="row"><?php echo esc_html__('MCP URL', 'fluent-toolkit'); ?></th>
-                    <td><code><?php echo esc_html(Settings::resourceUrl()); ?></code></td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php echo esc_html__('Authorization metadata', 'fluent-toolkit'); ?></th>
-                    <td><code><?php echo esc_html(home_url('/.well-known/oauth-authorization-server')); ?></code></td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php echo esc_html__('Protected resource metadata', 'fluent-toolkit'); ?></th>
-                    <td><code><?php echo esc_html(home_url('/.well-known/oauth-protected-resource')); ?></code></td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php echo esc_html__('Dynamic registration', 'fluent-toolkit'); ?></th>
-                    <td><code><?php echo esc_html(Metadata::registrationEndpoint()); ?></code></td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php echo esc_html__('Token endpoint', 'fluent-toolkit'); ?></th>
-                    <td><code><?php echo esc_html(Metadata::tokenEndpoint()); ?></code></td>
-                </tr>
-                </tbody>
-            </table>
+        if ($provider === 'toolkit') {
+            return __('Bundled with Fluent Toolkit', 'fluent-toolkit');
+        }
 
-            <h2><?php echo esc_html__('Registered Clients', 'fluent-toolkit'); ?></h2>
-            <p><?php echo esc_html__('These clients completed dynamic registration. Revoking a client also revokes its active approvals.', 'fluent-toolkit'); ?></p>
-            <table class="widefat striped" style="max-width: 1100px; margin: 20px 0;">
-                <thead>
-                <tr>
-                    <th><?php echo esc_html__('Client', 'fluent-toolkit'); ?></th>
-                    <th><?php echo esc_html__('Client ID', 'fluent-toolkit'); ?></th>
-                    <th><?php echo esc_html__('Redirect URIs', 'fluent-toolkit'); ?></th>
-                    <th><?php echo esc_html__('Registered', 'fluent-toolkit'); ?></th>
-                    <th><?php echo esc_html__('Action', 'fluent-toolkit'); ?></th>
-                </tr>
-                </thead>
-                <tbody>
-                <?php if (!$clients) : ?>
-                    <tr>
-                        <td colspan="5"><?php echo esc_html__('No registered clients yet.', 'fluent-toolkit'); ?></td>
-                    </tr>
-                <?php else : ?>
-                    <?php foreach ($clients as $client) : ?>
-                        <tr>
-                            <td><strong><?php echo esc_html($client['client_name'] ?? __('MCP Client', 'fluent-toolkit')); ?></strong></td>
-                            <td><code><?php echo esc_html($client['client_id']); ?></code></td>
-                            <td>
-                                <?php foreach (($client['redirect_uris'] ?? []) as $uri) : ?>
-                                    <div><code><?php echo esc_html($uri); ?></code></div>
-                                <?php endforeach; ?>
-                            </td>
-                            <td><?php echo esc_html(self::formatTimestamp($client['created_at'] ?? 0)); ?></td>
-                            <td>
-                                <form method="post">
-                                    <?php wp_nonce_field('fcrm_mcp_oauth_bridge_admin'); ?>
-                                    <input type="hidden" name="fcrm_mcp_oauth_bridge_action" value="revoke_client">
-                                    <input type="hidden" name="client_id" value="<?php echo esc_attr($client['client_id']); ?>">
-                                    <?php submit_button(__('Revoke', 'fluent-toolkit'), 'delete small', 'submit', false); ?>
-                                </form>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-                </tbody>
-            </table>
+        return __('Not detected', 'fluent-toolkit');
+    }
 
-            <h2><?php echo esc_html__('Approved Access', 'fluent-toolkit'); ?></h2>
-            <p><?php echo esc_html__('These are active OAuth access tokens issued after a WordPress user approved a client.', 'fluent-toolkit'); ?></p>
-            <table class="widefat striped" style="max-width: 1100px; margin: 20px 0;">
-                <thead>
-                <tr>
-                    <th><?php echo esc_html__('Client', 'fluent-toolkit'); ?></th>
-                    <th><?php echo esc_html__('User', 'fluent-toolkit'); ?></th>
-                    <th><?php echo esc_html__('Scope', 'fluent-toolkit'); ?></th>
-                    <th><?php echo esc_html__('Issued', 'fluent-toolkit'); ?></th>
-                    <th><?php echo esc_html__('Expires', 'fluent-toolkit'); ?></th>
-                    <th><?php echo esc_html__('Action', 'fluent-toolkit'); ?></th>
-                </tr>
-                </thead>
-                <tbody>
-                <?php if (!$tokens) : ?>
-                    <tr>
-                        <td colspan="6"><?php echo esc_html__('No active approvals yet.', 'fluent-toolkit'); ?></td>
-                    </tr>
-                <?php else : ?>
-                    <?php foreach ($tokens as $hash => $token) : ?>
-                        <?php
-                        $client = !empty($token['client_id']) ? ClientStore::get($token['client_id']) : null;
-                        $user = !empty($token['user_id']) ? get_userdata((int) $token['user_id']) : null;
-                        ?>
-                        <tr>
-                            <td>
-                                <strong><?php echo esc_html($client['client_name'] ?? __('Unknown client', 'fluent-toolkit')); ?></strong>
-                                <div><code><?php echo esc_html($token['client_id'] ?? ''); ?></code></div>
-                            </td>
-                            <td>
-                                <?php echo $user ? esc_html($user->display_name) : esc_html__('Unknown user', 'fluent-toolkit'); ?>
-                                <?php if ($user) : ?>
-                                    <div><code><?php echo esc_html($user->user_email); ?></code></div>
-                                <?php endif; ?>
-                            </td>
-                            <td><code><?php echo esc_html($token['scope'] ?? ''); ?></code></td>
-                            <td><?php echo esc_html(self::formatTimestamp($token['created_at'] ?? 0)); ?></td>
-                            <td><?php echo esc_html(self::formatTimestamp($token['expires_at'] ?? 0)); ?></td>
-                            <td>
-                                <form method="post">
-                                    <?php wp_nonce_field('fcrm_mcp_oauth_bridge_admin'); ?>
-                                    <input type="hidden" name="fcrm_mcp_oauth_bridge_action" value="revoke_token">
-                                    <input type="hidden" name="token_hash" value="<?php echo esc_attr($hash); ?>">
-                                    <?php submit_button(__('Revoke', 'fluent-toolkit'), 'delete small', 'submit', false); ?>
-                                </form>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-                </tbody>
-            </table>
+    private static function endpointRows(array $protectedRoutes)
+    {
+        $rows = [];
 
-            <form method="post" style="display:inline-block; margin-right: 12px;">
-                <?php wp_nonce_field('fcrm_mcp_oauth_bridge_admin'); ?>
-                <input type="hidden" name="fcrm_mcp_oauth_bridge_action" value="clear_clients">
-                <?php submit_button(__('Clear Registered Clients', 'fluent-toolkit'), 'secondary', 'submit', false); ?>
-            </form>
+        if (!$protectedRoutes) {
+            return $rows;
+        }
 
-            <form method="post" style="display:inline-block;">
-                <?php wp_nonce_field('fcrm_mcp_oauth_bridge_admin'); ?>
-                <input type="hidden" name="fcrm_mcp_oauth_bridge_action" value="clear_tokens">
-                <?php submit_button(__('Clear Access Tokens', 'fluent-toolkit'), 'delete', 'submit', false); ?>
-            </form>
-        </div>
-        <?php
+        foreach ($protectedRoutes as $route) {
+            $rows[] = [
+                'label' => sprintf(__('%s MCP URL', 'fluent-toolkit'), $route['name']),
+                'url' => Settings::resourceUrl($route['route']),
+                'icon' => 'link',
+            ];
+        }
+
+        $rows[] = [
+            'label' => __('Dynamic registration', 'fluent-toolkit'),
+            'url' => Metadata::registrationEndpoint(),
+            'icon' => 'user-plus',
+        ];
+        $rows[] = [
+            'label' => __('Token endpoint', 'fluent-toolkit'),
+            'url' => Metadata::tokenEndpoint(),
+            'icon' => 'lock',
+        ];
+
+        return $rows;
+    }
+
+    private static function formatClients(array $clients)
+    {
+        return array_values(array_map(function ($client) {
+            $clientName = $client['client_name'] ?? __('MCP Client', 'fluent-toolkit');
+            $redirectUris = $client['redirect_uris'] ?? [];
+            $firstRedirectUri = $redirectUris ? reset($redirectUris) : '';
+
+            return [
+                'client_id' => $client['client_id'],
+                'client_id_short' => self::shortId($client['client_id']),
+                'client_name' => $clientName,
+                'client_initials' => self::initials($clientName),
+                'client_meta' => self::clientMeta($client),
+                'redirect_uri' => $firstRedirectUri,
+                'redirect_count' => count($redirectUris),
+                'created_at' => self::formatTimestamp($client['created_at'] ?? 0),
+            ];
+        }, $clients));
+    }
+
+    private static function formatTokens(array $tokens)
+    {
+        $formatted = [];
+
+        foreach ($tokens as $hash => $token) {
+            $client = !empty($token['client_id']) ? ClientStore::get($token['client_id']) : null;
+            $clientName = $client['client_name'] ?? __('Unknown client', 'fluent-toolkit');
+            $user = !empty($token['user_id']) ? get_userdata((int) $token['user_id']) : null;
+            $userName = $user ? $user->display_name : __('Unknown user', 'fluent-toolkit');
+            $scopeParts = preg_split('/\s+/', trim((string) ($token['scope'] ?? '')), -1, PREG_SPLIT_NO_EMPTY);
+
+            $formatted[] = [
+                'token_hash' => $hash,
+                'client_id' => $token['client_id'] ?? '',
+                'client_id_short' => self::shortId($token['client_id'] ?? ''),
+                'client_name' => $clientName,
+                'client_initials' => self::initials($clientName),
+                'user_name' => $userName,
+                'user_email' => $user ? $user->user_email : '',
+                'user_initials' => self::initials($userName),
+                'scopes' => $scopeParts,
+                'created_at' => self::formatTimestamp($token['created_at'] ?? 0),
+                'expires_at' => self::formatTimestamp($token['expires_at'] ?? 0),
+            ];
+        }
+
+        return $formatted;
+    }
+
+    private static function verifyAjaxRequest()
+    {
+        if (!current_user_can('manage_options')) {
+            wp_send_json(['message' => __('You do not have permission to manage this OAuth bridge.', 'fluent-toolkit')], 403);
+        }
+
+        $nonce = isset($_REQUEST['__nonce']) ? sanitize_text_field(wp_unslash($_REQUEST['__nonce'])) : '';
+
+        if (!wp_verify_nonce($nonce, 'fluent_toolkit_nonce')) {
+            wp_send_json(['message' => __('Invalid nonce.', 'fluent-toolkit')], 403);
+        }
+    }
+
+    private static function clientMeta(array $client)
+    {
+        $uris = $client['redirect_uris'] ?? [];
+        $uri = $uris ? reset($uris) : '';
+        $host = $uri ? wp_parse_url($uri, PHP_URL_HOST) : '';
+
+        return $host ?: __('MCP Client', 'fluent-toolkit');
+    }
+
+    private static function initials($name)
+    {
+        $name = trim(wp_strip_all_tags((string) $name));
+
+        if (!$name) {
+            return 'MC';
+        }
+
+        $parts = preg_split('/\s+/', $name, -1, PREG_SPLIT_NO_EMPTY);
+        $initials = '';
+
+        foreach ($parts as $part) {
+            $initials .= strtoupper(substr($part, 0, 1));
+            if (strlen($initials) >= 2) {
+                break;
+            }
+        }
+
+        return $initials ?: 'MC';
+    }
+
+    private static function shortId($id)
+    {
+        $id = (string) $id;
+
+        if (strlen($id) <= 16) {
+            return $id;
+        }
+
+        return substr($id, 0, 10) . '...' . substr($id, -4);
     }
 
     private static function formatTimestamp($timestamp)

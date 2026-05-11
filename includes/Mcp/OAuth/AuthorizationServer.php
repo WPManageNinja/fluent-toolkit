@@ -11,25 +11,25 @@ class AuthorizationServer
 {
     public static function registerRoutes()
     {
-        register_rest_route('fluentcrm-mcp-oauth/v1', '/authorize', [
+        register_rest_route(Metadata::REST_NAMESPACE, '/authorize', [
             'methods' => ['GET', 'POST'],
             'callback' => [__CLASS__, 'authorize'],
             'permission_callback' => '__return_true',
         ]);
 
-        register_rest_route('fluentcrm-mcp-oauth/v1', '/register', [
+        register_rest_route(Metadata::REST_NAMESPACE, '/register', [
             'methods' => 'POST',
             'callback' => [__CLASS__, 'registerClient'],
             'permission_callback' => '__return_true',
         ]);
 
-        register_rest_route('fluentcrm-mcp-oauth/v1', '/token', [
+        register_rest_route(Metadata::REST_NAMESPACE, '/token', [
             'methods' => 'POST',
             'callback' => [__CLASS__, 'exchangeToken'],
             'permission_callback' => '__return_true',
         ]);
 
-        register_rest_route('fluentcrm-mcp-oauth/v1', '/metadata/authorization-server', [
+        register_rest_route(Metadata::REST_NAMESPACE, '/metadata/authorization-server', [
             'methods' => 'GET',
             'callback' => function () {
                 return new WP_REST_Response(Metadata::authorizationServer());
@@ -37,7 +37,7 @@ class AuthorizationServer
             'permission_callback' => '__return_true',
         ]);
 
-        register_rest_route('fluentcrm-mcp-oauth/v1', '/metadata/protected-resource', [
+        register_rest_route(Metadata::REST_NAMESPACE, '/metadata/protected-resource', [
             'methods' => 'GET',
             'callback' => function () {
                 return new WP_REST_Response(Metadata::protectedResource());
@@ -204,7 +204,7 @@ class AuthorizationServer
             return new \WP_Error('invalid_scope', 'scope must contain fluentcrm.read and/or fluentcrm.write.');
         }
 
-        if (untrailingslashit($resource) !== untrailingslashit(Settings::resourceUrl())) {
+        if (!Settings::isProtectedResource($resource)) {
             return new \WP_Error('invalid_target', 'resource must match the configured MCP endpoint.');
         }
 

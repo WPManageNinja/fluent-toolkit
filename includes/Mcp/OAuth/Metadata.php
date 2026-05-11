@@ -6,6 +6,8 @@ defined('ABSPATH') || exit;
 
 class Metadata
 {
+    const REST_NAMESPACE = 'fluent-toolkit-mcp-oauth/v1';
+
     public static function issuer()
     {
         return home_url('/');
@@ -13,17 +15,17 @@ class Metadata
 
     public static function authorizationEndpoint()
     {
-        return rest_url('fluentcrm-mcp-oauth/v1/authorize');
+        return rest_url(self::REST_NAMESPACE . '/authorize');
     }
 
     public static function tokenEndpoint()
     {
-        return rest_url('fluentcrm-mcp-oauth/v1/token');
+        return rest_url(self::REST_NAMESPACE . '/token');
     }
 
     public static function registrationEndpoint()
     {
-        return rest_url('fluentcrm-mcp-oauth/v1/register');
+        return rest_url(self::REST_NAMESPACE . '/register');
     }
 
     public static function authorizationServer()
@@ -45,12 +47,15 @@ class Metadata
 
     public static function protectedResource()
     {
+        $resources = Settings::resourceUrls();
+
         return [
-            'resource' => Settings::resourceUrl(),
+            'resource' => $resources ? reset($resources) : '',
+            'resources' => $resources,
             'authorization_servers' => [self::issuer()],
             'scopes_supported' => ['fluentcrm.read', 'fluentcrm.write'],
             'bearer_methods_supported' => ['header'],
-            'resource_name' => 'FluentCRM MCP',
+            'resource_name' => Settings::resourceName(),
         ];
     }
 }

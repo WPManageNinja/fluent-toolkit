@@ -24,9 +24,9 @@
                 <button class="ft-iconbtn" @click="getBetaPlugins()" title="Refresh registry" aria-label="Refresh">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
                 </button>
-                <button class="ft-iconbtn" title="Settings" aria-label="Settings">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                </button>
+                <a v-if="appVars.oauth_url" class="ft-iconbtn" :href="appVars.oauth_url" title="MCP Auth Bridge" aria-label="MCP Auth Bridge">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                </a>
             </div>
         </header>
 
@@ -51,54 +51,6 @@
                         <div class="ft-stat-num" :class="{ 'ft-warn-num': updatesCount > 0 }">{{ updatesCount }}</div>
                         <div class="ft-stat-label">Updates</div>
                     </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- MCP -->
-        <section class="ft-mcp-panel" v-loading="mcpLoading">
-            <div class="ft-mcp-header">
-                <div>
-                    <div class="ft-hero-eyebrow">MCP Connection</div>
-                    <h2>FluentCRM MCP OAuth</h2>
-                    <p>OAuth protected access for the FluentCRM MCP endpoint.</p>
-                </div>
-                <div class="ft-mcp-actions">
-                    <a
-                        v-if="mcpStatus && mcpStatus.oauth_settings_url && !mcpStatus.standalone_oauth_bridge_active"
-                        :href="mcpStatus.oauth_settings_url"
-                        class="ft-btn ft-btn-ghost"
-                    >Manage</a>
-                    <el-switch
-                        v-if="mcpStatus"
-                        :model-value="mcpStatus.oauth_enabled"
-                        :disabled="mcpStatus.standalone_oauth_bridge_active"
-                        :loading="mcpSaving"
-                        @change="toggleMcpOAuth"
-                    />
-                </div>
-            </div>
-
-            <div v-if="mcpStatus && mcpStatus.standalone_oauth_bridge_active" class="ft-mcp-warning">
-                Deactivate and remove the standalone FluentCRM MCP OAuth Bridge plugin before enabling Toolkit MCP OAuth.
-            </div>
-
-            <div v-if="mcpStatus" class="ft-mcp-grid">
-                <div>
-                    <span>Adapter</span>
-                    <strong>{{ mcpStatus.adapter_available ? adapterProviderLabel : 'Unavailable' }}</strong>
-                </div>
-                <div>
-                    <span>Abilities API</span>
-                    <strong>{{ mcpStatus.abilities_available ? 'Loaded' : 'Missing' }}</strong>
-                </div>
-                <div>
-                    <span>MCP URL</span>
-                    <code>{{ mcpStatus.mcp_url }}</code>
-                </div>
-                <div>
-                    <span>Dynamic registration</span>
-                    <code>{{ mcpStatus.registration_endpoint }}</code>
                 </div>
             </div>
         </section>
@@ -210,19 +162,13 @@
 </template>
 
 <script type="text/babel">
-import {EditPen} from "@element-plus/icons-vue";
-
 export default {
     name: 'Dashboard',
-    components: {EditPen},
     data() {
         return {
             betaPlugins: [],
             installing: false,
             loading: false,
-            mcpLoading: false,
-            mcpSaving: false,
-            mcpStatus: null,
             activeChannel: 'all',
             searchQuery: '',
         };
@@ -236,21 +182,6 @@ export default {
         },
         betaCount() {
             return this.betaPlugins.filter(p => p.has_beta_update || p.beta_version || p.is_beta).length;
-        },
-        adapterProviderLabel() {
-            if (!this.mcpStatus) {
-                return '';
-            }
-
-            if (this.mcpStatus.adapter_provider === 'plugin') {
-                return 'External plugin';
-            }
-
-            if (this.mcpStatus.adapter_provider === 'toolkit') {
-                return 'Toolkit fallback';
-            }
-
-            return 'Available';
         },
         filteredPlugins() {
             let plugins = this.betaPlugins;
@@ -296,36 +227,6 @@ export default {
                     this.loading = false;
                 });
         },
-        getMcpStatus() {
-            this.mcpLoading = true;
-            this.$get('fluent_toolkit_mcp_status')
-                .then(response => {
-                    this.mcpStatus = response;
-                })
-                .catch(error => {
-                    this.$handleError(error);
-                })
-                .finally(() => {
-                    this.mcpLoading = false;
-                });
-        },
-        toggleMcpOAuth(enabled) {
-            this.mcpSaving = true;
-            this.$post('fluent_toolkit_mcp_oauth_toggle', {
-                enabled: enabled ? 'yes' : 'no'
-            })
-                .then(response => {
-                    this.$notify.success(response.message);
-                    this.getMcpStatus();
-                })
-                .catch(error => {
-                    this.$handleError(error);
-                    this.getMcpStatus();
-                })
-                .finally(() => {
-                    this.mcpSaving = false;
-                });
-        },
         installPlugin(plugin, beta = '') {
             let licenseKey = plugin.license_key;
             if (plugin.require_license == 'yes' && !plugin.license_key) {
@@ -367,7 +268,6 @@ export default {
     },
     mounted() {
         this.getBetaPlugins();
-        this.getMcpStatus();
     },
     created() {
         jQuery('.update-nag,.notice, #wpbody-content > .updated, #wpbody-content > .error').remove();

@@ -127,9 +127,18 @@ if (!fluent_toolkit_has_standalone_mcp_oauth_bridge() && !function_exists('fluen
             return false;
         }
 
+        if (!$resource && class_exists('\FluentToolkit\Mcp\OAuth\Settings')) {
+            $resources = \FluentToolkit\Mcp\OAuth\Settings::resourceUrls();
+            $resource = $resources ? reset($resources) : '';
+        }
+
+        if (!$resource) {
+            return false;
+        }
+
         return \FluentToolkit\Mcp\OAuth\TokenStore::validateAccessToken(
             $token,
-            $resource ?: \FluentToolkit\Mcp\OAuth\Settings::resourceUrl()
+            $resource
         );
     }
 }
@@ -146,7 +155,7 @@ class FluentToolkitBootstrap
 
         // add plugin menu link to plugins page
         add_filter('plugin_action_links_' . plugin_basename(__FILE__), function ($links) {
-            $settings_link = '<a href="' . admin_url('index.php?page=fluent-plugins-toolkit') . '">' . __('Settings', 'fluent-toolkit') . '</a>';
+            $settings_link = '<a href="' . admin_url('admin.php?page=fluent-toolkit') . '">' . __('Settings', 'fluent-toolkit') . '</a>';
             array_unshift($links, $settings_link);
             return $links;
         });
@@ -159,10 +168,19 @@ class FluentToolkitBootstrap
             __('Fluent Toolkit', 'fluent-toolkit'),
             __('Fluent Toolkit', 'fluent-toolkit'),
             'manage_options',
-            'fluent-plugins-toolkit',
+            'fluent-toolkit',
             array($this, 'settingsPage'),
             $this->getPluginIcon(),
             200
+        );
+
+        add_submenu_page(
+            'fluent-toolkit',
+            __('Beta & Add-ons', 'fluent-toolkit'),
+            __('Beta & Add-ons', 'fluent-toolkit'),
+            'manage_options',
+            'fluent-toolkit',
+            array($this, 'settingsPage')
         );
     }
 
@@ -209,6 +227,8 @@ class FluentToolkitBootstrap
         $settingsAvailable = class_exists('\FluentToolkit\Mcp\OAuth\Settings');
         $statusClass = '\FluentToolkit\Classes\McpStatus';
         $standaloneOAuthBridgeActive = class_exists($statusClass) && $statusClass::standaloneOAuthBridgeActive();
+        $resourceUrls = $settingsAvailable ? \FluentToolkit\Mcp\OAuth\Settings::resourceUrls() : [];
+        $protectedRoutes = $settingsAvailable ? \FluentToolkit\Mcp\OAuth\Settings::protectedRoutes() : [];
 
         wp_send_json([
             'adapter_available'                  => class_exists('\WP\MCP\Core\McpAdapter') && function_exists('wp_register_ability'),
@@ -216,14 +236,14 @@ class FluentToolkitBootstrap
             'bundled_adapter_disabled'           => class_exists($statusClass) ? $statusClass::bundledAdapterDisabled() : false,
             'standalone_oauth_bridge_active'     => $standaloneOAuthBridgeActive,
             'abilities_available'                => function_exists('wp_register_ability'),
-            'oauth_enabled'                      => $settingsAvailable && !$standaloneOAuthBridgeActive ? \FluentToolkit\Mcp\OAuth\Settings::enabled() : false,
-            'mcp_url'                            => $settingsAvailable ? \FluentToolkit\Mcp\OAuth\Settings::resourceUrl() : rest_url('fluent-crm/mcp'),
+            'oauth_enabled'                      => $settingsAvailable && !$standaloneOAuthBridgeActive && \FluentToolkit\Mcp\OAuth\Settings::enabled() && count($protectedRoutes) > 0,
+            'mcp_url'                            => $resourceUrls ? reset($resourceUrls) : '',
             'authorization_metadata_url'         => home_url('/.well-known/oauth-authorization-server'),
             'protected_resource_metadata_url'    => home_url('/.well-known/oauth-protected-resource'),
-            'authorization_endpoint'             => rest_url('fluentcrm-mcp-oauth/v1/authorize'),
-            'token_endpoint'                     => rest_url('fluentcrm-mcp-oauth/v1/token'),
-            'registration_endpoint'              => rest_url('fluentcrm-mcp-oauth/v1/register'),
-            'oauth_settings_url'                 => $standaloneOAuthBridgeActive ? '' : admin_url('admin.php?page=fluent-toolkit-mcp-oauth'),
+            'authorization_endpoint'             => $settingsAvailable ? \FluentToolkit\Mcp\OAuth\Metadata::authorizationEndpoint() : rest_url('fluent-toolkit-mcp-oauth/v1/authorize'),
+            'token_endpoint'                     => $settingsAvailable ? \FluentToolkit\Mcp\OAuth\Metadata::tokenEndpoint() : rest_url('fluent-toolkit-mcp-oauth/v1/token'),
+            'registration_endpoint'              => $settingsAvailable ? \FluentToolkit\Mcp\OAuth\Metadata::registrationEndpoint() : rest_url('fluent-toolkit-mcp-oauth/v1/register'),
+            'oauth_settings_url'                 => $standaloneOAuthBridgeActive ? '' : $this->mcpOAuthUrl(),
         ], 200);
     }
 
@@ -403,13 +423,24 @@ class FluentToolkitBootstrap
             'nonce'          => wp_create_nonce('fluent_toolkit_nonce'),
             'version'        => FLUENT_TOOLKIT_VERSION,
             'source_version' => $sourceVersion,
-            'require_update' => $requireUpdate
+            'require_update' => $requireUpdate,
+            'dashboard_url'  => admin_url('admin.php?page=fluent-toolkit'),
+            'oauth_url'      => $this->mcpOAuthUrl()
         ));
         ?>
         <div class="wrap">
             <div id="fluent_app"></div>
         </div>
         <?php
+    }
+
+    private function mcpOAuthUrl()
+    {
+        if (class_exists('\FluentToolkit\Mcp\OAuth\AdminPage')) {
+            return \FluentToolkit\Mcp\OAuth\AdminPage::url();
+        }
+
+        return admin_url('admin.php?page=fluent-toolkit#/mcp-oauth');
     }
 
     private function getPluginIcon()

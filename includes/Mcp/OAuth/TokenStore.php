@@ -36,11 +36,15 @@ class TokenStore
         $hash = hash('sha256', $token);
         $ttl = Settings::accessTokenTtl();
         $tokens = self::tokens();
+        $resource = Settings::isProtectedResource($payload['resource'] ?? '')
+            ? esc_url_raw($payload['resource'])
+            : Settings::resourceUrl();
+
         $tokens[$hash] = [
             'client_id' => $payload['client_id'],
             'user_id' => (int) $payload['user_id'],
             'scope' => Settings::sanitizeScope($payload['scope'] ?? Settings::DEFAULT_SCOPE) ?: Settings::DEFAULT_SCOPE,
-            'resource' => Settings::resourceUrl(),
+            'resource' => $resource,
             'created_at' => time(),
             'expires_at' => time() + $ttl,
         ];
