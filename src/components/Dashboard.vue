@@ -35,8 +35,8 @@
             <div class="ft-hero-inner">
                 <div>
                     <div class="ft-hero-eyebrow">Beta Program</div>
-                    <h1>Ship faster. Test earlier.</h1>
-                    <p>Install release candidates, browse companion add-ons, and manage every Fluent product from one place — without leaving your dashboard.</p>
+                    <h1>Beta builds. Add-ons. One place.</h1>
+                    <p>Get ahead of what's shipping. Install release candidates, pick up companion add-ons, and track every beta across the Fluent ecosystem — all from here.</p>
                 </div>
                 <div class="ft-hero-stats">
                     <div>
