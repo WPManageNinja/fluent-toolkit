@@ -1,24 +1,56 @@
-## Fluent Toolkit: A Dedicated plugin for Beta testers for Fluent Plugins
+# Fluent Toolkit v1.1.0
 
+Beta builds. Add-ons. One place.
 
+Get early access to release candidates, install companion add-ons, and track update availability across the Fluent ecosystem — all from your WordPress dashboard.
 
-### Description
-Fluent Toolkit is a dedicated plugin for beta testers of Fluent Plugins. It provides a set of tools and features to help you test and provide feedback on Fluent Plugins before they are released to the public.
+---
 
-### 👉 [Download FluentKit Plugin ⬇️](https://wpmanageninja.s3.amazonaws.com/fluent-toolkit.zip)
+### 👉 [Download Latest Release ⬇️](https://wpmanageninja.s3.amazonaws.com/fluent-toolkit.zip)
 
-### How to Use the plugin
-- Download from Releases tab of this repo or [click here to download](https://wpmanageninja.s3.amazonaws.com/fluent-toolkit.zip)
-- Install on your WordPress site (Staging prefered)
-- Activate the plugin
-- Go to the Dashboard -> Fluent Toolkit menu in the WordPress admin panel
-- You will see a list of all Fluent Plugins which are available as a beta
-- Install the stable or beta version on the plugin you want to test
-- Provide Feedback at: https://community.wpmanageninja.com/portal
+---
 
+### Features
+
+- Browse and install beta builds & release candidates for Fluent plugins
+- Install companion add-ons alongside core plugins
+- Live stats — available, installed, and pending updates at a glance
+- Channel filter tabs: All / Beta / Installed / Updates
+- Real-time search across plugins
+- Self-update — toolkit updates itself when a new version is available
+
+### How to Use
+
+1. Download from Releases tab or [click here](https://wpmanageninja.s3.amazonaws.com/fluent-toolkit.zip)
+2. Install on your WordPress site (staging preferred)
+3. Activate the plugin
+4. Go to **Dashboard → Fluent Toolkit** in the WordPress admin
+5. Install beta builds, RCs, or companion add-ons
+6. Provide feedback at: https://community.wpmanageninja.com/portal
+
+---
 
 ### Development
 
-- `npm install`
-- `npx mix watch` // For Development
-- `npx mix --production` // For Build the assets
+```bash
+npm install
+npx mix watch          # development
+npx mix --production   # production build
+bash build.sh          # create release zip → builds/fluent-toolkit-{version}.zip
+```
+
+---
+
+### Changelog
+
+#### 1.1.0
+- Redesigned dashboard — topbar, hero stats, channel tabs, plugin grid
+- Added search, channel filters (All / Beta / Installed / Updates)
+- Updated copy: accurate tagline and description
+- `build.sh` — automated release zip builder
+
+#### 1.0.2
+- UI improvements
+
+#### 1.0.1
+- Initial release
