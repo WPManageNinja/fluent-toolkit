@@ -1,11 +1,11 @@
 import {createApp} from 'vue'
-import Dashboard from './components/Dashboard.vue'
+import App from './components/App.vue'
 
 import {ElNotification, ElMessageBox, ElLoading} from "element-plus";
 
 require('./style.scss');
 
-const app = createApp(Dashboard);
+const app = createApp(App);
 
 app.config.globalProperties.$notify = ElNotification;
 app.config.globalProperties.$confirm = ElMessageBox.confirm;
