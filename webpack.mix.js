@@ -31,4 +31,9 @@ mix.webpackConfig({
 });
 
 mix
-    .js('src/app.js', 'dist/app.js').vue({ version: 3 });
+    .js('src/app.js', 'dist/app.js').vue({ version: 3 })
+    .override((config) => {
+        config.plugins = config.plugins.filter(
+            (plugin) => !['ProgressPlugin', 'WebpackBarPlugin'].includes(plugin.constructor.name)
+        );
+    });
