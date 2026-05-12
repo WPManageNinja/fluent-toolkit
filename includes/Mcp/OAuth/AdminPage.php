@@ -2,22 +2,12 @@
 
 namespace FluentToolkit\Mcp\OAuth;
 
+use FluentToolkit\Classes\AdminMenu;
+
 defined('ABSPATH') || exit;
 
 class AdminPage
 {
-    public static function register()
-    {
-        add_submenu_page(
-            'fluent-toolkit',
-            __('MCP Auth Bridge', 'fluent-toolkit'),
-            __('MCP Auth Bridge', 'fluent-toolkit'),
-            'manage_options',
-            'fluent-toolkit#/mcp-oauth',
-            [__CLASS__, 'render']
-        );
-    }
-
     public static function registerAjax()
     {
         add_action('wp_ajax_fluent_toolkit_mcp_oauth_get', [__CLASS__, 'ajaxGet']);
@@ -30,17 +20,7 @@ class AdminPage
 
     public static function url()
     {
-        return admin_url('admin.php?page=fluent-toolkit#/mcp-oauth');
-    }
-
-    public static function render()
-    {
-        if (!current_user_can('manage_options')) {
-            wp_die(esc_html__('You do not have permission to manage this OAuth bridge.', 'fluent-toolkit'));
-        }
-
-        wp_safe_redirect(self::url());
-        exit;
+        return AdminMenu::url('mcp-auth');
     }
 
     public static function ajaxGet()
@@ -172,11 +152,11 @@ class AdminPage
                 'tokens' => count($tokens),
             ],
             'connection' => self::connectionStatus(),
-            'dashboard_url' => admin_url('admin.php?page=fluent-toolkit'),
+            'dashboard_url' => AdminMenu::url(),
         ];
     }
 
-    private static function connectionStatus()
+    public static function connectionStatus()
     {
         $statusClass = '\FluentToolkit\Classes\McpStatus';
         $settingsAvailable = class_exists(__NAMESPACE__ . '\Settings');

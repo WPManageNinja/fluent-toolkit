@@ -20,7 +20,13 @@ export default {
     },
     computed: {
         currentView() {
-            return this.hash.replace(/^#\/?/, '') === 'mcp-oauth' ? 'mcp_oauth' : 'dashboard';
+            const route = this.hash.replace(/^#\/?/, '');
+
+            if (route === 'mcp-auth' || route === 'mcp-oauth') {
+                return 'mcp_oauth';
+            }
+
+            return 'dashboard';
         },
     },
     mounted() {
