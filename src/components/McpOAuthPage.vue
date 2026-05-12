@@ -576,6 +576,7 @@ export default {
         },
     },
     mounted() {
+        document.title = 'MCP Auth Bridge - Fluent Toolkit';
         this.hydrate(this.appVars.oauth);
         this.fetchData();
     },

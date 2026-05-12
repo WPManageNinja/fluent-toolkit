@@ -147,7 +147,7 @@ class FluentToolkitBootstrap
 {
     public function __construct()
     {
-        add_action('admin_menu', array($this, 'admin_menu'));
+        add_action('admin_menu', array(\FluentToolkit\Classes\AdminMenu::class, 'register'));
         add_action('wp_ajax_fluent-beta-install', array($this, 'installBetaPlugin'));
         add_action('wp_ajax_fluent_beta_get_beta_versions', array($this, 'getBetaVersions'));
         add_action('wp_ajax_fluent_toolkit_mcp_status', array($this, 'getMcpStatus'));
@@ -155,33 +155,11 @@ class FluentToolkitBootstrap
 
         // add plugin menu link to plugins page
         add_filter('plugin_action_links_' . plugin_basename(__FILE__), function ($links) {
-            $settings_link = '<a href="' . admin_url('admin.php?page=fluent-toolkit') . '">' . __('Settings', 'fluent-toolkit') . '</a>';
+            $settings_link = '<a href="' . esc_url(\FluentToolkit\Classes\AdminMenu::url()) . '">' . __('Settings', 'fluent-toolkit') . '</a>';
             array_unshift($links, $settings_link);
             return $links;
         });
 
-    }
-
-    public function admin_menu()
-    {
-        add_menu_page(
-            __('Fluent Toolkit', 'fluent-toolkit'),
-            __('Fluent Toolkit', 'fluent-toolkit'),
-            'manage_options',
-            'fluent-toolkit',
-            array($this, 'settingsPage'),
-            $this->getPluginIcon(),
-            200
-        );
-
-        add_submenu_page(
-            'fluent-toolkit',
-            __('Beta & Add-ons', 'fluent-toolkit'),
-            __('Beta & Add-ons', 'fluent-toolkit'),
-            'manage_options',
-            'fluent-toolkit',
-            array($this, 'settingsPage')
-        );
     }
 
     public function getBetaVersions()
@@ -224,6 +202,15 @@ class FluentToolkitBootstrap
     {
         $this->verifyAjaxRequest();
 
+        if (class_exists('\FluentToolkit\Mcp\OAuth\AdminPage')) {
+            $status = \FluentToolkit\Mcp\OAuth\AdminPage::connectionStatus();
+            $status['oauth_settings_url'] = !empty($status['standalone_oauth_bridge_active'])
+                ? ''
+                : \FluentToolkit\Classes\AdminMenu::url('mcp-auth');
+
+            wp_send_json($status, 200);
+        }
+
         $settingsAvailable = class_exists('\FluentToolkit\Mcp\OAuth\Settings');
         $statusClass = '\FluentToolkit\Classes\McpStatus';
         $standaloneOAuthBridgeActive = class_exists($statusClass) && $statusClass::standaloneOAuthBridgeActive();
@@ -243,7 +230,7 @@ class FluentToolkitBootstrap
             'authorization_endpoint'             => $settingsAvailable ? \FluentToolkit\Mcp\OAuth\Metadata::authorizationEndpoint() : rest_url('fluent-toolkit-mcp-oauth/v1/authorize'),
             'token_endpoint'                     => $settingsAvailable ? \FluentToolkit\Mcp\OAuth\Metadata::tokenEndpoint() : rest_url('fluent-toolkit-mcp-oauth/v1/token'),
             'registration_endpoint'              => $settingsAvailable ? \FluentToolkit\Mcp\OAuth\Metadata::registrationEndpoint() : rest_url('fluent-toolkit-mcp-oauth/v1/register'),
-            'oauth_settings_url'                 => $standaloneOAuthBridgeActive ? '' : $this->mcpOAuthUrl(),
+            'oauth_settings_url'                 => $standaloneOAuthBridgeActive ? '' : \FluentToolkit\Classes\AdminMenu::url('mcp-auth'),
         ], 200);
     }
 
@@ -404,43 +391,6 @@ class FluentToolkitBootstrap
         if (!wp_verify_nonce($nonce, 'fluent_toolkit_nonce')) {
             wp_send_json(array('message' => __('Invalid nonce.', 'fluent-toolkit')), 403);
         }
-    }
-
-    public function settingsPage()
-    {
-        $cachedSettings = get_option('__fluent_toolkit_versions', []);
-
-        $sourceVersion = '';
-        $requireUpdate = false;
-        if ($cachedSettings && !empty($cachedSettings['toolkit'])) {
-            $sourceVersion = $cachedSettings['toolkit']['stable_version'];
-            $requireUpdate = version_compare(FLUENT_TOOLKIT_VERSION, $sourceVersion, '<');
-        }
-
-        wp_enqueue_script('fluent-toolkit-script', FLUENT_BETA_TESTING_PLUGIN_URL . 'dist/app.js', array('jquery'), FLUENT_TOOLKIT_VERSION, true);
-        wp_localize_script('fluent-toolkit-script', 'fluentToolkitVars', array(
-            'ajax_url'       => admin_url('admin-ajax.php'),
-            'nonce'          => wp_create_nonce('fluent_toolkit_nonce'),
-            'version'        => FLUENT_TOOLKIT_VERSION,
-            'source_version' => $sourceVersion,
-            'require_update' => $requireUpdate,
-            'dashboard_url'  => admin_url('admin.php?page=fluent-toolkit'),
-            'oauth_url'      => $this->mcpOAuthUrl()
-        ));
-        ?>
-        <div class="wrap">
-            <div id="fluent_app"></div>
-        </div>
-        <?php
-    }
-
-    private function mcpOAuthUrl()
-    {
-        if (class_exists('\FluentToolkit\Mcp\OAuth\AdminPage')) {
-            return \FluentToolkit\Mcp\OAuth\AdminPage::url();
-        }
-
-        return admin_url('admin.php?page=fluent-toolkit#/mcp-oauth');
     }
 
     private function getPluginIcon()
