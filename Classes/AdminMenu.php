@@ -7,8 +7,6 @@ defined('ABSPATH') || exit;
 class AdminMenu
 {
     const DASHBOARD_SLUG = 'fluent-toolkit';
-    const MCP_AUTH_HASH = 'mcp-auth';
-    const MCP_AUTH_MENU_SLUG = 'fluent-toolkit#mcp-auth';
 
     public static function register()
     {
@@ -30,15 +28,6 @@ class AdminMenu
             self::DASHBOARD_SLUG,
             [__CLASS__, 'render']
         );
-
-        add_submenu_page(
-            self::DASHBOARD_SLUG,
-            __('MCP Auth Bridge', 'fluent-toolkit'),
-            __('MCP Auth Bridge', 'fluent-toolkit'),
-            'manage_options',
-            self::MCP_AUTH_MENU_SLUG,
-            [__CLASS__, 'render']
-        );
     }
 
     public static function render()
@@ -58,10 +47,6 @@ class AdminMenu
     public static function url($view = 'dashboard')
     {
         $url = admin_url('admin.php?page=' . self::DASHBOARD_SLUG);
-
-        if (in_array($view, ['mcp-auth', 'mcp-oauth', 'mcp_oauth'], true)) {
-            return $url . '#' . self::MCP_AUTH_HASH;
-        }
 
         return $url;
     }
@@ -92,7 +77,6 @@ class AdminMenu
             'source_version' => $sourceVersion,
             'require_update' => $requireUpdate,
             'dashboard_url'  => self::url(),
-            'oauth_url'      => self::url('mcp-auth'),
         ]);
     }
 

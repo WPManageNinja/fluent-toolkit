@@ -14,8 +14,7 @@ Get early access to release candidates, install companion add-ons, and track upd
 
 - Browse and install beta builds & release candidates for Fluent plugins
 - Install companion add-ons alongside core plugins
-- Provide FluentCRM MCP OAuth support from Toolkit
-- Load the official WordPress MCP Adapter as a replaceable dependency fallback
+- Load the official WordPress MCP Adapter as a bundled, replaceable dependency fallback
 - Live stats — available, installed, and pending updates at a glance
 - Channel filter tabs: All / Beta / Installed / Updates
 - Real-time search across plugins
@@ -42,20 +41,19 @@ npx mix --production   # production build
 bash build.sh          # create release zip → builds/fluent-toolkit-{version}.zip
 ```
 
-### MCP OAuth Support
+### MCP Adapter Support
 
-Fluent Toolkit can provide the WordPress MCP Adapter package and the FluentCRM MCP OAuth bridge from one plugin. The MCP endpoint remains `/wp-json/fluent-crm/mcp`; Toolkit adds OAuth metadata, dynamic client registration, PKCE authorization, token issuance, and bearer-token validation for that route.
+Fluent Toolkit can provide the official WordPress MCP Adapter package as a bundled fallback dependency. The adapter stays isolated behind Toolkit's adapter provider so it can be updated or removed independently.
 
-The OAuth bridge is Fluent-maintained first-party Toolkit code. The MCP Adapter is WordPress-maintained and remains isolated behind Toolkit's adapter provider so it can be updated or removed independently.
+Toolkit only bundles the adapter fallback. Authentication and authorization for MCP routes should be handled outside this plugin.
 
 ---
 
 ### Changelog
 
 #### 1.2.0
-- Added built-in FluentCRM MCP OAuth bridge while keeping the existing `/wp-json/fluent-crm/mcp` route and OAuth endpoints
 - Added replaceable WordPress MCP Adapter provider using the official `wordpress/mcp-adapter` package
-- Added Toolkit dashboard status for MCP Adapter, Abilities API, OAuth status, and connector URLs
+- Added Toolkit dashboard status for MCP Adapter and Abilities API availability
 
 #### 1.1.0
 - Redesigned dashboard — topbar, hero stats, channel tabs, plugin grid

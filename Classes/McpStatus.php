@@ -7,10 +7,6 @@ defined('ABSPATH') || exit;
 class McpStatus
 {
     const ADAPTER_PLUGIN_FILE = 'mcp-adapter/mcp-adapter.php';
-    const OAUTH_BRIDGE_PLUGIN_FILES = [
-        'fluentCRM-MCP-OAuth-Bridge/fluentcrm-mcp-oauth-bridge.php',
-        'fluentcrm-mcp-oauth-bridge/fluentcrm-mcp-oauth-bridge.php',
-    ];
 
     public static function adapterActiveAsPlugin()
     {
@@ -24,25 +20,6 @@ class McpStatus
     public static function bundledAdapterDisabled()
     {
         return defined('FLUENT_TOOLKIT_DISABLE_BUNDLED_MCP_ADAPTER') && FLUENT_TOOLKIT_DISABLE_BUNDLED_MCP_ADAPTER;
-    }
-
-    public static function standaloneOAuthBridgeActive()
-    {
-        if (class_exists('\FluentCrmMcpOAuthBridge\Plugin')) {
-            return true;
-        }
-
-        if (!function_exists('is_plugin_active')) {
-            require_once ABSPATH . 'wp-admin/includes/plugin.php';
-        }
-
-        foreach (self::OAUTH_BRIDGE_PLUGIN_FILES as $pluginFile) {
-            if (is_plugin_active($pluginFile)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     public static function adapterAvailable()

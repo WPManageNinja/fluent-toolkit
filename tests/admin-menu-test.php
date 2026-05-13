@@ -58,8 +58,8 @@ require_once dirname(__DIR__) . '/Classes/AdminMenu.php';
 
 $submenus = $GLOBALS['fluent_toolkit_admin_menu_calls']['submenus'];
 
-if (count($submenus) !== 2) {
-    fwrite(STDERR, 'Expected exactly two Fluent Toolkit submenus.' . PHP_EOL);
+if (count($submenus) !== 1) {
+    fwrite(STDERR, 'Expected Fluent Toolkit to register only the dashboard submenu.' . PHP_EOL);
     exit(1);
 }
 
@@ -77,11 +77,6 @@ if ($submenus[0]['slug'] !== \FluentToolkit\Classes\AdminMenu::DASHBOARD_SLUG) {
     exit(1);
 }
 
-if ($submenus[1]['slug'] !== \FluentToolkit\Classes\AdminMenu::MCP_AUTH_MENU_SLUG) {
-    fwrite(STDERR, 'Expected second submenu to use the MCP Auth hash route.' . PHP_EOL);
-    exit(1);
-}
-
 $pageSlugs = array_values(array_unique(array_map(function ($submenu) {
     return strtok($submenu['slug'], '#');
 }, $submenus)));
@@ -96,8 +91,8 @@ if (\FluentToolkit\Classes\AdminMenu::url() !== 'http://example.test/wp-admin/ad
     exit(1);
 }
 
-if (\FluentToolkit\Classes\AdminMenu::url('mcp-auth') !== 'http://example.test/wp-admin/admin.php?page=fluent-toolkit#mcp-auth') {
-    fwrite(STDERR, 'Expected MCP Auth URL to use the Fluent Toolkit hash route.' . PHP_EOL);
+if (\FluentToolkit\Classes\AdminMenu::url('mcp-auth') !== 'http://example.test/wp-admin/admin.php?page=fluent-toolkit') {
+    fwrite(STDERR, 'Expected removed MCP Auth route to fall back to the dashboard URL.' . PHP_EOL);
     exit(1);
 }
 
