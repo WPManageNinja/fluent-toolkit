@@ -1,11 +1,33 @@
+/* ──────────────────────────────────────────────────────────
+   Fluent Unified UI — Stripe-inspired sidebar shell
+   ────────────────────────────────────────────────────────── */
+
 :root {
     --wp-admin--admin-bar--height: 0px;
+
+    /* Sidebar palette */
+    --fui-sidebar-width: 240px;
+    --fui-bg: var(--fc-secondary-bg, #fff);
+    --fui-surface: #ffffff;
+    --fui-surface-hover: #f6f5f4;
+    --fui-surface-active: #f1edff;
+    --fui-border: #ebe9e6;
+    --fui-text: #1a1a1a;
+    --fui-text-muted: #4f4f55;
+    --fui-text-soft: #8a8a93;
+    --fui-text-faint: #a8a7ad;
+    --fui-accent: #635bff; /* Stripe purple */
+    --fui-accent-hover: #5851e6;
+    --fui-shadow: 0 0 0 1px rgba(0, 0, 0, 0.02), 0 1px 3px rgba(15, 15, 15, 0.04);
 }
+
+/* ── WP chrome reset ─────────────────────────────────────── */
 #adminmenumain {
     display: none !important;
 }
 
-#wpadminbar, #wpfooter {
+#wpadminbar,
+#wpfooter {
     display: none !important;
 }
 
@@ -13,10 +35,735 @@ body .fcrm_topbar {
     top: 0;
 }
 
-body #wpcontent, body #wpfooter {
+body #wpbody-content {
+    padding-bottom: 0;
+}
+
+body #wpbody-content #fct_admin_menu_holder .fct_admin_menu_wrap {
+    top: 0;
+    width: 100%;
+    position: sticky;
+}
+
+div#fct_admin_menu_holder {
+    position: sticky;
+    top: 0;
+    z-index: 999;
+}
+
+#fluent_cart_plugin_app {
+    padding-top: 0;
+}
+
+.fct_admin_menu_wrap.fct_global_menu_wrap {
+    top: 0;
+    position: sticky;
+    width: 100%;
+}
+
+body #wpcontent,
+body #wpfooter {
     margin-left: 0;
 }
 
 body #wpcontent {
     padding-left: 0;
+}
+
+html.wp-toolbar {
+    padding-top: 0 !important;
+}
+
+body.wp-admin {
+    background: var(--fui-bg);
+}
+
+/* ── App shell ───────────────────────────────────────────── */
+.fluent_uui {
+    display: flex;
+    align-items: stretch;
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--fui-text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────── */
+.fluent_ui_sidebar {
+    width: var(--fui-sidebar-width);
+    flex: 0 0 var(--fui-sidebar-width);
+    background: var(--fui-surface);
+    border-right: 1px solid var(--fui-border);
+    padding: 14px 12px 24px;
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    height: 100vh;
+    overflow-y: auto;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* ── Workspace switcher ──────────────────────────────────── */
+.fui-workspace-wrap {
+    position: relative;
+    margin: 0 0 14px;
+}
+
+.fui-workspace-wrap .fui-workspace {
+    margin: 0;
+}
+
+.fui-workspace {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 10px;
+    margin: 0 0 14px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+    transition: background-color .12s ease;
+    -webkit-appearance: none;
+            appearance: none;
+}
+
+.fui-workspace:hover,
+.fui-workspace:focus {
+    background: var(--fui-surface-hover);
+    outline: none;
+}
+
+.fui-workspace:focus-visible {
+    box-shadow: 0 0 0 2px rgba(99, 91, 255, 0.35);
+}
+
+.fui-workspace-icon {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    border-radius: 7px;
+    object-fit: cover;
+    display: block;
+    background: var(--fui-surface-hover);
+}
+
+.fui-workspace-icon--initial {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--fui-text);
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.fui-workspace-info {
+    flex: 1 1 auto;
+    min-width: 0;
+    line-height: 1.25;
+}
+
+.fui-workspace-name {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--fui-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    letter-spacing: -0.005em;
+}
+
+.fui-workspace-sub {
+    font-size: 11.5px;
+    color: var(--fui-text-soft);
+    margin-top: 1px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fui-workspace-caret {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
+    background-color: var(--fui-text-soft);
+    opacity: 0.7;
+    transition: transform .15s ease;
+    -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M4 6l4 4 4-4' stroke='black' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>") center / 13px no-repeat;
+            mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M4 6l4 4 4-4' stroke='black' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>") center / 13px no-repeat;
+}
+
+.fui-workspace-wrap.is-open .fui-workspace-caret {
+    transform: rotate(180deg);
+    opacity: 0.9;
+}
+
+/* ── Workspace dropdown menu ─────────────────────────────── */
+.fui-workspace-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: var(--fui-surface);
+    border: 1px solid var(--fui-border);
+    border-radius: 10px;
+    padding: 6px;
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.02),
+        0 6px 20px -4px rgba(15, 15, 15, 0.12),
+        0 2px 6px rgba(15, 15, 15, 0.05);
+    min-width: 200px;
+}
+
+.fui-workspace-menu[hidden] {
+    display: none;
+}
+
+.fui-workspace-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--fui-text);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.3;
+    transition: background-color .12s ease, color .12s ease;
+    cursor: pointer;
+}
+
+.fui-workspace-menu-item:hover,
+.fui-workspace-menu-item:focus {
+    background: var(--fui-surface-hover);
+    color: var(--fui-text);
+    text-decoration: none;
+    outline: none;
+}
+
+.fui-workspace-menu-item:focus-visible {
+    box-shadow: 0 0 0 2px rgba(99, 91, 255, 0.35);
+}
+
+.fui-workspace-menu-item--danger {
+    color: #c4321a;
+}
+
+.fui-workspace-menu-item--danger:hover {
+    background: oklch(96% 0.04 25);
+    color: #a32814;
+}
+
+.fui-workspace-menu-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
+    color: var(--fui-text-soft);
+}
+
+.fui-workspace-menu-item--danger .fui-workspace-menu-icon {
+    color: currentColor;
+    opacity: 0.8;
+}
+
+.fui-workspace-menu-divider {
+    height: 1px;
+    background: var(--fui-border);
+    margin: 4px 0;
+}
+
+/* ── Main nav (current app's primary items) ──────────────── */
+.fui-main-nav {
+    display: block;
+    margin-bottom: 18px;
+}
+
+.fui-main-nav > ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* Scrollbar — subtle */
+.fluent_ui_sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.fluent_ui_sidebar::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 3px;
+}
+
+.fluent_ui_sidebar:hover::-webkit-scrollbar-thumb {
+    background: #d4d2cf;
+}
+
+/* Section heading — small caps, soft */
+.fluent_ui_sidebar h4 {
+    margin: 4px 0 8px;
+    padding: 0 10px;
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fui-text-soft);
+    line-height: 1.4;
+}
+
+/* ── Product row (top-level app entry) ───────────────────── */
+.fui-product {
+    list-style: none;
+    margin: 1px 0;
+}
+
+.fui-product-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--fui-text-muted);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.3;
+    transition: background-color .12s ease, color .12s ease, border-color .12s ease, box-shadow .12s ease;
+    border: 1px solid transparent;
+    box-shadow: none;
+    outline: none;
+    cursor: pointer;
+}
+
+.fui-product-head:hover,
+.fui-product-head:focus {
+    background: var(--fui-surface-hover);
+    color: var(--fui-text);
+    text-decoration: none;
+    box-shadow: none;
+    outline: none;
+}
+
+.fui-product-head:focus-visible {
+    box-shadow: 0 0 0 2px rgba(99, 91, 255, 0.35);
+}
+
+/* Chevron — clickable hit-area, rotates 180° when product is open */
+.fui-product-chevron {
+    margin-left: auto;
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--fui-text-soft);
+    cursor: pointer;
+    transition: background-color .12s ease, transform .15s ease, opacity .15s ease;
+    opacity: 0.65;
+}
+
+.fui-product-chevron::before {
+    content: '';
+    width: 14px;
+    height: 14px;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M4 6l4 4 4-4' stroke='black' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>") center / 12px no-repeat;
+            mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M4 6l4 4 4-4' stroke='black' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>") center / 12px no-repeat;
+}
+
+.fui-product-chevron:hover {
+    background: var(--fui-surface-hover);
+    opacity: 1;
+}
+
+.fui-product.is-open > .fui-product-head .fui-product-chevron {
+    transform: rotate(180deg);
+    opacity: 0.85;
+}
+
+/* Items rendered under an expanded product — hidden by default */
+.fluent_ui_sidebar .fui-product-items {
+    list-style: none;
+    margin: 2px 0 6px;
+    padding: 0 0 0 28px;
+    display: none;
+}
+
+.fluent_ui_sidebar .fui-product.is-open > .fui-product-items {
+    display: block;
+}
+
+/* ── Menu list ───────────────────────────────────────────── */
+.fluent_ui_sidebar ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.fluent_ui_sidebar li {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.fluent_ui_sidebar li::before,
+.fluent_ui_sidebar li::marker {
+    content: none;
+}
+
+/* ── Menu item ───────────────────────────────────────────── */
+.fui-apps-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 10px;
+    margin: 1px 0;
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--fui-text-muted);
+    font-size: 13.5px;
+    font-weight: 500;
+    line-height: 1.3;
+    transition: background-color .12s ease, color .12s ease;
+    cursor: pointer;
+    box-shadow: none;
+    outline: none;
+}
+
+.fui-apps-menu-item:hover,
+.fui-apps-menu-item:focus {
+    background: var(--fui-surface-hover);
+    color: var(--fui-text);
+    text-decoration: none;
+    box-shadow: none;
+    outline: none;
+}
+
+.fui-apps-menu-item:focus-visible {
+    box-shadow: 0 0 0 2px rgba(99, 91, 255, 0.35);
+}
+
+.fui-apps-menu-item.active {
+    background: var(--fui-surface-active);
+    color: var(--fui-accent);
+    font-weight: 600;
+}
+
+.fui-apps-menu-item.active:hover {
+    background: var(--fui-surface-active);
+    color: var(--fui-accent);
+}
+
+.fui-app-title {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ── Icons ───────────────────────────────────────────────── */
+.fui-app-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+    color: currentColor;
+}
+
+.fui-app-icon svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    color: inherit;
+}
+
+.fui-app-icon--img img {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    display: block;
+}
+
+/* ── Parent items with a submenu ─────────────────────────── */
+.fui-item {
+    list-style: none;
+}
+
+.fui-item--has-sub > .fui-apps-menu-item.is-parent-active {
+    color: var(--fui-text);
+    background: transparent;
+    font-weight: 600;
+}
+
+.fui-item--has-sub > .fui-apps-menu-item.is-parent-active:hover {
+    background: var(--fui-surface-hover);
+}
+
+/* ── Submenu (third-level, e.g. Contacts → Tags) ─────────── */
+.fluent_ui_sidebar .fui-submenu {
+    list-style: none;
+    margin: 1px 0 4px;
+    padding: 0 0 0 14px;
+    display: none;
+}
+
+.fluent_ui_sidebar .fui-item--has-sub.is-open > .fui-submenu {
+    display: block;
+}
+
+/* ── Chevron on parent items (clickable to toggle) ───────── */
+.fui-item-chevron {
+    margin-left: auto;
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--fui-text-soft);
+    cursor: pointer;
+    transition: background-color .12s ease, transform .15s ease, opacity .15s ease;
+    opacity: 0.6;
+}
+
+.fui-item-chevron::before {
+    content: '';
+    width: 12px;
+    height: 12px;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M4 6l4 4 4-4' stroke='black' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>") center / 11px no-repeat;
+            mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M4 6l4 4 4-4' stroke='black' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>") center / 11px no-repeat;
+}
+
+.fui-item-chevron:hover {
+    background: var(--fui-surface-hover);
+    opacity: 1;
+}
+
+.fui-item--has-sub.is-open > .fui-apps-menu-item .fui-item-chevron {
+    transform: rotate(180deg);
+    opacity: 0.85;
+}
+
+.fui-apps-submenu-item {
+    display: flex;
+    align-items: center;
+    padding: 5px 10px;
+    margin: 1px 0;
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--fui-text-muted);
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.3;
+    transition: background-color .12s ease, color .12s ease;
+    box-shadow: none;
+    outline: none;
+}
+
+.fui-apps-submenu-item:hover,
+.fui-apps-submenu-item:focus {
+    background: var(--fui-surface-hover);
+    color: var(--fui-text);
+    text-decoration: none;
+    box-shadow: none;
+    outline: none;
+}
+
+.fui-apps-submenu-item:focus-visible {
+    box-shadow: 0 0 0 2px rgba(99, 91, 255, 0.35);
+}
+
+.fui-apps-submenu-item.active {
+    background: var(--fui-surface-active);
+    color: var(--fui-accent);
+    font-weight: 600;
+}
+
+.fui-apps-submenu-item.active:hover {
+    background: var(--fui-surface-active);
+    color: var(--fui-accent);
+}
+
+/* Products section sits right after the current app's nav */
+.fluent_ui_sidebar .fui-products {
+    margin-top: 4px;
+}
+
+/* ── Main content area ───────────────────────────────────── */
+.fui-app-content {
+    flex: 1 1 auto;
+    min-width: 0;
+    background: var(--fui-bg);
+    min-height: 100vh;
+    box-sizing: border-box;
+    margin: 0 0 0 20px;
+}
+
+/* WordPress notices inside content area — tighter spacing */
+.fui-app-content .notice,
+.fui-app-content .updated,
+.fui-app-content .error {
+    margin: 12px 20px;
+}
+
+/* ── Mobile chrome ───────────────────────────────────────── */
+.fui-mobile-toggle {
+    display: none;
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 1002;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    border: 1px solid var(--fui-border);
+    background: var(--fui-surface);
+    color: var(--fui-text);
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(15, 15, 15, 0.06);
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    -webkit-appearance: none;
+            appearance: none;
+}
+
+.fui-mobile-toggle:hover {
+    background: var(--fui-surface-hover);
+}
+
+.fui-mobile-toggle-bars,
+.fui-mobile-toggle-bars::before,
+.fui-mobile-toggle-bars::after {
+    display: block;
+    width: 16px;
+    height: 1.75px;
+    background: currentColor;
+    border-radius: 2px;
+    transition: transform .2s ease, opacity .2s ease, top .2s ease;
+}
+
+.fui-mobile-toggle-bars {
+    position: relative;
+}
+
+.fui-mobile-toggle-bars::before,
+.fui-mobile-toggle-bars::after {
+    content: '';
+    position: absolute;
+    left: 0;
+}
+
+.fui-mobile-toggle-bars::before { top: -5px; }
+.fui-mobile-toggle-bars::after  { top: 5px; }
+
+.fluent_uui.is-mobile-open .fui-mobile-toggle-bars {
+    background: transparent;
+}
+
+.fluent_uui.is-mobile-open .fui-mobile-toggle-bars::before {
+    top: 0;
+    transform: rotate(45deg);
+}
+
+.fluent_uui.is-mobile-open .fui-mobile-toggle-bars::after {
+    top: 0;
+    transform: rotate(-45deg);
+}
+
+.fui-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 15, 15, 0.35);
+    z-index: 1000;
+    animation: fui-fade-in .15s ease;
+}
+
+@keyframes fui-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 1100px) {
+    :root {
+        --fui-sidebar-width: 220px;
+    }
+}
+
+@media (max-width: 900px) {
+    :root {
+        --fui-sidebar-width: 200px;
+    }
+
+    .fui-app-content {
+        margin-left: 12px;
+    }
+}
+
+@media (max-width: 782px) {
+    .fui-mobile-toggle {
+        display: inline-flex;
+    }
+
+    .fluent_uui.is-mobile-open .fui-backdrop {
+        display: block;
+    }
+
+    .fluent_ui_sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        height: 100vh;
+        width: 280px;
+        max-width: 86vw;
+        flex: none;
+        padding: 64px 12px 24px;
+        transform: translateX(-100%);
+        transition: transform .25s ease;
+        z-index: 1001;
+        box-shadow: 6px 0 24px -8px rgba(15, 15, 15, 0.18);
+        will-change: transform;
+    }
+
+    .fluent_uui.is-mobile-open .fluent_ui_sidebar {
+        transform: translateX(0);
+    }
+
+    .fui-app-content {
+        margin-left: 0;
+        padding-top: 64px;
+    }
+
+    /* Workspace dropdown sits within the drawer — keep it anchored */
+    .fui-workspace-menu {
+        right: 0;
+    }
+}
+
+
+.fluentcrm-app.is-settings-page .fluentcrm-body {
+   // position: relative;
 }
