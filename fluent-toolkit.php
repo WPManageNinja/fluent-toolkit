@@ -69,7 +69,6 @@ class FluentToolkitBootstrap
         add_action('admin_menu', array(\FluentToolkit\Classes\AdminMenu::class, 'register'));
         add_action('wp_ajax_fluent-beta-install', array($this, 'installBetaPlugin'));
         add_action('wp_ajax_fluent_beta_get_beta_versions', array($this, 'getBetaVersions'));
-        add_action('wp_ajax_fluent_toolkit_mcp_status', array($this, 'getMcpStatus'));
 
         // add plugin menu link to plugins page
         add_filter('plugin_action_links_' . plugin_basename(__FILE__), function ($links) {
@@ -113,20 +112,6 @@ class FluentToolkitBootstrap
 
         wp_send_json([
             'beta_versions' => $betaVersions,
-        ], 200);
-    }
-
-    public function getMcpStatus()
-    {
-        $this->verifyAjaxRequest();
-
-        $statusClass = '\FluentToolkit\Classes\McpStatus';
-
-        wp_send_json([
-            'adapter_available'        => class_exists('\WP\MCP\Core\McpAdapter') && function_exists('wp_register_ability'),
-            'adapter_provider'         => class_exists($statusClass) ? $statusClass::adapterProvider() : 'missing',
-            'bundled_adapter_disabled' => class_exists($statusClass) ? $statusClass::bundledAdapterDisabled() : false,
-            'abilities_available'      => function_exists('wp_register_ability'),
         ], 200);
     }
 

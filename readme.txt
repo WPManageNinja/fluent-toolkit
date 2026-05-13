@@ -16,11 +16,17 @@ Fluent Toolkit gives you early access to beta builds and release candidates acro
 
 Fluent Toolkit can load the official WordPress MCP Adapter as an isolated, replaceable dependency fallback. Authentication and authorization for MCP routes should be handled outside this plugin.
 
+== Installation ==
+
+Download the latest plugin zip from the GitHub Latest Release page:
+https://github.com/WPManageNinja/fluent-toolkit/releases/latest
+
+Upload the zip from your WordPress dashboard, activate Fluent Toolkit, then open Dashboard > Fluent Toolkit.
+
 == Changelog ==
 
 = 1.2.0 =
 * Added replaceable WordPress MCP Adapter provider using the official `wordpress/mcp-adapter` package
-* Added Toolkit dashboard status for MCP Adapter and Abilities API availability
 
 = 1.1.0 =
 * Redesigned dashboard UI — modern layout with topbar, hero stats, channel filter tabs, and plugin grid

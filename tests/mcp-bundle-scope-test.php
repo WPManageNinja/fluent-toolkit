@@ -24,6 +24,9 @@ $forbiddenPatterns = [
     'MCP Auth Bridge',
     'mcp-auth',
     'mcp-oauth',
+    'fluent_toolkit_mcp_status',
+    'getMcpStatus',
+    'ft-mcp-lite',
 ];
 
 foreach ($productionFiles as $file) {
