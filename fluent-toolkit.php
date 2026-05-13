@@ -78,6 +78,8 @@ class FluentToolkitBootstrap
             return $links;
         });
 
+        (new \FluentToolkit\Classes\UnifiedUiHandler())->register();
+
     }
 
     public function getBetaVersions()

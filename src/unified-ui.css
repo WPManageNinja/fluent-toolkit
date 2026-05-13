@@ -1,0 +1,22 @@
+:root {
+    --wp-admin--admin-bar--height: 0px;
+}
+#adminmenumain {
+    display: none !important;
+}
+
+#wpadminbar, #wpfooter {
+    display: none !important;
+}
+
+body .fcrm_topbar {
+    top: 0;
+}
+
+body #wpcontent, body #wpfooter {
+    margin-left: 0;
+}
+
+body #wpcontent {
+    padding-left: 0;
+}
