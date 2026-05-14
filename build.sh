@@ -26,9 +26,7 @@ cp index.php          "${BUILD_DIR}/"
 cp -r Classes "${BUILD_DIR}/Classes"
 
 # PHP modules + Composer dependencies
-cp -r includes "${BUILD_DIR}/includes"
-cp composer.json composer.lock "${BUILD_DIR}/"
-cp -r vendor "${BUILD_DIR}/vendor"
+cp -r libs "${BUILD_DIR}/libs"
 
 # Compiled assets + security index
 mkdir -p "${BUILD_DIR}/dist"

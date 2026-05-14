@@ -4,8 +4,8 @@ if (!defined('ABSPATH')) {
     define('ABSPATH', dirname(__DIR__) . '/');
 }
 
-if (!defined('FLUENT_BETA_TESTING_PLUGIN_PATH')) {
-    define('FLUENT_BETA_TESTING_PLUGIN_PATH', dirname(__DIR__) . '/');
+if (!defined('FLUENT_TOOLKIT_PLUGIN_PATH')) {
+    define('FLUENT_TOOLKIT_PLUGIN_PATH', dirname(__DIR__) . '/');
 }
 
 if (!defined('FLUENT_TOOLKIT_DISABLE_BUNDLED_MCP_ADAPTER')) {

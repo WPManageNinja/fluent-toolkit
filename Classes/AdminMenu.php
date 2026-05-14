@@ -64,7 +64,7 @@ class AdminMenu
 
         wp_enqueue_script(
             'fluent-toolkit-script',
-            FLUENT_BETA_TESTING_PLUGIN_URL . 'dist/app.js',
+            FLUENT_TOOLKIT_PLUGIN_URL . 'dist/app.js',
             ['jquery'],
             FLUENT_TOOLKIT_VERSION,
             true

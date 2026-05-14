@@ -7,7 +7,5 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'WP\\McpSchema\\' => array($vendorDir . '/wordpress/php-mcp-schema/src'),
-    'WP\\MCP\\' => array($vendorDir . '/wordpress/mcp-adapter/includes'),
-    'FluentToolkit\\Mcp\\' => array($baseDir . '/includes/Mcp'),
-    'FluentToolkit\\Classes\\' => array($baseDir . '/Classes'),
+    'WP\\MCP\\' => array($baseDir . '/includes'),
 );
