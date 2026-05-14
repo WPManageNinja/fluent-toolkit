@@ -9,7 +9,8 @@
   --fui-surface: #ffffff;
   --fui-surface-hover: #f6f5f4;
   --fui-surface-active: #f1edff;
-  --fui-border: #ebe9e6;
+  --fui-border: var(--fc-primary-border, #E1E4EA);
+  --fui-text-inverse: var(--fc-text-inverse, #FFFFFF);
   --fui-text: var(--fc-primary-text, #0E121B);
   --fui-text-muted: var(--fc-text-muted, #99A0AE);
   --fui-text-soft: var(--fc-secondary-text, #525866);
@@ -17,4 +18,19 @@
   --fui-accent: #635bff; /* Stripe purple */
   --fui-accent-hover: #5851e6;
   --fui-shadow: 0 0 0 1px rgba(0, 0, 0, 0.02), 0 1px 3px rgba(15, 15, 15, 0.04);
+}
+
+.dark {
+  --fui-primary-bg: #151d26;
+  --fui-bg:         #1c2732;
+  --fui-surface:    #2a2926;
+  --fui-surface-hover:   #333130;
+  --fui-surface-active:  #2d2a42;
+  --fui-border:     #2c3c4e;
+  --fui-text-inverse: #0E121B;
+  --fui-text:       #F5F7FA;
+  --fui-text-muted: #99A0AE;
+  --fui-text-soft:  #CACFD8;
+  --fui-text-faint: #6a6760;
+  --fui-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.3);
 }

@@ -18,9 +18,9 @@
 .fluent_ui_sidebar {
     width: var(--fui-sidebar-width);
     flex: 0 0 var(--fui-sidebar-width);
-    background: var(--fui-surface);
+    background: var(--fui-primary-bg);
     border-right: 1px solid var(--fui-border);
-    padding: 14px 12px 24px;
+    padding: 14px 12px 0 12px;
     position: sticky;
     top: 0;
     align-self: flex-start;
@@ -30,6 +30,7 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
+    z-index: 100;
 }
 
 /* ── Workspace switcher ──────────────────────────────────── */
@@ -86,7 +87,7 @@
     align-items: center;
     justify-content: center;
     background: var(--fui-text);
-    color: #fff;
+    color: var(--fui-text-inverse);
     font-weight: 600;
     font-size: 14px;
 }
@@ -529,8 +530,11 @@
 
 
 /* Products section sits right after the current app's nav */
-.fluent_ui_sidebar .fui-products {
-    margin-top: 4px;
+.fluent_ui_sidebar {
+    .fui-products {
+        margin-top: 4px;
+        margin-bottom: 14px;
+    }
 }
 
 /* ── Main content area ───────────────────────────────────── */

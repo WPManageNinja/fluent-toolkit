@@ -107,6 +107,14 @@ class UnifiedUiHandler
         $siteName = get_bloginfo('name');
         $siteIcon = function_exists('get_site_icon_url') ? get_site_icon_url(64) : '';
         ?>
+        <script>
+        (function () {
+            var mode = localStorage.getItem('fluent_theme_mode') || 'system';
+            var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            var isDark = mode === 'dark' || (mode === 'system' && prefersDark);
+            document.body.classList.add(isDark ? 'dark' : 'light');
+        })();
+        </script>
 
         <div class="fluent_uui">
         <button type="button" class="fui-mobile-toggle" aria-label="Toggle menu" aria-controls="fui-sidebar"
@@ -240,6 +248,15 @@ class UnifiedUiHandler
                     <?php endforeach; ?>
                 </div>
             <?php endif; ?>
+
+            <!-- Theme select -->
+            <div class="fui-sidebar-footer">
+                <select class="fui-theme-select" id="fui-theme-select" aria-label="Theme">
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                    <option value="system">System</option>
+                </select>
+            </div>
         </div>
         <div class="fui-app-content">
 
@@ -355,6 +372,32 @@ class UnifiedUiHandler
                             var navLink = e.target.closest('.fui-apps-menu-item, .fui-apps-submenu-item');
                             if (navLink) setMobileOpen(false);
                         }
+                    });
+
+                    // Theme select
+                    var themeSelect = document.getElementById('fui-theme-select');
+
+                    function applyTheme(mode) {
+                        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                        var isDark = mode === 'dark' || (mode === 'system' && prefersDark);
+                        document.body.classList.remove('dark', 'light');
+                        document.body.classList.add(isDark ? 'dark' : 'light');
+                        if (themeSelect) themeSelect.value = mode;
+                    }
+
+                    applyTheme(localStorage.getItem('fluent_theme_mode') || 'system');
+
+                    if (themeSelect) {
+                        themeSelect.addEventListener('change', function () {
+                            var mode = themeSelect.value;
+                            localStorage.setItem('fluent_theme_mode', mode);
+                            applyTheme(mode);
+                        });
+                    }
+
+                    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
+                        var mode = localStorage.getItem('fluent_theme_mode') || 'system';
+                        if (mode === 'system') applyTheme('system');
                     });
 
                     // Workspace switcher dropdown.
