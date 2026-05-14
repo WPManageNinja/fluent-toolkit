@@ -22,48 +22,48 @@ class UnifiedUiHandler
             'fluentcrm-admin' => [
                 'disabled' => !defined('FLUENTCRM'),
                 'title'    => 'CRM',
-                'icon'     => FLUENT_BETA_TESTING_PLUGIN_URL . 'dist/images/fluentcrm_icon.svg',
-                'logo'     => FLUENT_BETA_TESTING_PLUGIN_URL . 'dist/images/fluentcrm-logo.svg',
+                'icon'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentcrm_icon.svg',
+                'logo'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentcrm-logo.svg',
                 'items'    => $this->getCrmMenu(),
                 'has_dark_mode' => true
             ],
             'fluent-cart'     => [
                 'disabled' => !defined('FLUENTCART_VERSION'),
                 'title'    => 'Commerce',
-                'icon'     => FLUENT_BETA_TESTING_PLUGIN_URL . 'dist/images/fluentcart_icon.svg',
-                'logo'     => FLUENT_BETA_TESTING_PLUGIN_URL . 'dist/images/fluentcart_logo.svg',
+                'icon'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentcart_icon.svg',
+                'logo'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentcart_logo.svg',
                 'items'    => $this->getCartMenu(),
                 'has_dark_mode' => true
             ],
             'fluent_forms'    => [
                     'disabled' => !defined('FLUENTFORM'),
                     'title'    => 'Fluent',
-                    'icon'     => FLUENT_BETA_TESTING_PLUGIN_URL . 'dist/images/fluentforms_icon.svg',
-                    'logo'     => FLUENT_BETA_TESTING_PLUGIN_URL . 'dist/images/fluentforms_logo.svg',
+                    'icon'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentforms_icon.svg',
+                    'logo'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentforms_logo.svg',
                     'items'    => $this->getFormsMenu(),
                     'has_dark_mode' => false
             ],
             'fluent-support'    => [
                     'disabled' => !defined('FLUENT_SUPPORT_VERSION'),
                     'title'    => 'Support',
-                    'icon'     => FLUENT_BETA_TESTING_PLUGIN_URL . 'dist/images/fluentsupport_icon.svg',
-                    'logo'     => FLUENT_BETA_TESTING_PLUGIN_URL . 'dist/images/fluentsupport_logo.svg',
+                    'icon'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentsupport_icon.svg',
+                    'logo'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentsupport_logo.svg',
                     'items'    => [],
                     'has_dark_mode' => false
             ],
             'fluent-booking'  => [
                 'disabled' => !defined('FLUENT_BOOKING_VERSION'),
                 'title'    => 'Appointments',
-                'icon'     => FLUENT_BETA_TESTING_PLUGIN_URL . 'dist/images/fluentbooking_icon.svg',
-                'logo'     => FLUENT_BETA_TESTING_PLUGIN_URL . 'dist/images/fluentbooking_logo.svg',
+                'icon'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentbooking_icon.svg',
+                'logo'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentbooking_logo.svg',
                 'items'    => $this->getBookingMenu(),
                 'has_dark_mode' => true
             ],
             'fluent-boards'   => [
                 'disabled' => !defined('FLUENT_BOARDS'),
                 'title'    => 'Projects',
-                'icon'     => FLUENT_BETA_TESTING_PLUGIN_URL . 'dist/images/fluentboards_icon.svg',
-                'logo'     => FLUENT_BETA_TESTING_PLUGIN_URL . 'dist/images/fluentboards_logo.svg',
+                'icon'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentboards_icon.svg',
+                'logo'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentboards_logo.svg',
                 'items'    => $this->getBoardsMenu(),
                 'has_dark_mode' => false
             ]
@@ -112,7 +112,7 @@ class UnifiedUiHandler
 
     public function loadUnifiedUi($screen = '')
     {
-        wp_enqueue_style('fluent_unified_ui', FLUENT_BETA_TESTING_PLUGIN_URL . 'dist/unified-ui.css', [], FLUENT_TOOLKIT_VERSION);
+        wp_enqueue_style('fluent_unified_ui', FLUENT_TOOLKIT_PLUGIN_URL . 'dist/unified-ui.css', [], FLUENT_TOOLKIT_VERSION);
     }
 
     public function pushUnifiedUiToTop()
