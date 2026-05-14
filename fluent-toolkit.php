@@ -45,6 +45,8 @@ class FluentToolkitBootstrap
             }
         }, 999);
 
+        (new \FluentToolkit\Classes\UnifiedUiHandler())->register();
+
     }
 
     public function getBetaVersions()
@@ -269,6 +271,7 @@ class FluentToolkitBootstrap
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/AdminMenu.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/ToolkitHelper.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/McpManager.php';
+        require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/UnifiedUiHandler.php';
     }
 }
 
