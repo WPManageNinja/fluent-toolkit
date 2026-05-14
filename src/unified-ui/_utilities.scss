@@ -81,17 +81,34 @@ select {
       }
     }
   }
+  .fct-settings-nav-container,
   .fcrm_settings_sidebar {
     left: 0;
     height: 100vh;
   }
 
-  #fct_admin_app_wrapper {
-    padding-top: 20px;
-  }
+  #fluent-booking-app .fframe_main-menu-items,
+  .ff_header,
   .fcrm_topbar,
   #fct_admin_menu_holder {
     display: none;
+  }
+  .fct-setting-container {
+    position: relative;
+    height: 100vh;
+  }
+  #fct_admin_app_wrapper {
+    padding-top: 0;
+  }
+  #fluent_cart_plugin_app.fct_settings_page_plugin_app_wrap {
+    padding: 0;
+  }
+  .fct-settings-nav-content-inner {
+    max-height: 100vh;
+    min-height: 100vh;
+  }
+  .fct-settings-nav-content {
+    padding-left: 260px;
   }
 }
 
