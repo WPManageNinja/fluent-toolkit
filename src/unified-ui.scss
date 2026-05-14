@@ -31,6 +31,7 @@
     flex-direction: column;
     gap: 4px;
     z-index: 100;
+    scrollbar-width: none;
 }
 
 /* ── Workspace switcher ──────────────────────────────────── */
@@ -222,20 +223,6 @@
     list-style: none;
     margin: 0;
     padding: 0;
-}
-
-/* Scrollbar — subtle */
-.fluent_ui_sidebar::-webkit-scrollbar {
-    width: 6px;
-}
-
-.fluent_ui_sidebar::-webkit-scrollbar-thumb {
-    background: transparent;
-    border-radius: 3px;
-}
-
-.fluent_ui_sidebar:hover::-webkit-scrollbar-thumb {
-    background: #d4d2cf;
 }
 
 /* Section heading — small caps, soft */
@@ -649,6 +636,7 @@
     bottom: 0;
     z-index: 2;
     background: var(--fui-primary-bg);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
     &--right,
     &--left {
         display: flex;
