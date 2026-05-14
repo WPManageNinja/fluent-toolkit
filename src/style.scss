@@ -5,17 +5,15 @@
 @import "~element-plus/theme-chalk/el-message-box.css";
 
 #fluent_app {
-  background: #f6f5f2;
   min-height: 100vh;
-  margin: -10px -20px -10px -2px;
-  padding: 40px 32px 80px;
+  padding: 24px 0;
 }
 
 .ft-app {
   --bg: #f6f5f2;
   --surface: #ffffff;
   --surface-2: #fafaf8;
-  --border: #ecebe6;
+  --border: #E1E4EA;
   --border-strong: #dedcd5;
   --text: #14130f;
   --text-muted: #6b685f;
@@ -117,7 +115,7 @@
   .ft-hero {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 16px;
+    border-radius: 8px;
     padding: 20px 32px;
     margin-bottom: 24px;
     position: relative;
@@ -306,7 +304,7 @@
   .ft-list {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 16px;
+    border-radius: 8px;
     overflow: hidden;
   }
 
