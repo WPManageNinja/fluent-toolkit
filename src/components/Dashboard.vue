@@ -13,6 +13,7 @@
                 </div>
             </div>
             <div class="ft-topbar-actions">
+                <ViewTabs :active-view="activeView" @navigate="$emit('navigate', $event)" />
                 <el-button
                     v-if="appVars.require_update"
                     :loading="installing"
@@ -159,8 +160,20 @@
 </template>
 
 <script type="text/babel">
+import ViewTabs from './ViewTabs.vue';
+
 export default {
     name: 'Dashboard',
+    components: {
+        ViewTabs,
+    },
+    props: {
+        activeView: {
+            type: String,
+            default: 'dashboard',
+        },
+    },
+    emits: ['navigate'],
     data() {
         return {
             betaPlugins: [],

@@ -69,6 +69,8 @@ class FluentToolkitBootstrap
         add_action('admin_menu', array(\FluentToolkit\Classes\AdminMenu::class, 'register'));
         add_action('wp_ajax_fluent-beta-install', array($this, 'installBetaPlugin'));
         add_action('wp_ajax_fluent_beta_get_beta_versions', array($this, 'getBetaVersions'));
+        add_action('wp_ajax_fluent_toolkit_mcp_overview', array($this, 'fetchMcpOverview'));
+        add_action('wp_ajax_fluent_toolkit_mcp_toggle', array($this, 'toggleMcpAccess'));
 
         // add plugin menu link to plugins page
         add_filter('plugin_action_links_' . plugin_basename(__FILE__), function ($links) {
@@ -211,6 +213,47 @@ class FluentToolkitBootstrap
         ], 200);
     }
 
+    public function fetchMcpOverview()
+    {
+        $this->verifySettingsAjaxRequest();
+
+        wp_send_json(\FluentToolkit\Classes\McpManager::status(), 200);
+    }
+
+    public function toggleMcpAccess()
+    {
+        $this->verifySettingsAjaxRequest();
+
+        $slug = isset($_POST['slug']) ? sanitize_key($_POST['slug']) : 'fluent-crm';
+        $enabled = isset($_POST['enabled']) ? sanitize_text_field($_POST['enabled']) : '';
+        $enabled = in_array($enabled, ['yes', 'true', '1', 'on'], true);
+
+        $result = \FluentToolkit\Classes\McpManager::setProductMcpEnabled($slug, $enabled);
+
+        if (is_wp_error($result)) {
+            wp_send_json([
+                'message' => $result->get_error_message(),
+            ], 422);
+        }
+
+        $status = \FluentToolkit\Classes\McpManager::status();
+        $productName = $slug;
+
+        foreach ($status['products'] as $product) {
+            if ($product['slug'] === $slug) {
+                $productName = $product['name'];
+                break;
+            }
+        }
+
+        wp_send_json([
+            'message' => $enabled
+                ? sprintf(__('%s MCP tools are enabled.', 'fluent-toolkit'), $productName)
+                : sprintf(__('%s MCP tools are disabled.', 'fluent-toolkit'), $productName),
+            'status'  => $status,
+        ], 200);
+    }
+
     private function getLicenseKey($licenseOption)
     {
         $option = explode('.', $licenseOption);
@@ -234,6 +277,19 @@ class FluentToolkitBootstrap
     {
         if (!current_user_can('install_plugins')) {
             wp_send_json(array('message' => __('You do not have permission to install a plugin.', 'fluent-toolkit')), 403);
+        }
+
+        $nonce = isset($_REQUEST['__nonce']) ? sanitize_text_field($_REQUEST['__nonce']) : '';
+
+        if (!wp_verify_nonce($nonce, 'fluent_toolkit_nonce')) {
+            wp_send_json(array('message' => __('Invalid nonce.', 'fluent-toolkit')), 403);
+        }
+    }
+
+    private function verifySettingsAjaxRequest()
+    {
+        if (!current_user_can('manage_options')) {
+            wp_send_json(array('message' => __('You do not have permission to manage Fluent Toolkit settings.', 'fluent-toolkit')), 403);
         }
 
         $nonce = isset($_REQUEST['__nonce']) ? sanitize_text_field($_REQUEST['__nonce']) : '';
