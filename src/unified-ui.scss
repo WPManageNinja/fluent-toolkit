@@ -551,7 +551,8 @@
     background: var(--fui-bg);
     min-height: 100vh;
     box-sizing: border-box;
-    margin: 0 0 0 20px;
+    margin: 0;
+    padding-left: 20px;
 }
 
 /* WordPress notices inside content area — tighter spacing */

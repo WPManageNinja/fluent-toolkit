@@ -95,6 +95,19 @@ select {
   #fct_admin_menu_holder {
     display: none;
   }
+  .fl_app.fluent-cart-admin-pages {
+    padding: 24px
+  }
+  .fct_report_page_plugin_app_wrap {
+    .fl_app.fluent-cart-admin-pages {
+      padding: 0;
+    }
+  }
+  .fct_settings_page_plugin_app_wrap .fl_app.fluent-cart-admin-pages,
+  #fluent_cart_plugin_app {
+    padding: 0;
+  }
+  .fct-reports-view,
   .fct-setting-container {
     position: relative;
     height: 100vh;
@@ -105,10 +118,12 @@ select {
   #fluent_cart_plugin_app.fct_settings_page_plugin_app_wrap {
     padding: 0;
   }
+  .fct-report-body,
   .fct-settings-nav-content-inner {
     max-height: 100vh;
     min-height: 100vh;
   }
+  .fct-report-body,
   .fct-settings-nav-content {
     padding-left: 260px;
   }
@@ -119,8 +134,23 @@ select {
       padding-left: 240px;
     }
   }
+  .fs_reports_layout,
   .fs_dashboard_wrapper {
     padding-top: 0;
+  }
+  .fs_tickets_view {
+    margin-top: -24px;
+  }
+  .fs_inside_activity_menu_tab_header {
+    top: 0;
+  }
+  .fs_reports_wrapper {
+    top: 0;
+    left: 239px;
+  }
+  .fcal_onboard_wrap {
+    padding-top: 24px;
+    padding-bottom: 24px;
   }
 }
 
