@@ -19,30 +19,6 @@
             </div>
         </header>
 
-        <section class="ft-hero ft-mcp-hero">
-            <div class="ft-hero-inner">
-                <div>
-                    <div class="ft-hero-eyebrow">MCP for agents</div>
-                    <h1>Connect AI agents to Fluent plugins.</h1>
-                    <p>Enable MCP servers, verify the available plugin surface, and copy the exact connection details for Claude Code, Codex, Claude Desktop, Cursor, or any HTTP MCP client.</p>
-                </div>
-                <div class="ft-hero-stats" v-if="activeProduct">
-                    <div>
-                        <div class="ft-stat-num">{{ activeProduct.tools_count }}</div>
-                        <div class="ft-stat-label">Tools</div>
-                    </div>
-                    <div>
-                        <div class="ft-stat-num" :class="{ 'ft-warn-num': !activeProduct.mcp_enabled }">{{ activeProduct.mcp_enabled ? 'On' : 'Off' }}</div>
-                        <div class="ft-stat-label">MCP</div>
-                    </div>
-                    <div>
-                        <div class="ft-stat-num">{{ statusLabel(activeProduct.status) }}</div>
-                        <div class="ft-stat-label">Status</div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
         <div class="ft-mcp-empty" v-if="showEmptyBanner">
             <div>
                 <strong>No Fluent plugins are exposing MCP yet.</strong>

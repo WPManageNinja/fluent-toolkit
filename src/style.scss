@@ -201,6 +201,193 @@
     margin-top: 2px;
   }
 
+  // -- Dashboard overview ----------------
+  .ft-unified-panel {
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 14px 42px rgba(20, 19, 15, .06);
+    color: var(--text);
+    display: flex;
+    gap: 18px;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    overflow: hidden;
+    padding: 22px 24px;
+    position: relative;
+  }
+
+  .ft-unified-icon {
+    align-items: center;
+    background: var(--text);
+    border-radius: 12px;
+    color: #fff;
+    display: flex;
+    flex-shrink: 0;
+    height: 48px;
+    justify-content: center;
+    position: relative;
+    width: 48px;
+    z-index: 1;
+  }
+
+  .ft-unified-copy,
+  .ft-unified-control {
+    position: relative;
+    z-index: 1;
+  }
+
+  .ft-unified-copy {
+    max-width: 640px;
+
+    h1 {
+      color: var(--text);
+      font-size: 26px;
+      font-weight: 650;
+      letter-spacing: 0;
+      line-height: 1.15;
+      margin: 0 0 8px;
+    }
+
+    p {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin: 0;
+      max-width: 560px;
+    }
+  }
+
+  .ft-unified-eyebrow,
+  .ft-section-kicker {
+    color: var(--accent);
+    display: inline-flex;
+    font-size: 11px;
+    font-weight: 650;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+
+  .ft-unified-control {
+    align-items: center;
+    background: rgba(255, 255, 255, .78);
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(20, 19, 15, .06);
+    display: flex;
+    flex-shrink: 0;
+    gap: 18px;
+    min-width: 270px;
+    padding: 16px 18px;
+
+    strong {
+      color: var(--text);
+      display: block;
+      font-size: 14px;
+      font-weight: 650;
+      margin-bottom: 2px;
+    }
+
+    span {
+      color: var(--text-muted);
+      display: block;
+      font-size: 12px;
+    }
+  }
+
+  .ft-switch-large span {
+    height: 32px;
+    width: 58px;
+
+    &::after {
+      height: 26px;
+      width: 26px;
+    }
+  }
+
+  .ft-switch-large input:checked + span::after {
+    transform: translateX(26px);
+  }
+
+  .ft-mcp-dashboard-banner {
+    padding: 16px 22px;
+    margin-bottom: 18px;
+
+    .ft-hero-inner {
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .ft-hero-eyebrow {
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-size: 22px;
+      margin-bottom: 6px;
+    }
+
+    p {
+      font-size: 13.5px;
+      max-width: 620px;
+    }
+  }
+
+  .ft-mcp-banner-copy {
+    min-width: 0;
+  }
+
+  .ft-mcp-banner-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-left: auto;
+    margin-top: 0;
+    flex-shrink: 0;
+  }
+
+  .ft-section-head {
+    align-items: center;
+    display: flex;
+    gap: 18px;
+    justify-content: space-between;
+    margin-bottom: 16px;
+
+    h2 {
+      color: var(--text);
+      font-size: 18px;
+      font-weight: 650;
+      letter-spacing: 0;
+      line-height: 1.25;
+      margin: 0;
+    }
+  }
+
+  .ft-beta-head {
+    margin: 0 0 12px;
+  }
+
+  .ft-beta-stats {
+    color: var(--text-soft);
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 12px;
+    gap: 10px;
+
+    span {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 5px 10px;
+    }
+  }
+
+  .ft-warn-text {
+    color: oklch(45% 0.13 70);
+  }
+
   // ── Toolbar ──────────────────────────
   .ft-toolbar {
     display: flex;
@@ -538,4 +725,49 @@
     }
   }
 
+}
+
+@media (max-width: 782px) {
+  #fluent_app {
+    padding: 24px 16px 64px;
+  }
+
+  .ft-app {
+    .ft-unified-panel,
+    .ft-unified-control,
+    .ft-section-head {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .ft-unified-panel {
+      padding: 22px 20px;
+    }
+
+    .ft-unified-control {
+      min-width: 0;
+    }
+
+    .ft-mcp-banner-actions {
+      justify-content: flex-start;
+      margin-left: 0;
+      width: 100%;
+    }
+
+    .ft-list-head {
+      display: none;
+    }
+
+    .ft-row {
+      grid-template-columns: 1fr;
+    }
+
+    .ft-actions {
+      justify-content: flex-start;
+    }
+
+    .ft-plugin-desc {
+      white-space: normal;
+    }
+  }
 }

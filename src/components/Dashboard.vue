@@ -28,33 +28,63 @@
             </div>
         </header>
 
-        <!-- Hero -->
-        <section class="ft-hero">
-            <div class="ft-hero-inner">
+        <section class="ft-unified-panel" v-loading="mcpLoading" element-loading-text="Loading MCP status...">
+            <div class="ft-unified-icon" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 7h16"/>
+                    <path d="M4 12h16"/>
+                    <path d="M4 17h16"/>
+                    <path d="M8 4v16"/>
+                    <path d="M16 4v16"/>
+                </svg>
+            </div>
+            <div class="ft-unified-copy">
+                <span class="ft-unified-eyebrow">Unified Fluent workspace</span>
+                <h1>Fluent Unified UI</h1>
+                <p>Keep Fluent plugin controls, agent access, and early access tools organized in one clean workspace.</p>
+            </div>
+            <div class="ft-unified-control">
                 <div>
-                    <div class="ft-hero-eyebrow">Beta Program</div>
-                    <h1>Beta builds. Add-ons. One place.</h1>
-                    <p>Get ahead of what's shipping. Install release candidates, pick up companion add-ons, and track every beta across the Fluent ecosystem — all from here.</p>
+                    <strong>Unified UI</strong>
+                    <span>{{ unifiedUiStatusLabel }}</span>
                 </div>
-                <div class="ft-hero-stats">
-                    <div>
-                        <div class="ft-stat-num">{{ betaPlugins.length }}</div>
-                        <div class="ft-stat-label">Available</div>
-                    </div>
-                    <div>
-                        <div class="ft-stat-num">{{ installedCount }}</div>
-                        <div class="ft-stat-label">Installed</div>
-                    </div>
-                    <div>
-                        <div class="ft-stat-num" :class="{ 'ft-warn-num': updatesCount > 0 }">{{ updatesCount }}</div>
-                        <div class="ft-stat-label">Updates</div>
-                    </div>
+                <label class="ft-switch ft-switch-large" title="Enable Fluent Unified UI">
+                    <input
+                        type="checkbox"
+                        :checked="unifiedUiEnabled"
+                        :disabled="mcpSaving || !canToggleUnifiedUi"
+                        @change="toggleUnifiedUi($event.target.checked)"
+                    />
+                    <span></span>
+                </label>
+            </div>
+        </section>
+
+        <section class="ft-hero ft-mcp-hero ft-mcp-dashboard-banner">
+            <div class="ft-hero-inner">
+                <div class="ft-mcp-banner-copy">
+                    <div class="ft-hero-eyebrow">MCP for agents</div>
+                    <h1>Connect AI agents to Fluent plugins.</h1>
+                    <p>Enable MCP servers, review the available Fluent plugin surface, and manage connection details for Codex, Claude, Cursor, and other HTTP MCP clients.</p>
+                </div>
+                <div class="ft-mcp-banner-actions">
+                    <button class="ft-btn ft-btn-primary" @click="$emit('navigate', 'mcp')">Manage MCP</button>
                 </div>
             </div>
         </section>
 
+        <div class="ft-section-head ft-beta-head">
+            <div>
+                <span class="ft-section-kicker">Beta program</span>
+                <h2>Beta / Early Access Plugins</h2>
+            </div>
+            <div class="ft-beta-stats">
+                <span>{{ betaPlugins.length }} available</span>
+                <span>{{ installedCount }} installed</span>
+                <span :class="{ 'ft-warn-text': updatesCount > 0 }">{{ updatesCount }} updates</span>
+            </div>
+        </div>
 
-        <h3>Beta / Early Access Plugins</h3>
         <!-- List -->
         <div class="ft-list">
             <el-skeleton v-if="loading" :animated="true" :rows="3" style="padding: 24px;" />
@@ -157,6 +187,15 @@ export default {
             betaPlugins: [],
             installing: false,
             loading: false,
+            mcpLoading: false,
+            mcpSaving: false,
+            mcpOverview: {
+                adapter: {
+                    available: false,
+                    provider: 'missing',
+                },
+                products: [],
+            },
             activeChannel: 'all',
             searchQuery: '',
         };
@@ -192,6 +231,33 @@ export default {
 
             return plugins;
         },
+        mcpProducts() {
+            return this.mcpOverview.products || [];
+        },
+        primaryMcpProduct() {
+            return this.mcpProducts.find(product => product.toggleable) || this.mcpProducts[0] || null;
+        },
+        unifiedUiEnabled() {
+            return this.primaryMcpProduct ? !!this.primaryMcpProduct.mcp_enabled : false;
+        },
+        canToggleUnifiedUi() {
+            return !!(this.primaryMcpProduct && this.primaryMcpProduct.toggleable);
+        },
+        unifiedUiStatusLabel() {
+            if (this.mcpLoading) {
+                return 'Checking status';
+            }
+
+            if (!this.primaryMcpProduct) {
+                return 'No MCP plugins detected yet';
+            }
+
+            if (!this.canToggleUnifiedUi) {
+                return this.mcpStatusLabel(this.primaryMcpProduct.status);
+            }
+
+            return this.unifiedUiEnabled ? 'Enabled' : 'Disabled';
+        },
     },
     methods: {
         pluginInitials(name) {
@@ -213,6 +279,41 @@ export default {
                 })
                 .finally(() => {
                     this.loading = false;
+                });
+        },
+        getMcpOverview() {
+            this.mcpLoading = true;
+            this.$get('fluent_toolkit_mcp_overview')
+                .then(response => {
+                    this.mcpOverview = response;
+                })
+                .catch(error => {
+                    this.$handleError(error);
+                })
+                .finally(() => {
+                    this.mcpLoading = false;
+                });
+        },
+        toggleUnifiedUi(enabled) {
+            if (!this.primaryMcpProduct) {
+                return;
+            }
+
+            this.mcpSaving = true;
+            this.$post('fluent_toolkit_mcp_toggle', {
+                slug: this.primaryMcpProduct.slug,
+                enabled: enabled ? 'yes' : 'no',
+            })
+                .then(response => {
+                    this.$notify.success(enabled ? 'Unified UI enabled.' : 'Unified UI disabled.');
+                    this.mcpOverview = response.status;
+                })
+                .catch(error => {
+                    this.$handleError(error);
+                    this.getMcpOverview();
+                })
+                .finally(() => {
+                    this.mcpSaving = false;
                 });
         },
         installPlugin(plugin, beta = '') {
@@ -253,9 +354,21 @@ export default {
             if (!licenseKey) return '';
             return licenseKey.replace(/.(?=.{6})/g, '*').slice(-10);
         },
+        mcpStatusLabel(status) {
+            const labels = {
+                ready: 'Ready',
+                disabled: 'Disabled',
+                adapter_required: 'Adapter required',
+                crm_required: 'Product required',
+                plugin_required: 'Product required',
+            };
+
+            return labels[status] || 'Unknown';
+        },
     },
     mounted() {
         this.getBetaPlugins();
+        this.getMcpOverview();
     },
     created() {
         jQuery('.update-nag,.notice, #wpbody-content > .updated, #wpbody-content > .error').remove();
