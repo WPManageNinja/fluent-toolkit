@@ -87,6 +87,9 @@ class UnifiedUiHandler
                 echo '</div></div>';
             }, 9999999);
 
+            // disable CRM Admin Menu
+            add_filter('fluent_crm/render_top_menu_bar', '__return_false');
+
             // disable top menu
             add_filter('show_admin_bar', '__return_false', 9999);
 
