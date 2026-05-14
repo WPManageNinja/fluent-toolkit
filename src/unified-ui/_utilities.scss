@@ -60,28 +60,58 @@ select {
   border: 1px solid var(--fui-border);
   border-radius: 8px;
 }
+.fluent_uui {
+  .fluentcrm-app.is-settings-page {
+    margin-top: 0;
+    .fluentcrm-body {
+      position: relative;
+      height: 100vh;
+      margin-top: 0;
+    }
+    .fcrm_settings_inner {
+      padding-left: 271px;
+      &.is-collapsed {
+        padding-left: 78px;
+      }
+    }
+    .fcrm_settings_content {
+      .fcrm_settings {
+        max-height: 100vh;
+        min-height: 100vh;
+      }
+    }
+  }
+  .fcrm_settings_sidebar {
+    left: 0;
+    height: 100vh;
+  }
 
-/* ── Sidebar: theme toggle footer ────────────────────────── */
-.fui-sidebar-footer {
-  padding: 12px 12px;
-  border-top: 1px solid var(--fui-border);
-  flex-shrink: 0;
-  margin-top: auto;
-  position: sticky;
-  bottom: 0;
-  background: var(--fui-primary-bg);
-  margin-left: -12px;
-  margin-right: -12px;
-  box-shadow: 0 0 30px rgba(0, 0, 0,0.1);
+  #fct_admin_app_wrapper {
+    padding-top: 20px;
+  }
+  .fcrm_topbar,
+  #fct_admin_menu_holder {
+    display: none;
+  }
 }
 
-.fluent_ui_sidebar {
+/* ── Workspace menu: theme select ────────────────────────── */
+.fui-workspace-menu-theme {
+  padding: 6px 8px;
+
+  &--label {
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 16px;
+    margin-bottom: 4px;
+  }
   .fui-theme-select {
     width: 100%;
     padding: 5px 10px;
     border: 1px solid var(--fui-border);
     border-radius: 8px;
-    background: var(--fui-primary-bg);
+    background: var(--fui-primary-bg) url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%206l5%205%205-5%202%201-7%207-7-7%202-1z%22%20fill%3D%22%23555%22%2F%3E%3C%2Fsvg%3E') no-repeat right 8px top 50%;
+    background-size: 12px 12px;
     color: var(--fui-text-soft);
     font-size: 12.5px;
     font-family: inherit;
@@ -91,8 +121,9 @@ select {
     line-height: 20px;
     margin: 0;
     font-weight: 500;
-    &:hover,&:focus {
-      border-color: var(--fui-border);
+
+    &:hover, &:focus {
+      border-color: var(--fui-text-faint);
       color: var(--fui-text);
     }
   }

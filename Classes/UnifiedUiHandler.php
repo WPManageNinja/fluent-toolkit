@@ -109,10 +109,11 @@ class UnifiedUiHandler
         ?>
         <script>
         (function () {
-            var mode = localStorage.getItem('fluent_theme_mode') || 'system';
+            var savedMode = localStorage.getItem('fluent_theme_mode') || 'system';
             var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            var isDark = mode === 'dark' || (mode === 'system' && prefersDark);
-            document.body.classList.add(isDark ? 'dark' : 'light');
+            var resolvedMode = savedMode.indexOf(':') !== -1 ? savedMode.split(':').pop() : savedMode;
+            var isDark = resolvedMode === 'dark' || (resolvedMode === 'system' && prefersDark);
+            if (isDark && !document.body.classList.contains('fluent_theme_dark')) document.body.classList.add('fluent_theme_dark');
         })();
         </script>
 
@@ -160,6 +161,17 @@ class UnifiedUiHandler
                         </span>
                         Visit Site
                     </a>
+                    <div class="fui-workspace-menu-divider" role="none"></div>
+                    <div class="fui-workspace-menu-theme" role="none">
+                        <div class="fui-workspace-menu-theme--label">
+                            <?php echo esc_html__('Theme', 'fluent-toolkit'); ?>
+                        </div>
+                        <select class="fui-theme-select" id="fui-theme-select" aria-label="Theme">
+                            <option value="light">Light</option>
+                            <option value="dark">Dark</option>
+                            <option value="system">System</option>
+                        </select>
+                    </div>
                     <div class="fui-workspace-menu-divider" role="none"></div>
                     <a href="<?php echo esc_url(wp_logout_url()); ?>"
                        class="fui-workspace-menu-item fui-workspace-menu-item--danger" role="menuitem">
@@ -249,14 +261,7 @@ class UnifiedUiHandler
                 </div>
             <?php endif; ?>
 
-            <!-- Theme select -->
-            <div class="fui-sidebar-footer">
-                <select class="fui-theme-select" id="fui-theme-select" aria-label="Theme">
-                    <option value="light">Light</option>
-                    <option value="dark">Dark</option>
-                    <option value="system">System</option>
-                </select>
-            </div>
+
         </div>
         <div class="fui-app-content">
 
@@ -380,24 +385,30 @@ class UnifiedUiHandler
                     function applyTheme(mode) {
                         var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
                         var isDark = mode === 'dark' || (mode === 'system' && prefersDark);
-                        document.body.classList.remove('dark', 'light');
-                        document.body.classList.add(isDark ? 'dark' : 'light');
+                        document.body.classList.remove('fluent_theme_dark');
+                        if (isDark && !document.body.classList.contains('fluent_theme_dark')) document.body.classList.add('fluent_theme_dark');
+                        if (mode === 'system') {
+                            localStorage.setItem('fluent_theme_mode', 'system:' + (prefersDark ? 'dark' : 'light'));
+                        } else {
+                            localStorage.setItem('fluent_theme_mode', mode);
+                        }
                         if (themeSelect) themeSelect.value = mode;
                     }
 
-                    applyTheme(localStorage.getItem('fluent_theme_mode') || 'system');
+                    var savedMode = localStorage.getItem('fluent_theme_mode') || 'system';
+                    var baseMode = savedMode.startsWith('system') ? 'system' : savedMode;
+                    applyTheme(baseMode);
 
                     if (themeSelect) {
                         themeSelect.addEventListener('change', function () {
-                            var mode = themeSelect.value;
-                            localStorage.setItem('fluent_theme_mode', mode);
-                            applyTheme(mode);
+                            applyTheme(themeSelect.value);
                         });
                     }
 
                     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
-                        var mode = localStorage.getItem('fluent_theme_mode') || 'system';
-                        if (mode === 'system') applyTheme('system');
+                        var savedMode = localStorage.getItem('fluent_theme_mode') || 'system';
+                        var baseMode = savedMode.startsWith('system') ? 'system' : savedMode;
+                        if (baseMode === 'system') applyTheme('system');
                     });
 
                     // Workspace switcher dropdown.
@@ -494,7 +505,7 @@ class UnifiedUiHandler
             return [];
         }
 
-        $menuItems = \FluentCart\App\Helpers\AdminHelper::getMenuItems();
+        $menuItems = \FluentCart\App\Helpers\AdminHelper::getMenuItems(true);
 
         $formattedItems = [];
 
