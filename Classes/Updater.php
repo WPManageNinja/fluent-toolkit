@@ -35,7 +35,7 @@ class Updater
      */
     function __construct($_api_url, $_plugin_file, $_api_data = null, $_plugin_update_data = [])
     {
-        $this->api_url = trailingslashit($_api_url);
+        $this->api_url = untrailingslashit($_api_url);
         $this->api_data = $_api_data;
         $this->name = plugin_basename($_plugin_file);
         $this->slug = basename($_plugin_file, '.php');
@@ -75,7 +75,7 @@ class Updater
         remove_action( 'after_plugin_row_' . $this->name, 'wp_plugin_update_row' );
 
         add_action( 'after_plugin_row_' . $this->name, [ $this, 'show_update_notification' ], 10, 2 );
- 
+
     }
 
     function remove_plugin_update_message()
@@ -104,28 +104,37 @@ class Updater
             $_transient_data = new \stdClass();
         }
 
-        if (empty($_transient_data->checked)) {
-            return $_transient_data;
-        }
-
         $version_info = $this->get_transient($this->response_transient_key);
 
-        if (false === $version_info) {
-            $version_info = $this->api_request('plugin_latest_version', array('slug' => $this->slug));
-            if (is_wp_error($version_info)) {
+        if (false === $version_info || !is_object($version_info)) {
+            $api_response = $this->api_request('plugin_latest_version', array('slug' => $this->slug));
+            if (is_wp_error($api_response) || !is_object($api_response)) {
                 $version_info = new \stdClass();
                 $version_info->error = true;
+            } else {
+                $version_info = $api_response;
             }
             $this->set_transient($this->response_transient_key, $version_info);
         }
 
-        if (!empty($version_info->error) || !$version_info) {
+        if (!empty($version_info->error)) {
             return $_transient_data;
         }
 
-        if (is_object($version_info) && isset($version_info->new_version)) {
+        if (isset($version_info->new_version)) {
+            if (!isset($_transient_data->response) || !is_array($_transient_data->response)) {
+                $_transient_data->response = array();
+            }
+            if (!isset($_transient_data->checked) || !is_array($_transient_data->checked)) {
+                $_transient_data->checked = array();
+            }
             if (version_compare($this->version, $version_info->new_version, '<')) {
                 $_transient_data->response[$this->name] = $version_info;
+            } else {
+                if (!isset($_transient_data->no_update) || !is_array($_transient_data->no_update)) {
+                    $_transient_data->no_update = array();
+                }
+                $_transient_data->no_update[$this->name] = $version_info;
             }
             $_transient_data->last_checked = time();
             $_transient_data->checked[$this->name] = $this->version;
@@ -168,6 +177,11 @@ class Updater
         // Restore our filter
         add_filter( 'pre_set_site_transient_update_plugins', [ $this, 'check_update' ] );
 
+        // Render the standard "update available" row
+        if ( ! function_exists( 'wp_plugin_update_row' ) ) {
+            require_once ABSPATH . 'wp-admin/includes/update.php';
+        }
+        wp_plugin_update_row( $file, $plugin );
     }
 
 
@@ -334,7 +348,7 @@ class Updater
             $this->delete_transients();
         }
 
-        if(isset($_GET['fluent-cart-elementor-blocks-check-update'])) {
+        if(isset($_GET['fluent-toolkit-check-update'])) {
             if ( current_user_can( 'update_plugins' ) ) {
                 $this->delete_transients();
 
@@ -350,7 +364,7 @@ class Updater
                 // Restore our filter
                 add_filter( 'pre_set_site_transient_update_plugins', [ $this, 'check_update' ] );
 
-                wp_redirect(admin_url('plugins.php?s=fluent-cart-elementor-blocks&plugin_status=all'));
+                wp_redirect(admin_url('plugins.php?s=fluent-toolkit&plugin_status=all'));
                 exit();
             }
         }
