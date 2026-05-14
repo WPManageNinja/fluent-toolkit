@@ -186,7 +186,11 @@ class UnifiedUiHandler
                                     <img class="fui-product-mark" src="<?php echo esc_url($app['icon']); ?>" alt=""/>
                                 <?php endif; ?>
                                 <span class="fui-product-name"><?php echo esc_html($app['title']); ?></span>
-                                <span class="fui-product-chevron" aria-hidden="true"></span>
+                                <span class="fui-item-chevron" aria-hidden="true">
+                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M10.0001 10.879L13.7126 7.1665L14.7731 8.227L10.0001 13L5.22705 8.227L6.28755 7.1665L10.0001 10.879Z" fill="currentColor"/>
+                                    </svg>
+                                </span>
                             </button>
 
                             <?php if (!empty($appItems)): ?>
@@ -205,7 +209,11 @@ class UnifiedUiHandler
                                                 <span
                                                     class="fui-app-title"><?php echo esc_html($item['title']); ?></span>
                                                 <?php if ($hasSub): ?>
-                                                    <span class="fui-item-chevron" aria-hidden="true"></span>
+                                                    <span class="fui-item-chevron" aria-hidden="true">
+                                                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M10.0001 10.879L13.7126 7.1665L14.7731 8.227L10.0001 13L5.22705 8.227L6.28755 7.1665L10.0001 10.879Z" fill="currentColor"/>
+                                                        </svg>
+                                                    </span>
                                                 <?php endif; ?>
                                             </a>
                                             <?php if ($hasSub): ?>

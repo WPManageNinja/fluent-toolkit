@@ -1,0 +1,20 @@
+
+:root {
+  --wp-admin--admin-bar--height: 0px;
+
+  /* Sidebar palette */
+  --fui-sidebar-width: 240px;
+  --fui-primary-bg: var(--fc-primary-bg, #FFFFFF);
+  --fui-bg: var(--fc-secondary-bg, #F5F7FA);
+  --fui-surface: #ffffff;
+  --fui-surface-hover: #f6f5f4;
+  --fui-surface-active: #f1edff;
+  --fui-border: #ebe9e6;
+  --fui-text: var(--fc-primary-text, #0E121B);
+  --fui-text-muted: var(--fc-text-muted, #99A0AE);
+  --fui-text-soft: var(--fc-secondary-text, #525866);
+  --fui-text-faint: #a8a7ad;
+  --fui-accent: #635bff; /* Stripe purple */
+  --fui-accent-hover: #5851e6;
+  --fui-shadow: 0 0 0 1px rgba(0, 0, 0, 0.02), 0 1px 3px rgba(15, 15, 15, 0.04);
+}
