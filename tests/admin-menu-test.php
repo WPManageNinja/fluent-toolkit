@@ -9,7 +9,7 @@ if (!defined('FLUENT_TOOLKIT_PLUGIN_URL')) {
 }
 
 if (!defined('FLUENT_TOOLKIT_VERSION')) {
-    define('FLUENT_TOOLKIT_VERSION', '1.2.0');
+    define('FLUENT_TOOLKIT_VERSION', '2.0.0');
 }
 
 $GLOBALS['fluent_toolkit_admin_menu_calls'] = [

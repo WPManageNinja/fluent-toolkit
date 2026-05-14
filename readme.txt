@@ -26,7 +26,10 @@ Upload the zip from your WordPress dashboard, activate Fluent Toolkit, then open
 == Changelog ==
 
 = 2.0.0 =
-* Added replaceable WordPress MCP Adapter provider using the official `wordpress/mcp-adapter` package
+* New: AI / MCP support — turn on Model Context Protocol tools per Fluent product (FluentCRM, Fluent Forms, FluentCart, and more) directly from the Toolkit settings
+* New: Unified UI — a single, consistent admin experience that ties your Fluent plugins together under one dashboard
+* New: Built-in update channel — Toolkit now self-updates from the official Fluent release channel, with "Check Update" and version details available right from the Plugins screen
+* Bundles the official WordPress MCP Adapter as a safe fallback when no other plugin provides it
 
 = 1.1.0 =
 * Redesigned dashboard UI — modern layout with topbar, hero stats, channel filter tabs, and plugin grid

@@ -1,4 +1,4 @@
-# Fluent Toolkit v1.2.0
+# Fluent Toolkit v2.0.0
 
 Beta builds. Add-ons. One place.
 
@@ -50,6 +50,12 @@ Toolkit only bundles the adapter fallback. Authentication and authorization for 
 ---
 
 ### Changelog
+
+#### 2.0.0
+- `McpManager` — per-product MCP enable/disable, status API, AJAX handlers wired into the toolkit settings
+- `UnifiedUiHandler` — cross-plugin admin shell with shared assets (`dist/unified-ui.css`)
+- `Updater` — self-hosted update channel against `https://kit.wpmanageninja.com/kit-version`, including `plugins_api` integration for the "View details" modal
+- Bundled `wordpress/mcp-adapter` only when no other plugin defines `WP_MCP_VERSION`
 
 #### 1.2.0
 - Added replaceable WordPress MCP Adapter provider using the official `wordpress/mcp-adapter` package
