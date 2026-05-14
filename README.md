@@ -6,9 +6,9 @@ Get early access to release candidates, install companion add-ons, and track upd
 
 ---
 
-### 👉 [Download Latest Release ⬇️](https://wpmanageninja.s3.amazonaws.com/fluent-toolkit.zip)
+### Download
 
----
+Download the latest plugin zip from the [Latest Release](https://github.com/WPManageNinja/fluent-toolkit/releases/latest) section of this repository.
 
 ### Features
 
@@ -22,7 +22,7 @@ Get early access to release candidates, install companion add-ons, and track upd
 
 ### How to Use
 
-1. Download from Releases tab or [click here](https://wpmanageninja.s3.amazonaws.com/fluent-toolkit.zip)
+1. Open the [Latest Release](https://github.com/WPManageNinja/fluent-toolkit/releases/latest) and download the plugin zip from the release assets
 2. Install on your WordPress site (staging preferred)
 3. Activate the plugin
 4. Go to **Dashboard → Fluent Toolkit** in the WordPress admin
@@ -53,7 +53,6 @@ Toolkit only bundles the adapter fallback. Authentication and authorization for 
 
 #### 1.2.0
 - Added replaceable WordPress MCP Adapter provider using the official `wordpress/mcp-adapter` package
-- Added Toolkit dashboard status for MCP Adapter and Abilities API availability
 
 #### 1.1.0
 - Redesigned dashboard — topbar, hero stats, channel tabs, plugin grid

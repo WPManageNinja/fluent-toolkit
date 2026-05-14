@@ -1,3 +1,4 @@
+@use "./mcp";
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
 @import "~element-plus/theme-chalk/el-notification.css";
 @import "~element-plus/theme-chalk/el-loading.css";
@@ -198,81 +199,6 @@
     letter-spacing: 0.08em;
     color: var(--text-soft);
     margin-top: 2px;
-  }
-
-  // ── MCP status ───────────────────────
-  .ft-mcp-lite-panel {
-    margin: 0 0 24px;
-    padding: 18px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--surface);
-  }
-
-  .ft-mcp-lite-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-
-    h2 {
-      margin: 0;
-      font-size: 18px;
-      line-height: 1.3;
-      letter-spacing: 0;
-    }
-
-    p {
-      margin: 6px 0 0;
-      color: var(--text-muted);
-      font-size: 13px;
-    }
-  }
-
-  .ft-mcp-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-    margin-top: 16px;
-  }
-
-  .ft-mcp-warning {
-    margin-top: 14px;
-    padding: 10px 12px;
-    border: 1px solid oklch(86% 0.09 35);
-    border-radius: 8px;
-    background: oklch(97% 0.03 35);
-    color: oklch(42% 0.13 35);
-    font-size: 13px;
-  }
-
-  .ft-mcp-grid > div {
-    min-width: 0;
-    padding: 12px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--surface-2);
-  }
-
-  .ft-mcp-grid span {
-    display: block;
-    margin-bottom: 6px;
-    color: var(--text-soft);
-    font-size: 12px;
-  }
-
-  .ft-mcp-grid strong {
-    font-size: 13px;
-    font-weight: 600;
-  }
-
-  .ft-mcp-grid code {
-    display: block;
-    overflow-wrap: anywhere;
-    color: var(--text);
-    font-family: 'JetBrains Mono', ui-monospace, monospace;
-    font-size: 12px;
-    line-height: 1.45;
   }
 
   // ── Toolbar ──────────────────────────
@@ -611,17 +537,5 @@
       &:hover { text-decoration: underline; }
     }
   }
-}
 
-@media (max-width: 782px) {
-  .ft-app {
-    .ft-mcp-lite-head {
-      align-items: flex-start;
-      flex-direction: column;
-    }
-
-    .ft-mcp-grid {
-      grid-template-columns: 1fr;
-    }
-  }
 }

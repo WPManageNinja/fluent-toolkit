@@ -13,6 +13,7 @@
                 </div>
             </div>
             <div class="ft-topbar-actions">
+                <ViewTabs :active-view="activeView" @navigate="$emit('navigate', $event)" />
                 <el-button
                     v-if="appVars.require_update"
                     :loading="installing"
@@ -52,34 +53,11 @@
             </div>
         </section>
 
-        <!-- Toolbar -->
-        <div class="ft-toolbar">
-            <div class="ft-channels" role="tablist">
-                <button class="ft-channel" :aria-selected="activeChannel === 'all'" @click="activeChannel = 'all'">
-                    All <span class="ft-channel-count">{{ betaPlugins.length }}</span>
-                </button>
-                <button class="ft-channel" :aria-selected="activeChannel === 'beta'" @click="activeChannel = 'beta'">
-                    Beta <span class="ft-channel-count">{{ betaCount }}</span>
-                </button>
-                <button class="ft-channel" :aria-selected="activeChannel === 'installed'" @click="activeChannel = 'installed'">
-                    Installed <span class="ft-channel-count">{{ installedCount }}</span>
-                </button>
-                <button class="ft-channel" :aria-selected="activeChannel === 'updates'" @click="activeChannel = 'updates'">
-                    Updates <span class="ft-channel-count">{{ updatesCount }}</span>
-                </button>
-            </div>
-            <div class="ft-toolbar-right">
-                <div class="ft-search">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-soft); flex-shrink: 0;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                    <input type="text" placeholder="Search plugins…" v-model="searchQuery" />
-                    <!-- <span class="ft-kbd">⌘K</span> -->
-                </div>
-            </div>
-        </div>
 
+        <h3>Beta / Early Access Plugins</h3>
         <!-- List -->
         <div class="ft-list">
-            <el-skeleton v-if="loading" :animated="true" :rows="8" style="padding: 24px;" />
+            <el-skeleton v-if="loading" :animated="true" :rows="3" style="padding: 24px;" />
             <div v-else v-loading="installing" element-loading-text="Installing… Please wait.">
                 <div class="ft-list-head">
                     <div>Plugin</div>
@@ -91,7 +69,8 @@
                     <!-- Plugin info -->
                     <div class="ft-plugin">
                         <div class="ft-plugin-icon" :class="`ft-ic-${index % 6}`">
-                            {{ pluginInitials(plugin.name) }}
+                            <img style="max-width: 44px;" :src="plugin.logo" v-if="plugin.logo" />
+                            <span v-else>{{ pluginInitials(plugin.name) }}</span>
                         </div>
                         <div class="ft-plugin-info">
                             <div class="ft-plugin-name">
@@ -137,14 +116,14 @@
                         <button v-if="!plugin.installed_version" @click="installPlugin(plugin)" class="ft-btn ft-btn-primary">Install</button>
                         <button v-else-if="plugin.has_beta_update" @click="installPlugin(plugin, 'yes')" class="ft-btn ft-btn-accent">Update</button>
                         <button v-else-if="plugin.has_update" @click="installPlugin(plugin)" class="ft-btn ft-btn-accent">Update</button>
-                        <button v-else class="ft-btn ft-btn-ghost ft-btn-icon-only" title="More options">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-                        </button>
+                        <span v-else>
+                            --
+                        </span>
                     </div>
                 </div>
 
                 <div v-if="filteredPlugins.length === 0" class="ft-empty">
-                    No plugins found.
+                    Currently, there has no beta testing available.
                 </div>
             </div>
         </div>
@@ -159,8 +138,20 @@
 </template>
 
 <script type="text/babel">
+import ViewTabs from './ViewTabs.vue';
+
 export default {
     name: 'Dashboard',
+    components: {
+        ViewTabs,
+    },
+    props: {
+        activeView: {
+            type: String,
+            default: 'dashboard',
+        },
+    },
+    emits: ['navigate'],
     data() {
         return {
             betaPlugins: [],

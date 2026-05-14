@@ -4,8 +4,8 @@ if (!defined('ABSPATH')) {
     define('ABSPATH', dirname(__DIR__) . '/');
 }
 
-if (!defined('FLUENT_BETA_TESTING_PLUGIN_URL')) {
-    define('FLUENT_BETA_TESTING_PLUGIN_URL', 'http://example.test/wp-content/plugins/fluent-toolkit/');
+if (!defined('FLUENT_TOOLKIT_PLUGIN_URL')) {
+    define('FLUENT_TOOLKIT_PLUGIN_URL', 'http://example.test/wp-content/plugins/fluent-toolkit/');
 }
 
 if (!defined('FLUENT_TOOLKIT_VERSION')) {
