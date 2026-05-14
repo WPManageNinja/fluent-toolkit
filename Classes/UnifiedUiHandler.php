@@ -24,35 +24,40 @@ class UnifiedUiHandler
                 'title'    => 'CRM',
                 'icon'     => FLUENT_BETA_TESTING_PLUGIN_URL . 'dist/images/fluentcrm_icon.svg',
                 'logo'     => FLUENT_BETA_TESTING_PLUGIN_URL . 'dist/images/fluentcrm-logo.svg',
-                'items'    => $this->getCrmMenu()
+                'items'    => $this->getCrmMenu(),
+                'has_dark_mode' => true
             ],
             'fluent-cart'     => [
                 'disabled' => !defined('FLUENTCART_VERSION'),
                 'title'    => 'Commerce',
                 'icon'     => FLUENT_BETA_TESTING_PLUGIN_URL . 'dist/images/fluentcart_icon.svg',
                 'logo'     => FLUENT_BETA_TESTING_PLUGIN_URL . 'dist/images/fluentcart_logo.svg',
-                'items'    => $this->getCartMenu()
+                'items'    => $this->getCartMenu(),
+                'has_dark_mode' => true
+            ],
+            'fluent_forms'    => [
+                    'disabled' => !defined('FLUENTFORM'),
+                    'title'    => 'Forms',
+                    'icon'     => FLUENT_BETA_TESTING_PLUGIN_URL . 'dist/images/fluentforms_icon.svg',
+                    'logo'     => FLUENT_BETA_TESTING_PLUGIN_URL . 'dist/images/fluentforms_logo.svg',
+                    'items'    => $this->getFormsMenu(),
+                    'has_dark_mode' => false
             ],
             'fluent-booking'  => [
                 'disabled' => !defined('FLUENT_BOOKING_VERSION'),
                 'title'    => 'Appointments',
                 'icon'     => FLUENT_BETA_TESTING_PLUGIN_URL . 'dist/images/fluentbooking_icon.svg',
                 'logo'     => FLUENT_BETA_TESTING_PLUGIN_URL . 'dist/images/fluentbooking_logo.svg',
-                'items'    => $this->getBookingMenu()
+                'items'    => $this->getBookingMenu(),
+                'has_dark_mode' => true
             ],
             'fluent-boards'   => [
                 'disabled' => !defined('FLUENT_BOARDS'),
                 'title'    => 'Projects',
                 'icon'     => FLUENT_BETA_TESTING_PLUGIN_URL . 'dist/images/fluentboards_icon.svg',
                 'logo'     => FLUENT_BETA_TESTING_PLUGIN_URL . 'dist/images/fluentboards_logo.svg',
-                'items'    => $this->getBoardsMenu()
-            ],
-            'fluent_forms'    => [
-                'disabled' => !defined('FLUENTFORM'),
-                'title'    => 'Forms',
-                'icon'     => FLUENT_BETA_TESTING_PLUGIN_URL . 'dist/images/fluentforms_icon.svg',
-                'logo'     => FLUENT_BETA_TESTING_PLUGIN_URL . 'dist/images/fluentforms_logo.svg',
-                'items'    => $this->getFormsMenu()
+                'items'    => $this->getBoardsMenu(),
+                'has_dark_mode' => false
             ]
         ];
 
@@ -165,14 +170,6 @@ class UnifiedUiHandler
                     </span>
                 </button>
                 <div class="fui-workspace-menu" role="menu" hidden>
-                    <a href="<?php echo esc_url(admin_url()); ?>" class="fui-workspace-menu-item" role="menuitem">
-                        <span class="fui-workspace-menu-icon" aria-hidden="true">
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
-                                 stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path
-                                    d="M10 4 6 8l4 4"/></svg>
-                        </span>
-                        Back to WP Admin
-                    </a>
                     <a href="<?php echo esc_url(home_url('/')); ?>" target="_blank" rel="noopener"
                        class="fui-workspace-menu-item" role="menuitem">
                         <span class="fui-workspace-menu-icon" aria-hidden="true">
@@ -183,17 +180,6 @@ class UnifiedUiHandler
                         </span>
                         Visit Site
                     </a>
-                    <div class="fui-workspace-menu-divider" role="none"></div>
-                    <div class="fui-workspace-menu-theme" role="none">
-                        <div class="fui-workspace-menu-theme--label">
-                            <?php echo esc_html__('Theme', 'fluent-toolkit'); ?>
-                        </div>
-                        <select class="fui-theme-select" id="fui-theme-select" aria-label="Theme">
-                            <option value="light">Light</option>
-                            <option value="dark">Dark</option>
-                            <option value="system">System</option>
-                        </select>
-                    </div>
                     <div class="fui-workspace-menu-divider" role="none"></div>
                     <a href="<?php echo esc_url(wp_logout_url()); ?>"
                        class="fui-workspace-menu-item fui-workspace-menu-item--danger" role="menuitem">
@@ -284,6 +270,53 @@ class UnifiedUiHandler
                 </div>
             <?php endif; ?>
 
+            <div class="fui-sidebar-footer">
+                <div class="fui-sidebar-footer--left">
+                    <a href="<?php echo esc_url(admin_url()); ?>" class="fui-wordpress-menu-link" aria-label="Back to WP Admin">
+                        <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M3.32308 12C3.32308 15.4385 5.32308 18.4 8.21538 19.8077L4.07692 8.46923C3.57998 9.57999 3.3231 10.7831 3.32308 12ZM12 20.6769C13.0077 20.6769 13.9769 20.5 14.8846 20.1846L14.8231 20.0692L12.1538 12.7615L9.55385 20.3231C10.3231 20.5538 11.1462 20.6769 12 20.6769ZM13.1923 7.93077L16.3308 17.2615L17.2 14.3692C17.5692 13.1692 17.8538 12.3077 17.8538 11.5615C17.8538 10.4846 17.4692 9.74615 17.1462 9.17692C16.7 8.45385 16.2923 7.84615 16.2923 7.13846C16.2923 6.33846 16.8923 5.6 17.7538 5.6H17.8615C16.2627 4.13224 14.1704 3.31946 12 3.32308C10.5629 3.32281 9.14834 3.67979 7.88347 4.3619C6.61861 5.04402 5.54315 6.02987 4.75385 7.23077L5.30769 7.24615C6.21538 7.24615 7.61539 7.13077 7.61539 7.13077C8.09231 7.10769 8.14615 7.79231 7.67692 7.84615C7.67692 7.84615 7.20769 7.90769 6.67692 7.93077L9.84615 17.3308L11.7462 11.6385L10.3923 7.93077C10.0891 7.91404 9.78636 7.88838 9.48462 7.85385C9.01538 7.82308 9.06923 7.10769 9.53846 7.13077C9.53846 7.13077 10.9692 7.24615 11.8231 7.24615C12.7308 7.24615 14.1308 7.13077 14.1308 7.13077C14.6 7.10769 14.6615 7.79231 14.1923 7.84615C14.1923 7.84615 13.7231 7.9 13.1923 7.93077ZM16.3615 19.5C17.6742 18.7368 18.7636 17.6424 19.5208 16.3263C20.2781 15.0102 20.6767 13.5184 20.6769 12C20.6769 10.4923 20.2923 9.07692 19.6154 7.83846C19.7529 9.20099 19.5466 10.5762 19.0154 11.8385L16.3615 19.5ZM12 22C9.34784 22 6.8043 20.9464 4.92893 19.0711C3.05357 17.1957 2 14.6522 2 12C2 9.34784 3.05357 6.8043 4.92893 4.92893C6.8043 3.05357 9.34784 2 12 2C14.6522 2 17.1957 3.05357 19.0711 4.92893C20.9464 6.8043 22 9.34784 22 12C22 14.6522 20.9464 17.1957 19.0711 19.0711C17.1957 20.9464 14.6522 22 12 22Z"></path></svg>
+                    </a>
+                    <div class="fui-theme-wrap">
+                        <button type="button" class="fui-theme-toggle" id="fui-theme-toggle"
+                                aria-label="Switch theme" aria-haspopup="true" aria-expanded="false">
+                            <span class="fui-theme-icon--light">
+                                <?php echo $this->getIcon('light'); ?>
+                            </span>
+                            <span class="fui-theme-icon--dark">
+                                <?php echo $this->getIcon('dark'); ?>
+                            </span>
+                        </button>
+                        <div class="fui-theme-dropdown" id="fui-theme-dropdown" role="menu" hidden>
+                            <button class="fui-theme-option" data-theme="light" role="menuitem">
+                                <?php echo $this->getIcon('light'); ?>
+                                <?php echo esc_html__('Light', 'fluent-toolkit'); ?>
+                                <span class="fui-theme-check">
+                                    <?php echo $this->getIcon('check'); ?>
+                                </span>
+                            </button>
+                            <button class="fui-theme-option" data-theme="dark" role="menuitem">
+                                <?php echo $this->getIcon('dark'); ?>
+                                <?php echo esc_html__('Dark', 'fluent-toolkit'); ?>
+                                <span class="fui-theme-check">
+                                    <?php echo $this->getIcon('check'); ?>
+                                </span>
+                            </button>
+                            <button class="fui-theme-option" data-theme="system" role="menuitem">
+                                <?php echo $this->getIcon('system'); ?>
+                                <?php echo esc_html__('System', 'fluent-toolkit'); ?>
+                                <span class="fui-theme-check">
+                                    <?php echo $this->getIcon('check'); ?>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="fui-sidebar-footer--right">
+                    <a href="#" aria-label="FluentToolkit Settings">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none" stroke="currentColor"><path d="M262.29,192.31a64,64,0,1,0,57.4,57.4A64.13,64.13,0,0,0,262.29,192.31ZM416.39,256a154.34,154.34,0,0,1-1.53,20.79l45.21,35.46A10.81,10.81,0,0,1,462.52,326l-42.77,74a10.81,10.81,0,0,1-13.14,4.59l-44.9-18.08a16.11,16.11,0,0,0-15.17,1.75A164.48,164.48,0,0,1,325,400.8a15.94,15.94,0,0,0-8.82,12.14l-6.73,47.89A11.08,11.08,0,0,1,298.77,470H213.23a11.11,11.11,0,0,1-10.69-8.87l-6.72-47.82a16.07,16.07,0,0,0-9-12.22,155.3,155.3,0,0,1-21.46-12.57,16,16,0,0,0-15.11-1.71l-44.89,18.07a10.81,10.81,0,0,1-13.14-4.58l-42.77-74a10.8,10.8,0,0,1,2.45-13.75l38.21-30a16.05,16.05,0,0,0,6-14.08c-.36-4.17-.58-8.33-.58-12.5s.21-8.27.58-12.35a16,16,0,0,0-6.07-13.94l-38.19-30A10.81,10.81,0,0,1,49.48,186l42.77-74a10.81,10.81,0,0,1,13.14-4.59l44.9,18.08a16.11,16.11,0,0,0,15.17-1.75A164.48,164.48,0,0,1,187,111.2a15.94,15.94,0,0,0,8.82-12.14l6.73-47.89A11.08,11.08,0,0,1,213.23,42h85.54a11.11,11.11,0,0,1,10.69,8.87l6.72,47.82a16.07,16.07,0,0,0,9,12.22,155.3,155.3,0,0,1,21.46,12.57,16,16,0,0,0,15.11,1.71l44.89-18.07a10.81,10.81,0,0,1,13.14,4.58l42.77,74a10.8,10.8,0,0,1-2.45,13.75l-38.21,30a16.05,16.05,0,0,0-6.05,14.08C416.17,247.67,416.39,251.83,416.39,256Z" style="fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;stroke-width:32px"></path></svg>
+                    </a>
+                </div>
+
+            </div>
 
         </div>
         <div class="fui-app-content">
@@ -402,29 +435,53 @@ class UnifiedUiHandler
                         }
                     });
 
-                    // Theme select
-                    var themeSelect = document.getElementById('fui-theme-select');
+                    // Theme toggle dropdown
+                    var themeToggle = document.getElementById('fui-theme-toggle');
+                    var themeDropdown = document.getElementById('fui-theme-dropdown');
 
                     function applyTheme(mode) {
                         var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
                         var isDark = mode === 'dark' || (mode === 'system' && prefersDark);
                         document.body.classList.remove('fluent_theme_dark');
-                        if (isDark && !document.body.classList.contains('fluent_theme_dark')) document.body.classList.add('fluent_theme_dark');
+                        if (isDark) document.body.classList.add('fluent_theme_dark');
                         if (mode === 'system') {
                             localStorage.setItem('fluent_theme_mode', 'system:' + (prefersDark ? 'dark' : 'light'));
                         } else {
                             localStorage.setItem('fluent_theme_mode', mode);
                         }
-                        if (themeSelect) themeSelect.value = mode;
+                        if (themeToggle) themeToggle.classList.toggle('is-dark', isDark);
+                        if (themeDropdown) {
+                            themeDropdown.querySelectorAll('.fui-theme-option').forEach(function (btn) {
+                                btn.classList.toggle('is-active', btn.dataset.theme === mode);
+                            });
+                        }
                     }
 
                     var savedMode = localStorage.getItem('fluent_theme_mode') || 'system';
                     var baseMode = savedMode.startsWith('system') ? 'system' : savedMode;
                     applyTheme(baseMode);
 
-                    if (themeSelect) {
-                        themeSelect.addEventListener('change', function () {
-                            applyTheme(themeSelect.value);
+                    if (themeToggle && themeDropdown) {
+                        themeToggle.addEventListener('click', function (e) {
+                            e.stopPropagation();
+                            var isOpen = !themeDropdown.hidden;
+                            themeDropdown.hidden = isOpen;
+                            themeToggle.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+                        });
+
+                        themeDropdown.querySelectorAll('.fui-theme-option').forEach(function (btn) {
+                            btn.addEventListener('click', function () {
+                                applyTheme(btn.dataset.theme);
+                                themeDropdown.hidden = true;
+                                themeToggle.setAttribute('aria-expanded', 'false');
+                            });
+                        });
+
+                        document.addEventListener('click', function (e) {
+                            if (!themeToggle.contains(e.target) && !themeDropdown.contains(e.target)) {
+                                themeDropdown.hidden = true;
+                                themeToggle.setAttribute('aria-expanded', 'false');
+                            }
                         });
                     }
 
@@ -723,7 +780,11 @@ class UnifiedUiHandler
             'entries'       => '<svg viewBox="0 0 24 24" width="128" height="128" color="currentColor" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M3.25 5C3.25 4.58579 3.58579 4.25 4 4.25H20C20.4142 4.25 20.75 4.58579 20.75 5C20.75 5.41421 20.4142 5.75 20 5.75H4C3.58579 5.75 3.25 5.41421 3.25 5ZM3.25 9C3.25 8.58579 3.58579 8.25 4 8.25H20C20.4142 8.25 20.75 8.58579 20.75 9C20.75 9.41421 20.4142 9.75 20 9.75H4C3.58579 9.75 3.25 9.41421 3.25 9ZM3.25 13C3.25 12.5858 3.58579 12.25 4 12.25H14C14.4142 12.25 14.75 12.5858 14.75 13C14.75 13.4142 14.4142 13.75 14 13.75H4C3.58579 13.75 3.25 13.4142 3.25 13ZM3.25 17C3.25 16.5858 3.58579 16.25 4 16.25H10C10.4142 16.25 10.75 16.5858 10.75 17C10.75 17.4142 10.4142 17.75 10 17.75H4C3.58579 17.75 3.25 17.4142 3.25 17ZM16.5 14.25C16.9142 14.25 17.25 14.5858 17.25 15V18.25H20.5C20.9142 18.25 21.25 18.5858 21.25 19C21.25 19.4142 20.9142 19.75 20.5 19.75H17.25V23C17.25 23.4142 16.9142 23.75 16.5 23.75C16.0858 23.75 15.75 23.4142 15.75 23V19.75H12.5C12.0858 19.75 11.75 19.4142 11.75 19C11.75 18.5858 12.0858 18.25 12.5 18.25H15.75V15C15.75 14.5858 16.0858 14.25 16.5 14.25Z" fill="currentColor" /></svg>',
             'tools'         => '<svg viewBox="0 0 24 24" width="128" height="128" color="currentColor" fill="none"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437 1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008Z" /></svg>',
             'integrations'  => '<svg viewBox="0 0 24 24" width="128" height="128" color="currentColor" fill="none"><path d="M20.5 16.5C20.5 18.7091 18.7091 20.5 16.5 20.5C14.2909 20.5 12.5 18.7091 12.5 16.5C12.5 14.2909 14.2909 12.5 16.5 12.5C18.7091 12.5 20.5 14.2909 20.5 16.5Z" stroke="currentColor" stroke-width="1.5" /><path d="M11.5 7.5C11.5 9.70914 9.70914 11.5 7.5 11.5C5.29086 11.5 3.5 9.70914 3.5 7.5C3.5 5.29086 5.29086 3.5 7.5 3.5C9.70914 3.5 11.5 5.29086 11.5 7.5Z" stroke="currentColor" stroke-width="1.5" /><path d="M3.5 16.5H11.5M7.5 12.5V20.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /><path d="M13.5 7.5H20.5M17 4V11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>',
-            'money'         => '<svg viewBox="0 0 24 24" width="128" height="128" color="currentColor" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2.25C6.61522 2.25 2.25 6.61522 2.25 12C2.25 17.3848 6.61522 21.75 12 21.75C17.3848 21.75 21.75 17.3848 21.75 12C21.75 6.61522 17.3848 2.25 12 2.25ZM0.75 12C0.75 5.7868 5.7868 0.75 12 0.75C18.2132 0.75 23.25 5.7868 23.25 12C23.25 18.2132 18.2132 23.25 12 23.25C5.7868 23.25 0.75 18.2132 0.75 12ZM12 5.25C12.4142 5.25 12.75 5.58579 12.75 6V6.81802C13.8288 7.09133 14.6825 7.78245 15.1785 8.69064C15.3795 9.05898 15.2453 9.52089 14.877 9.72183C14.5086 9.92278 14.0467 9.78857 13.8458 9.42023C13.5261 8.83388 12.9381 8.38176 12.1676 8.27168C11.4329 8.16729 10.7076 8.40032 10.2499 8.87757C9.81161 9.33492 9.66978 9.99348 9.85938 10.6152C10.0433 11.2168 10.5381 11.6603 11.2061 11.8433L12.7939 12.2817C13.9743 12.6064 14.9175 13.4045 15.2646 14.5293C15.6181 15.6758 15.2859 16.9095 14.3999 17.7011C13.9413 18.1108 13.3726 18.3857 12.75 18.4936V19C12.75 19.4142 12.4142 19.75 12 19.75C11.5858 19.75 11.25 19.4142 11.25 19V18.4327C10.0297 18.1191 9.09903 17.3123 8.63282 16.2402C8.46247 15.8571 8.63891 15.4089 9.02198 15.2385C9.40506 15.0682 9.85328 15.2446 10.0236 15.6277C10.3444 16.3552 11.0302 16.8398 11.8624 16.9431C12.6289 17.0388 13.3838 16.7786 13.8478 16.2637C14.294 15.7683 14.4319 15.0842 14.2197 14.4082C14.013 13.7493 13.4874 13.2904 12.8061 13.1067L11.2183 12.6683C10.0811 12.3562 9.10974 11.5692 8.77148 10.4598C8.43982 9.37086 8.77127 8.18124 9.63525 7.34742C10.1132 6.88348 10.7283 6.56939 11.25 6.43022V6C11.25 5.58579 11.5858 5.25 12 5.25Z" fill="currentColor" /></svg>'
+            'money'         => '<svg viewBox="0 0 24 24" width="128" height="128" color="currentColor" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2.25C6.61522 2.25 2.25 6.61522 2.25 12C2.25 17.3848 6.61522 21.75 12 21.75C17.3848 21.75 21.75 17.3848 21.75 12C21.75 6.61522 17.3848 2.25 12 2.25ZM0.75 12C0.75 5.7868 5.7868 0.75 12 0.75C18.2132 0.75 23.25 5.7868 23.25 12C23.25 18.2132 18.2132 23.25 12 23.25C5.7868 23.25 0.75 18.2132 0.75 12ZM12 5.25C12.4142 5.25 12.75 5.58579 12.75 6V6.81802C13.8288 7.09133 14.6825 7.78245 15.1785 8.69064C15.3795 9.05898 15.2453 9.52089 14.877 9.72183C14.5086 9.92278 14.0467 9.78857 13.8458 9.42023C13.5261 8.83388 12.9381 8.38176 12.1676 8.27168C11.4329 8.16729 10.7076 8.40032 10.2499 8.87757C9.81161 9.33492 9.66978 9.99348 9.85938 10.6152C10.0433 11.2168 10.5381 11.6603 11.2061 11.8433L12.7939 12.2817C13.9743 12.6064 14.9175 13.4045 15.2646 14.5293C15.6181 15.6758 15.2859 16.9095 14.3999 17.7011C13.9413 18.1108 13.3726 18.3857 12.75 18.4936V19C12.75 19.4142 12.4142 19.75 12 19.75C11.5858 19.75 11.25 19.4142 11.25 19V18.4327C10.0297 18.1191 9.09903 17.3123 8.63282 16.2402C8.46247 15.8571 8.63891 15.4089 9.02198 15.2385C9.40506 15.0682 9.85328 15.2446 10.0236 15.6277C10.3444 16.3552 11.0302 16.8398 11.8624 16.9431C12.6289 17.0388 13.3838 16.7786 13.8478 16.2637C14.294 15.7683 14.4319 15.0842 14.2197 14.4082C14.013 13.7493 13.4874 13.2904 12.8061 13.1067L11.2183 12.6683C10.0811 12.3562 9.10974 11.5692 8.77148 10.4598C8.43982 9.37086 8.77127 8.18124 9.63525 7.34742C10.1132 6.88348 10.7283 6.56939 11.25 6.43022V6C11.25 5.58579 11.5858 5.25 12 5.25Z" fill="currentColor" /></svg>',
+            'dark'          => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>',
+            'light'         => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>',
+            'system'        => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" x2="4" y1="21" y2="14"/><line x1="4" x2="4" y1="6" y2="3"/><line x1="12" x2="12" y1="21" y2="12"/><line x1="12" x2="12" y1="4" y2="3"/><line x1="20" x2="20" y1="21" y2="16"/><line x1="20" x2="20" y1="8" y2="3"/><line x1="1" x2="7" y1="14" y2="14"/><line x1="9" x2="15" y1="12" y2="12"/><line x1="17" x2="23" y1="16" y2="16"/></svg>',
+            'check'         => '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>'
         ];
 
         if (isset($icons[$key])) {
