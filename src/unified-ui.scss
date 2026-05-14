@@ -12,7 +12,7 @@
     --fui-surface-hover: #f6f5f4;
     --fui-surface-active: #f1edff;
     --fui-border: #ebe9e6;
-    --fui-text: #1a1a1a;
+    --fui-text: var(--fc-primary-text, #0E121B);
     --fui-text-muted: #4f4f55;
     --fui-text-soft: #8a8a93;
     --fui-text-faint: #a8a7ad;
