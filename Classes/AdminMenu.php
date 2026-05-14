@@ -11,22 +11,13 @@ class AdminMenu
     public static function register()
     {
         add_menu_page(
-            __('Fluent Toolkit', 'fluent-toolkit'),
-            __('Fluent Toolkit', 'fluent-toolkit'),
+            __('FluentKit', 'fluent-toolkit'),
+            __('FluentKit', 'fluent-toolkit'),
             'manage_options',
             self::DASHBOARD_SLUG,
             [__CLASS__, 'render'],
             self::pluginIcon(),
             200
-        );
-
-        add_submenu_page(
-            self::DASHBOARD_SLUG,
-            __('Beta & Add-ons', 'fluent-toolkit'),
-            __('Beta & Add-ons', 'fluent-toolkit'),
-            'manage_options',
-            self::DASHBOARD_SLUG,
-            [__CLASS__, 'render']
         );
     }
 

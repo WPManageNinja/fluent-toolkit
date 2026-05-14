@@ -1,14 +1,14 @@
-=== Fluent Toolkit ===
+=== FluentKit ===
 Contributors: techjewel, wpmanageninja
 Tags: fluent plugins, toolkit
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 2.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Install beta builds, release candidates, and companion add-ons for the Fluent ecosystem — all from one place.
+Install early access addons, release candidates, and companion add-ons for the Fluent ecosystem — all from one place.
 
 == Description ==
 
@@ -25,7 +25,7 @@ Upload the zip from your WordPress dashboard, activate Fluent Toolkit, then open
 
 == Changelog ==
 
-= 1.2.0 =
+= 2.0.0 =
 * Added replaceable WordPress MCP Adapter provider using the official `wordpress/mcp-adapter` package
 
 = 1.1.0 =
