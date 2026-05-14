@@ -37,10 +37,18 @@ class UnifiedUiHandler
             ],
             'fluent_forms'    => [
                     'disabled' => !defined('FLUENTFORM'),
-                    'title'    => 'Forms',
+                    'title'    => 'Fluent',
                     'icon'     => FLUENT_BETA_TESTING_PLUGIN_URL . 'dist/images/fluentforms_icon.svg',
                     'logo'     => FLUENT_BETA_TESTING_PLUGIN_URL . 'dist/images/fluentforms_logo.svg',
                     'items'    => $this->getFormsMenu(),
+                    'has_dark_mode' => false
+            ],
+            'fluent-support'    => [
+                    'disabled' => !defined('FLUENT_SUPPORT_VERSION'),
+                    'title'    => 'Support',
+                    'icon'     => FLUENT_BETA_TESTING_PLUGIN_URL . 'dist/images/fluentsupport_icon.svg',
+                    'logo'     => FLUENT_BETA_TESTING_PLUGIN_URL . 'dist/images/fluentsupport_logo.svg',
+                    'items'    => [],
                     'has_dark_mode' => false
             ],
             'fluent-booking'  => [
