@@ -15,7 +15,7 @@ class UnifiedUiHandler
     public function init()
     {
         if (!defined('FLUENT_UNIFIED_UIX')) {
-            // return;
+           //  return;
         }
 
         $apps = [
@@ -66,6 +66,12 @@ class UnifiedUiHandler
                 'logo'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentboards_logo.svg',
                 'items'    => $this->getBoardsMenu(),
                 'has_dark_mode' => false
+            ],
+            'fluent-toolkit' => [
+                'disabled' => true,
+                'title'   => 'FluentKit',
+                'has_dark_mode' => false,
+                'hide_on_menu' => true
             ]
         ];
 
