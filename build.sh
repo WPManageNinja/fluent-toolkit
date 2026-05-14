@@ -34,6 +34,7 @@ cp -r vendor "${BUILD_DIR}/vendor"
 mkdir -p "${BUILD_DIR}/dist"
 cp dist/app.js "${BUILD_DIR}/dist/"
 [ -f dist/app.css ] && cp dist/app.css "${BUILD_DIR}/dist/"
+[ -f dist/unified-ui.css ] && cp dist/unified-ui.css "${BUILD_DIR}/dist/"
 cp index.php "${BUILD_DIR}/dist/index.php"
 
 # Create zip

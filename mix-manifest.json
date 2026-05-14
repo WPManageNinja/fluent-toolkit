@@ -1,5 +1,6 @@
 {
     "/dist/app.js": "/dist/app.js",
+    "/dist/unified-ui.css": "/dist/unified-ui.css",
     "/dist/images/fluentboards_icon.svg": "/dist/images/fluentboards_icon.svg",
     "/dist/images/fluentbooking_icon.svg": "/dist/images/fluentbooking_icon.svg",
     "/dist/images/fluentbooking_logo.svg": "/dist/images/fluentbooking_logo.svg",

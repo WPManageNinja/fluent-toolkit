@@ -96,7 +96,7 @@ class UnifiedUiHandler
 
     public function loadUnifiedUi($screen = '')
     {
-        wp_enqueue_style('fluent_unified_ui', FLUENT_BETA_TESTING_PLUGIN_URL . 'src/unified-ui.css', [], FLUENT_TOOLKIT_VERSION);
+        wp_enqueue_style('fluent_unified_ui', FLUENT_BETA_TESTING_PLUGIN_URL . 'dist/unified-ui.css', [], FLUENT_TOOLKIT_VERSION);
     }
 
     public function pushUnifiedUiToTop()
