@@ -9,17 +9,18 @@ class McpManager
     const FLUENTCRM_PLUGIN_FILE = 'fluent-crm/fluent-crm.php';
     const FLUENTCAMPAIGN_PLUGIN_FILE = 'fluentcampaign-pro/fluentcampaign-pro.php';
     const FLUENTCRM_OPTION_KEY = 'mcp_enabled';
-    const FLUENTCRM_OPTION_TYPE = 'option';
 
     public static function status()
     {
         $adapter = [
-            'available' => McpStatus::adapterAvailable(),
-            'provider'  => McpStatus::adapterProvider(),
+            'available' => self::adapterAvailable(),
+            'provider'  => defined('WP_MCP_VERSION') ? 'available' : 'missing',
         ];
-        $products = [
-            self::fluentCrmProduct($adapter['available']),
-        ];
+        $products = [];
+
+        if (self::fluentCrmExposesMcp()) {
+            $products[] = self::fluentCrmProduct($adapter['available']);
+        }
 
         /**
          * Register MCP products shown in Fluent Toolkit's MCP page.
@@ -55,8 +56,7 @@ class McpManager
         $enabled = (bool) $enabled;
 
         if ($slug === 'fluent-crm') {
-            self::setFluentCrmMcpEnabled($enabled);
-            return true;
+            return self::setFluentCrmMcpEnabled($enabled);
         }
 
         return new \WP_Error(
@@ -67,53 +67,26 @@ class McpManager
 
     public static function fluentCrmMcpEnabled()
     {
-        $row = self::getFluentCrmMcpOptionRow();
-
-        if (!$row || !isset($row->value)) {
+        if (!function_exists('fluentcrm_get_option')) {
             return true;
         }
 
-        $value = maybe_unserialize($row->value);
+        $value = fluentcrm_get_option(self::FLUENTCRM_OPTION_KEY, 'yes');
 
         return $value !== 'no' && $value !== false && $value !== 0 && $value !== '0';
     }
 
     public static function setFluentCrmMcpEnabled($enabled)
     {
-        global $wpdb;
-
-        $enabled = (bool) $enabled;
-        $row = self::getFluentCrmMcpOptionRow();
-        $table = self::fluentCrmMetaTable();
-        $value = $enabled ? 'yes' : 'no';
-        $now = current_time('mysql');
-
-        if ($row && !empty($row->id)) {
-            $wpdb->update(
-                $table,
-                [
-                    'value'      => $value,
-                    'updated_at' => $now,
-                ],
-                [
-                    'id' => (int) $row->id,
-                ]
+        if (!function_exists('fluentcrm_update_option')) {
+            return new \WP_Error(
+                'fluent_toolkit_fluentcrm_helpers_missing',
+                __('FluentCRM option helpers are not available.', 'fluent-toolkit')
             );
-
-            return $enabled;
         }
 
-        $wpdb->insert(
-            $table,
-            [
-                'object_type' => self::FLUENTCRM_OPTION_TYPE,
-                'object_id'   => null,
-                'key'         => self::FLUENTCRM_OPTION_KEY,
-                'value'       => $value,
-                'created_at'  => $now,
-                'updated_at'  => $now,
-            ]
-        );
+        $enabled = (bool) $enabled;
+        fluentcrm_update_option(self::FLUENTCRM_OPTION_KEY, $enabled ? 'yes' : 'no');
 
         return $enabled;
     }
@@ -237,6 +210,13 @@ class McpManager
         return $proActive ? 20 : 16;
     }
 
+    private static function fluentCrmExposesMcp()
+    {
+        return self::pluginActive(self::FLUENTCRM_PLUGIN_FILE)
+            && class_exists('\FluentCrm\App\Modules\MCP\AbilitiesRegistrar')
+            && class_exists('\FluentCrm\App\Modules\MCP\MCPInit');
+    }
+
     private static function fluentCrmEndpointUrl()
     {
         if (class_exists('\FluentCrm\App\Modules\MCP\MCPInit') && method_exists('\FluentCrm\App\Modules\MCP\MCPInit', 'getEndpointUrl')) {
@@ -246,26 +226,6 @@ class McpManager
         return get_rest_url(null, trailingslashit('fluent-crm') . 'mcp');
     }
 
-    private static function getFluentCrmMcpOptionRow()
-    {
-        global $wpdb;
-
-        return $wpdb->get_row(
-            $wpdb->prepare(
-                'SELECT id, value FROM ' . self::fluentCrmMetaTable() . ' WHERE `key` = %s AND object_type = %s LIMIT 1',
-                self::FLUENTCRM_OPTION_KEY,
-                self::FLUENTCRM_OPTION_TYPE
-            )
-        );
-    }
-
-    private static function fluentCrmMetaTable()
-    {
-        global $wpdb;
-
-        return $wpdb->prefix . 'fc_meta';
-    }
-
     private static function pluginActive($pluginFile)
     {
         if (!function_exists('is_plugin_active')) {
@@ -273,5 +233,10 @@ class McpManager
         }
 
         return is_plugin_active($pluginFile);
+    }
+
+    private static function adapterAvailable()
+    {
+        return defined('WP_MCP_VERSION') && class_exists('\WP\MCP\Core\McpAdapter') && function_exists('wp_register_ability');
     }
 }
