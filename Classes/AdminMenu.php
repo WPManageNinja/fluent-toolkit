@@ -62,6 +62,11 @@ class AdminMenu
             $requireUpdate = version_compare(FLUENT_TOOLKIT_VERSION, $sourceVersion, '<');
         }
 
+        $toolkitSettings = get_option('_fluent_kit_settings', []);
+        if (!is_array($toolkitSettings)) {
+            $toolkitSettings = [];
+        }
+
         $currentUser = function_exists('wp_get_current_user') ? wp_get_current_user() : null;
         $currentUserLogin = ($currentUser && !empty($currentUser->user_login)) ? sanitize_text_field($currentUser->user_login) : '';
 
@@ -81,6 +86,7 @@ class AdminMenu
             'require_update'     => $requireUpdate,
             'dashboard_url'      => self::url(),
             'current_user_login' => $currentUserLogin,
+            'settings'           => $toolkitSettings,
         ]);
     }
 

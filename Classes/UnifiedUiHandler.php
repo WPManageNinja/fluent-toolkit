@@ -14,8 +14,9 @@ class UnifiedUiHandler
 
     public function init()
     {
-        if (!defined('FLUENT_UNIFIED_UIX')) {
-           //  return;
+        $toolkitSettings = get_option('_fluent_kit_settings', []);
+        if (!is_array($toolkitSettings) || empty($toolkitSettings['uinified_ui']) || $toolkitSettings['uinified_ui'] !== 'yes') {
+            return;
         }
 
         $apps = [

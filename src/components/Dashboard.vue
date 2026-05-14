@@ -27,7 +27,7 @@
             </div>
         </header>
 
-        <section class="ft-unified-panel" v-loading="mcpLoading" element-loading-text="Loading MCP status...">
+        <section class="ft-unified-panel" v-loading="unifiedUiSaving" element-loading-text="Saving Unified UI status...">
             <div class="ft-unified-icon" aria-hidden="true">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M4 7h16"/>
@@ -51,7 +51,7 @@
                     <input
                         type="checkbox"
                         :checked="unifiedUiEnabled"
-                        :disabled="mcpSaving || !canToggleUnifiedUi"
+                        :disabled="unifiedUiSaving"
                         @change="toggleUnifiedUi($event.target.checked)"
                     />
                     <span></span>
@@ -175,15 +175,8 @@ export default {
             betaPlugins: [],
             installing: false,
             loading: false,
-            mcpLoading: false,
-            mcpSaving: false,
-            mcpOverview: {
-                adapter: {
-                    available: false,
-                    provider: 'missing',
-                },
-                products: [],
-            },
+            unifiedUiSaving: false,
+            unifiedUiEnabled: (window.fluentToolkitVars.settings || {}).uinified_ui === 'yes',
             activeChannel: 'all',
             searchQuery: '',
         };
@@ -219,31 +212,7 @@ export default {
 
             return plugins;
         },
-        mcpProducts() {
-            return this.mcpOverview.products || [];
-        },
-        primaryMcpProduct() {
-            return this.mcpProducts.find(product => product.toggleable) || this.mcpProducts[0] || null;
-        },
-        unifiedUiEnabled() {
-            return this.primaryMcpProduct ? !!this.primaryMcpProduct.mcp_enabled : false;
-        },
-        canToggleUnifiedUi() {
-            return !!(this.primaryMcpProduct && this.primaryMcpProduct.toggleable);
-        },
         unifiedUiStatusLabel() {
-            if (this.mcpLoading) {
-                return 'Checking status';
-            }
-
-            if (!this.primaryMcpProduct) {
-                return 'No MCP plugins detected yet';
-            }
-
-            if (!this.canToggleUnifiedUi) {
-                return this.mcpStatusLabel(this.primaryMcpProduct.status);
-            }
-
             return this.unifiedUiEnabled ? 'Enabled' : 'Disabled';
         },
     },
@@ -269,39 +238,19 @@ export default {
                     this.loading = false;
                 });
         },
-        getMcpOverview() {
-            this.mcpLoading = true;
-            this.$get('fluent_toolkit_mcp_overview')
-                .then(response => {
-                    this.mcpOverview = response;
-                })
-                .catch(error => {
-                    this.$handleError(error);
-                })
-                .finally(() => {
-                    this.mcpLoading = false;
-                });
-        },
         toggleUnifiedUi(enabled) {
-            if (!this.primaryMcpProduct) {
-                return;
-            }
-
-            this.mcpSaving = true;
-            this.$post('fluent_toolkit_mcp_toggle', {
-                slug: this.primaryMcpProduct.slug,
+            this.unifiedUiSaving = true;
+            this.$post('fluent_toolkit_unified_ui_toggle', {
                 enabled: enabled ? 'yes' : 'no',
             })
-                .then(response => {
-                    this.$notify.success(enabled ? 'Unified UI enabled.' : 'Unified UI disabled.');
-                    this.mcpOverview = response.status;
+                .then(() => {
+                    window.location.reload();
                 })
                 .catch(error => {
                     this.$handleError(error);
-                    this.getMcpOverview();
                 })
                 .finally(() => {
-                    this.mcpSaving = false;
+                    this.unifiedUiSaving = false;
                 });
         },
         installPlugin(plugin, beta = '') {
@@ -342,21 +291,9 @@ export default {
             if (!licenseKey) return '';
             return licenseKey.replace(/.(?=.{6})/g, '*').slice(-10);
         },
-        mcpStatusLabel(status) {
-            const labels = {
-                ready: 'Ready',
-                disabled: 'Disabled',
-                adapter_required: 'Adapter required',
-                crm_required: 'Product required',
-                plugin_required: 'Product required',
-            };
-
-            return labels[status] || 'Unknown';
-        },
     },
     mounted() {
         this.getBetaPlugins();
-        this.getMcpOverview();
     },
     created() {
         jQuery('.update-nag,.notice, #wpbody-content > .updated, #wpbody-content > .error').remove();

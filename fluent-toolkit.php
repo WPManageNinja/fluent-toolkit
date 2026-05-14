@@ -29,6 +29,7 @@ class FluentToolkitBootstrap
         add_action('admin_menu', array(\FluentToolkit\Classes\AdminMenu::class, 'register'));
         add_action('wp_ajax_fluent-beta-install', array($this, 'installBetaPlugin'));
         add_action('wp_ajax_fluent_beta_get_beta_versions', array($this, 'getBetaVersions'));
+        add_action('wp_ajax_fluent_toolkit_unified_ui_toggle', array($this, 'toggleUnifiedUi'));
         add_action('wp_ajax_fluent_toolkit_mcp_overview', array($this, 'fetchMcpOverview'));
         add_action('wp_ajax_fluent_toolkit_mcp_toggle', array($this, 'toggleMcpAccess'));
 
@@ -217,6 +218,27 @@ class FluentToolkitBootstrap
         $this->verifySettingsAjaxRequest();
 
         wp_send_json(\FluentToolkit\Classes\McpManager::status(), 200);
+    }
+
+    public function toggleUnifiedUi()
+    {
+        $this->verifySettingsAjaxRequest();
+
+        $enabled = isset($_POST['enabled']) ? sanitize_text_field($_POST['enabled']) : '';
+        $enabled = in_array($enabled, ['yes', 'true', '1', 'on'], true);
+        $settings = get_option('_fluent_kit_settings', []);
+        if (!is_array($settings)) {
+            $settings = [];
+        }
+
+        $settings['uinified_ui'] = $enabled ? 'yes' : 'no';
+        update_option('_fluent_kit_settings', $settings);
+
+        wp_send_json([
+            'message' => $enabled
+                ? __('Unified UI enabled.', 'fluent-toolkit')
+                : __('Unified UI disabled.', 'fluent-toolkit'),
+        ], 200);
     }
 
     public function toggleMcpAccess()
