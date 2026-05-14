@@ -57,7 +57,7 @@ class UnifiedUiHandler
                 'icon'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentbooking_icon.svg',
                 'logo'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentbooking_logo.svg',
                 'items'    => $this->getBookingMenu(),
-                'has_dark_mode' => true
+                'has_dark_mode' => false
             ],
             'fluent-boards'   => [
                 'disabled' => !defined('FLUENT_BOARDS'),
