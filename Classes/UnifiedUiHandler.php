@@ -15,7 +15,7 @@ class UnifiedUiHandler
     public function init()
     {
         if (!defined('FLUENT_UNIFIED_UIX')) {
-            // return;
+           //  return;
         }
 
         $apps = [
@@ -37,7 +37,7 @@ class UnifiedUiHandler
             ],
             'fluent_forms'    => [
                     'disabled' => !defined('FLUENTFORM'),
-                    'title'    => 'Fluent',
+                    'title'    => 'Forms',
                     'icon'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentforms_icon.svg',
                     'logo'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentforms_logo.svg',
                     'items'    => $this->getFormsMenu(),
@@ -45,10 +45,10 @@ class UnifiedUiHandler
             ],
             'fluent-support'    => [
                     'disabled' => !defined('FLUENT_SUPPORT_VERSION'),
-                    'title'    => 'Support',
+                    'title'    => 'Support Tickets',
                     'icon'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentsupport_icon.svg',
                     'logo'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentsupport_logo.svg',
-                    'items'    => [],
+                    'items'    => $this->getSupportTicketsMenu(),
                     'has_dark_mode' => false
             ],
             'fluent-booking'  => [
@@ -66,6 +66,12 @@ class UnifiedUiHandler
                 'logo'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentboards_logo.svg',
                 'items'    => $this->getBoardsMenu(),
                 'has_dark_mode' => false
+            ],
+            'fluent-toolkit' => [
+                'disabled' => true,
+                'title'   => 'FluentKit',
+                'has_dark_mode' => false,
+                'hide_on_menu' => true
             ]
         ];
 
@@ -149,7 +155,7 @@ class UnifiedUiHandler
         </script>
 
         <div class="fluent_uui">
-        <button type="button" class="fui-mobile-toggle" aria-label="Toggle menu" aria-controls="fui-sidebar"
+        <button type="button" class="fui-mobile-toggle" aria-label="<?php echo esc_attr__('Toggle menu', 'fluent-toolkit'); ?>" aria-controls="fui-sidebar"
                 aria-expanded="false">
             <span class="fui-mobile-toggle-bars" aria-hidden="true"></span>
         </button>
@@ -236,7 +242,7 @@ class UnifiedUiHandler
                                         $hasSub = $isCurrent && !empty($item['sub_menu']);
                                         $isServerActive = $isCurrent && !$itemHash && ($itemKey === $plugin_page);
                                         ?>
-                                        <li class="fui-item<?php echo $hasSub ? ' fui-item--has-sub is-open' : ''; ?>">
+                                        <li class="fui-item<?php echo $hasSub ? ' fui-item--has-sub' : ''; ?>">
                                             <a href="<?php echo esc_url($item['url']); ?>"
                                                class="fui-apps-menu-item<?php echo $isServerActive ? ' active' : ''; ?>"
                                                <?php echo ($isCurrent && $itemHash) ? 'data-fui-hash="#' . esc_attr($itemHash) . '"' : ''; ?>>
@@ -321,7 +327,7 @@ class UnifiedUiHandler
                     <?php endif; ?>
                 </div>
                 <div class="fui-sidebar-footer--right">
-                    <a href="#" aria-label="FluentToolkit Settings">
+                    <a class="fui-sidebar-settings-btn" href="<?php echo esc_url(admin_url('admin.php?page=fluent-toolkit#/')); ?>" aria-label="<?php echo esc_attr__('FluentToolkit Settings', 'fluent-toolkit'); ?>">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none" stroke="currentColor"><path d="M262.29,192.31a64,64,0,1,0,57.4,57.4A64.13,64.13,0,0,0,262.29,192.31ZM416.39,256a154.34,154.34,0,0,1-1.53,20.79l45.21,35.46A10.81,10.81,0,0,1,462.52,326l-42.77,74a10.81,10.81,0,0,1-13.14,4.59l-44.9-18.08a16.11,16.11,0,0,0-15.17,1.75A164.48,164.48,0,0,1,325,400.8a15.94,15.94,0,0,0-8.82,12.14l-6.73,47.89A11.08,11.08,0,0,1,298.77,470H213.23a11.11,11.11,0,0,1-10.69-8.87l-6.72-47.82a16.07,16.07,0,0,0-9-12.22,155.3,155.3,0,0,1-21.46-12.57,16,16,0,0,0-15.11-1.71l-44.89,18.07a10.81,10.81,0,0,1-13.14-4.58l-42.77-74a10.8,10.8,0,0,1,2.45-13.75l38.21-30a16.05,16.05,0,0,0,6-14.08c-.36-4.17-.58-8.33-.58-12.5s.21-8.27.58-12.35a16,16,0,0,0-6.07-13.94l-38.19-30A10.81,10.81,0,0,1,49.48,186l42.77-74a10.81,10.81,0,0,1,13.14-4.59l44.9,18.08a16.11,16.11,0,0,0,15.17-1.75A164.48,164.48,0,0,1,187,111.2a15.94,15.94,0,0,0,8.82-12.14l6.73-47.89A11.08,11.08,0,0,1,213.23,42h85.54a11.11,11.11,0,0,1,10.69,8.87l6.72,47.82a16.07,16.07,0,0,0,9,12.22,155.3,155.3,0,0,1,21.46,12.57,16,16,0,0,0,15.11,1.71l44.89-18.07a10.81,10.81,0,0,1,13.14,4.58l42.77,74a10.8,10.8,0,0,1-2.45,13.75l-38.21,30a16.05,16.05,0,0,0-6.05,14.08C416.17,247.67,416.39,251.83,416.39,256Z" style="fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;stroke-width:32px"></path></svg>
                     </a>
                 </div>
@@ -415,8 +421,16 @@ class UnifiedUiHandler
                             e.preventDefault();
                             var section = productHeader.closest('.fui-product-section');
                             if (section) {
-                                var nowOpen = section.classList.toggle('is-open');
-                                productHeader.setAttribute('aria-expanded', nowOpen ? 'true' : 'false');
+                                var isAlreadyOpen = section.classList.contains('is-open');
+                                sidebar.querySelectorAll('.fui-product-section').forEach(function (s) {
+                                    s.classList.remove('is-open');
+                                    var h = s.querySelector('.fui-product-header');
+                                    if (h) h.setAttribute('aria-expanded', 'false');
+                                });
+                                if (!isAlreadyOpen) {
+                                    section.classList.add('is-open');
+                                    productHeader.setAttribute('aria-expanded', 'true');
+                                }
                             }
                             return;
                         }
@@ -426,7 +440,15 @@ class UnifiedUiHandler
                             e.preventDefault();
                             e.stopPropagation();
                             var item = itemChevron.closest('.fui-item--has-sub');
-                            if (item) item.classList.toggle('is-open');
+                            if (item) {
+                                var isAlreadyOpen = item.classList.contains('is-open');
+                                sidebar.querySelectorAll('.fui-item--has-sub').forEach(function (i) {
+                                    i.classList.remove('is-open');
+                                });
+                                if (!isAlreadyOpen) {
+                                    item.classList.add('is-open');
+                                }
+                            }
                             return;
                         }
 
@@ -756,6 +778,67 @@ class UnifiedUiHandler
         return $menuItems;
     }
 
+    protected function getSupportTicketsMenu()
+    {
+        if (!defined('FLUENT_SUPPORT_VERSION')) {
+            return [];
+        }
+
+        $baseUrl = admin_url('admin.php?page=fluent-support#/');
+
+        $menuItems = [
+            'dashboard'        => [
+                'title'    => __('Dashboard', 'fluent-toolkit'),
+                'url'      => $baseUrl,
+                'icon_svg' => $this->getIcon('dashboard')
+            ],
+            'tickets'        => [
+                'title'    => __('Tickets', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'tickets',
+                'icon_svg' => $this->getIcon('tickets')
+            ],
+            'reports'        => [
+                    'title'    => __('Reports', 'fluent-toolkit'),
+                    'url'      => $baseUrl . 'reports',
+                    'icon_svg' => $this->getIcon('reports')
+            ],
+            'mailboxes'        => [
+                    'title'    => __('Business Inboxes', 'fluent-toolkit'),
+                    'url'      => $baseUrl . 'mailboxes',
+                    'icon_svg' => $this->getIcon('mailboxes')
+            ],
+            'activity'        => [
+                    'title'    => __('Activities', 'fluent-toolkit'),
+                    'url'      => $baseUrl . 'activity',
+                    'icon_svg' => $this->getIcon('activities')
+            ],
+            'customers'        => [
+                    'title'    => __('Customers', 'fluent-toolkit'),
+                    'url'      => $baseUrl . 'customers',
+                    'icon_svg' => $this->getIcon('customers')
+            ],
+            'more'        => [
+                'title'    => __('More', 'fluent-toolkit'),
+                'url'  => '#',
+                'icon_svg' => $this->getIcon('more'),
+                'sub_menu' => [
+                    'saved_replies' => [
+                        'title' => __('Saved Replies', 'fluent-toolkit'),
+                        'url' => $baseUrl . 'saved-replies',
+                    ],
+                    'workflows' => [
+                        'title' => __('Workflows', 'fluent-toolkit'),
+                        'url' => $baseUrl . 'workflows',
+                    ]
+                ]
+            ]
+        ];
+
+
+        return $menuItems;
+
+    }
+
     protected function getIcon($key)
     {
 
@@ -794,7 +877,10 @@ class UnifiedUiHandler
             'dark'          => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>',
             'light'         => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>',
             'system'        => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" x2="4" y1="21" y2="14"/><line x1="4" x2="4" y1="6" y2="3"/><line x1="12" x2="12" y1="21" y2="12"/><line x1="12" x2="12" y1="4" y2="3"/><line x1="20" x2="20" y1="21" y2="16"/><line x1="20" x2="20" y1="8" y2="3"/><line x1="1" x2="7" y1="14" y2="14"/><line x1="9" x2="15" y1="12" y2="12"/><line x1="17" x2="23" y1="16" y2="16"/></svg>',
-            'check'         => '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>'
+            'check'         => '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>',
+            'tickets'       => '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" fill="currentColor"><path fill="currentColor" d="M192 128v768h640V128zm-32-64h704a32 32 0 0 1 32 32v832a32 32 0 0 1-32 32H160a32 32 0 0 1-32-32V96a32 32 0 0 1 32-32m160 448h384v64H320zm0-192h192v64H320zm0 384h384v64H320z"></path></svg>',
+            'mailboxes'     => '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 13.5h3.86a2.25 2.25 0 0 1 2.012 1.244l.256.512a2.25 2.25 0 0 0 2.013 1.244h3.218a2.25 2.25 0 0 0 2.013-1.244l.256-.512a2.25 2.25 0 0 1 2.013-1.244h3.859m-19.5.338V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 0 0-2.15-1.588H6.911a2.25 2.25 0 0 0-2.15 1.588L2.35 13.177a2.25 2.25 0 0 0-.1.661Z"></path></svg>',
+            'activities'    => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" color="currentColor"><path d="M21.5 4.5C21.5 5.60457 20.6046 6.5 19.5 6.5C18.3954 6.5 17.5 5.60457 17.5 4.5C17.5 3.39543 18.3954 2.5 19.5 2.5C20.6046 2.5 21.5 3.39543 21.5 4.5Z" stroke="currentColor"></path><path d="M20.4711 9.40577C20.5 10.2901 20.5 11.3119 20.5 12.5C20.5 16.7426 20.5 18.864 19.182 20.182C17.864 21.5 15.7426 21.5 11.5 21.5C7.25736 21.5 5.13604 21.5 3.81802 20.182C2.5 18.864 2.5 16.7426 2.5 12.5C2.5 8.25736 2.5 6.13604 3.81802 4.81802C5.13604 3.5 7.25736 3.5 11.5 3.5C12.6881 3.5 13.7099 3.5 14.5942 3.52895" stroke="currentColor"></path><path d="M6.5 14.5L9.29289 11.7071C9.68342 11.3166 10.3166 11.3166 10.7071 11.7071L12.2929 13.2929C12.6834 13.6834 13.3166 13.6834 13.7071 13.2929L16.5 10.5" stroke="currentColor"></path></svg>'
         ];
 
         if (isset($icons[$key])) {

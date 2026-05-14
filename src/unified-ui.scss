@@ -31,6 +31,7 @@
     flex-direction: column;
     gap: 4px;
     z-index: 100;
+    scrollbar-width: none;
 }
 
 /* ── Workspace switcher ──────────────────────────────────── */
@@ -224,20 +225,6 @@
     padding: 0;
 }
 
-/* Scrollbar — subtle */
-.fluent_ui_sidebar::-webkit-scrollbar {
-    width: 6px;
-}
-
-.fluent_ui_sidebar::-webkit-scrollbar-thumb {
-    background: transparent;
-    border-radius: 3px;
-}
-
-.fluent_ui_sidebar:hover::-webkit-scrollbar-thumb {
-    background: #d4d2cf;
-}
-
 /* Section heading — small caps, soft */
 .fluent_ui_sidebar h4 {
     margin: 4px 0 8px;
@@ -255,9 +242,7 @@
     margin: 0;
     padding: 0;
     + .fui-product-section {
-        border-top: 1px solid var(--fui-border);
-        margin-top: 10px;
-        padding-top: 10px;
+        margin-top: 6px;
     }
 }
 
@@ -297,6 +282,7 @@
     .fui-item-chevron {
         transform: rotate(-90deg);
         opacity: 0;
+        transition: background-color .12s ease, transform .25s ease, opacity .15s ease;
     }
 }
 
@@ -311,28 +297,40 @@
 .fui-product-name {
     flex: 1 1 auto;
     min-width: 0;
-    font-size: 14.5px;
-    font-weight: 600;
-    color: var(--fui-text);
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--fui-text-soft);
     letter-spacing: -0.01em;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.fui-product-section.is-open > .fui-product-header .fui-item-chevron {
-    opacity: 1;
+.fui-product-section.is-open {
+    .fui-product-name {
+        color: var(--fui-text);
+    }
+    > .fui-product-header {
+        .fui-item-chevron {
+            opacity: 1;
+            transform: rotate(0deg);
+        }
+    }
 }
 
-.fui-product-nav {
-    list-style: none;
-    margin: 0;
-    padding: 0 0 0 5px;
-    display: none;
+.fluent_ui_sidebar {
+    .fui-product-nav {
+        list-style: none;
+        margin: 0;
+        padding: 0 0 0 24px;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.28s ease;
+    }
 }
 
 .fui-product-section.is-open > .fui-product-nav {
-    display: block;
+    max-height: 800px;
 }
 
 /* Non-current product's items — muted (they navigate away on click) */
@@ -469,13 +467,16 @@
 /* ── Submenu (third-level, e.g. Contacts → Tags) ─────────── */
 .fluent_ui_sidebar .fui-submenu {
     list-style: none;
-    margin: 1px 0 4px;
+    margin: 1px 0 0;
     padding: 0 0 0 14px;
-    display: none;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease;
 }
 
 .fluent_ui_sidebar .fui-item--has-sub.is-open > .fui-submenu {
-    display: block;
+    max-height: 600px;
+    margin-bottom: 4px;
 }
 
 /* ── Chevron on parent items (clickable to toggle) ───────── */
@@ -649,6 +650,7 @@
     bottom: 0;
     z-index: 2;
     background: var(--fui-primary-bg);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
     &--right,
     &--left {
         display: flex;
@@ -656,7 +658,9 @@
         justify-content: space-between;
         gap: 8px;
         a {
-            display: block;
+            &:not(.fui-sidebar-settings-btn) {
+                display: block;
+            }
             color: var(--fui-text-soft);
             &:hover {
                 color: var(--fui-text);
@@ -675,6 +679,7 @@
     position: relative;
 }
 
+.fui-sidebar-settings-btn,
 .fui-theme-toggle {
     display: inline-flex;
     align-items: center;
@@ -705,6 +710,8 @@
         display: block;
         svg {
             display: block;
+            height: 18px;
+            width: 18px;
         }
     }
     .fui-theme-icon--dark { display: none; }
