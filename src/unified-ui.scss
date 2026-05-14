@@ -701,6 +701,12 @@
         box-shadow: 0 0 0 2px rgba(99, 91, 255, 0.35);
     }
 
+    > span {
+        display: block;
+        svg {
+            display: block;
+        }
+    }
     .fui-theme-icon--dark { display: none; }
 
     &.is-dark {
@@ -716,7 +722,7 @@
     z-index: 1000;
     background: var(--fui-primary-bg);
     border: 1px solid var(--fui-border);
-    border-radius: 10px;
+    border-radius: 8px;
     padding: 6px;
     box-shadow:
         0 0 0 1px rgba(0, 0, 0, 0.02),
