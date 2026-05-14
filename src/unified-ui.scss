@@ -723,8 +723,18 @@
         0 -4px 20px -4px rgba(15, 15, 15, 0.12),
         0 2px 6px rgba(15, 15, 15, 0.05);
     min-width: 150px;
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+    transform-origin: bottom;
+    transition: .1s;
+    display: block;
 
-    &[hidden] { display: none; }
+    &[hidden] {
+        opacity: 0;
+        visibility: hidden;
+        transform: scale(0.5);
+    }
 }
 
 .fui-theme-option {
