@@ -40,6 +40,39 @@ class FluentToolkitBootstrap
         });
 
         add_action('plugins_loaded', function () {
+            /**
+             * Plugin Updater
+             */
+            new \FluentToolkit\Classes\Updater('https://kit.wpmanageninja.com/kit-version', FLUENT_TOOLKIT_PLUGIN_FILE, array(
+                'version'   => FLUENT_TOOLKIT_VERSION,
+                'license'   => '12345',
+                'item_name' => 'FluentKit',
+                'item_id'   => '101',
+                'author'    => 'wpmanageninja'
+            ),
+                array(
+                    'license_status' => 'valid',
+                    'admin_page_url' => admin_url('admin.php?page=fluent-toolkit'),
+                    'purchase_url'   => 'https://wpmanageninja.com',
+                    'plugin_title'   => 'FluentKit'
+                )
+            );
+
+            add_filter('plugin_row_meta', function ($links, $pluginFile) {
+                if (plugin_basename(FLUENT_TOOLKIT_PLUGIN_FILE) !== $pluginFile) {
+                    return $links;
+                }
+
+                $checkUpdateUrl = esc_url(admin_url('plugins.php?fluent-toolkit-check-update=' . time()));
+
+                $row_meta = array(
+                    'check_update' => '<a style="color: #583fad;font-weight: 600;" href="' . $checkUpdateUrl . '" aria-label="' . esc_attr__('Check Update', 'fluent-toolkit') . '">' . esc_html__('Check Update', 'fluent-toolkit') . '</a>',
+                );
+
+                return array_merge($links, $row_meta);
+
+            }, 10, 2);
+
             if (!defined('WP_MCP_VERSION')) {
                 require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'libs/mcp-adapter/mcp-adapter.php';
             }
@@ -272,6 +305,7 @@ class FluentToolkitBootstrap
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/ToolkitHelper.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/McpManager.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/UnifiedUiHandler.php';
+        require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/Updater.php';
     }
 }
 
