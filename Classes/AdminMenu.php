@@ -62,6 +62,9 @@ class AdminMenu
             $requireUpdate = version_compare(FLUENT_TOOLKIT_VERSION, $sourceVersion, '<');
         }
 
+        $currentUser = function_exists('wp_get_current_user') ? wp_get_current_user() : null;
+        $currentUserLogin = ($currentUser && !empty($currentUser->user_login)) ? sanitize_text_field($currentUser->user_login) : '';
+
         wp_enqueue_script(
             'fluent-toolkit-script',
             FLUENT_TOOLKIT_PLUGIN_URL . 'dist/app.js',
@@ -71,12 +74,13 @@ class AdminMenu
         );
 
         wp_localize_script('fluent-toolkit-script', 'fluentToolkitVars', [
-            'ajax_url'       => admin_url('admin-ajax.php'),
-            'nonce'          => wp_create_nonce('fluent_toolkit_nonce'),
-            'version'        => FLUENT_TOOLKIT_VERSION,
-            'source_version' => $sourceVersion,
-            'require_update' => $requireUpdate,
-            'dashboard_url'  => self::url(),
+            'ajax_url'           => admin_url('admin-ajax.php'),
+            'nonce'              => wp_create_nonce('fluent_toolkit_nonce'),
+            'version'            => FLUENT_TOOLKIT_VERSION,
+            'source_version'     => $sourceVersion,
+            'require_update'     => $requireUpdate,
+            'dashboard_url'      => self::url(),
+            'current_user_login' => $currentUserLogin,
         ]);
     }
 

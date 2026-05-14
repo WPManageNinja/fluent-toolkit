@@ -2,10 +2,10 @@
     <nav class="ft-view-tabs" aria-label="Fluent Toolkit sections">
         <button
             class="ft-view-tab"
-            :aria-selected="activeView === 'mcp'"
-            @click="$emit('navigate', 'mcp')"
+            aria-selected="true"
+            @click="$emit('navigate', navTarget)"
         >
-            MCP
+            {{ navLabel }}
         </button>
     </nav>
 </template>
@@ -20,5 +20,13 @@ export default {
         },
     },
     emits: ['navigate'],
+    computed: {
+        navTarget() {
+            return this.activeView === 'mcp' ? 'dashboard' : 'mcp';
+        },
+        navLabel() {
+            return this.activeView === 'mcp' ? 'Dashboard' : 'MCP';
+        },
+    },
 };
 </script>

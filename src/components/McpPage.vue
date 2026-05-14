@@ -99,7 +99,7 @@
                         <h2>Connect client</h2>
                         <p>Use a WordPress Application Password for the selected user. Toolkit fills the endpoint and header format.</p>
                     </div>
-                    <a class="ft-btn ft-btn-ghost" :href="activeProduct.app_passwords_url" target="_blank" rel="noopener">Application Passwords</a>
+                    <a class="ft-btn ft-btn-ghost" :href="activeProduct.app_passwords_url" target="_blank" rel="noopener">Create Application Password</a>
                 </div>
 
                 <div class="ft-credential-row">
@@ -162,14 +162,14 @@ export default {
                 products: [],
             },
             activeProductSlug: 'fluent-crm',
-            activeClient: 'claude-code',
+            activeClient: 'codex',
             loading: false,
             saving: false,
-            username: '',
+            username: window.fluentToolkitVars.current_user_login || '',
             appPassword: '',
             clients: [
-                { key: 'claude-code', label: 'Claude Code', note: 'Run this command in your terminal.' },
-                { key: 'codex', label: 'Codex', note: 'Paste these fields into Settings → Connect to a custom MCP.' },
+                { key: 'codex', label: 'Codex', note: 'Paste these fields into Codex custom MCP settings.' },
+                { key: 'copilot', label: 'GitHub Copilot', note: 'Paste this JSON into VS Code Copilot MCP configuration.' },
                 { key: 'claude-desktop', label: 'Claude Desktop', note: 'Paste this JSON into claude_desktop_config.json and restart Claude Desktop.' },
                 { key: 'cursor', label: 'Cursor', note: 'Paste this JSON into Cursor MCP settings and restart Cursor.' },
                 { key: 'generic', label: 'Generic', note: 'Use this URL and Basic Auth header with any HTTP MCP client.' },
@@ -231,13 +231,27 @@ export default {
 
             if (this.activeClient === 'codex') {
                 return [
+                    'Codex app custom MCP',
                     `Name: ${this.serverName}`,
                     'Transport: Streamable HTTP',
                     `URL: ${endpoint}`,
-                    'Header:',
-                    '  Key: Authorization',
-                    `  Value: Basic ${this.authHeader}`,
+                    'Header key: Authorization',
+                    `Header value: Basic ${this.authHeader}`,
                 ].join('\n');
+            }
+
+            if (this.activeClient === 'copilot') {
+                return JSON.stringify({
+                    servers: {
+                        [this.serverName]: {
+                            type: 'http',
+                            url: endpoint,
+                            headers: {
+                                Authorization: `Basic ${this.authHeader}`,
+                            },
+                        },
+                    },
+                }, null, 2);
             }
 
             if (this.activeClient === 'claude-desktop') {
@@ -283,10 +297,8 @@ export default {
             }
 
             return [
-                'claude mcp add \\',
-                '  --transport http \\',
-                `  ${this.serverName} ${endpoint} \\`,
-                `  --header "Authorization: Basic ${this.authHeader}"`,
+                `URL: ${endpoint}`,
+                `Authorization: Basic ${this.authHeader}`,
             ].join('\n');
         },
     },
