@@ -250,11 +250,25 @@ class FluentToolkitBootstrap
         }
     }
 
+    private function verifySettingsAjaxRequest()
+    {
+        if (!current_user_can('manage_options')) {
+            wp_send_json(array('message' => __('You do not have permission to manage Fluent Toolkit settings.', 'fluent-toolkit')), 403);
+        }
+
+        $nonce = isset($_REQUEST['__nonce']) ? sanitize_text_field($_REQUEST['__nonce']) : '';
+
+        if (!wp_verify_nonce($nonce, 'fluent_toolkit_nonce')) {
+            wp_send_json(array('message' => __('Invalid nonce.', 'fluent-toolkit')), 403);
+        }
+    }
+
 
     private function loadClasses()
     {
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/AdminMenu.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/ToolkitHelper.php';
+        require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/McpManager.php';
     }
 }
 

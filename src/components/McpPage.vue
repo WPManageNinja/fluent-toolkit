@@ -23,8 +23,8 @@
             <div class="ft-hero-inner">
                 <div>
                     <div class="ft-hero-eyebrow">MCP for agents</div>
-                    <h1>Connect AI agents to Fluent tools.</h1>
-                    <p>Enable MCP servers, verify the available tool surface, and copy the exact connection details for Claude Code, Codex, Claude Desktop, Cursor, or any HTTP MCP client.</p>
+                    <h1>Connect AI agents to Fluent plugins.</h1>
+                    <p>Enable MCP servers, verify the available plugin surface, and copy the exact connection details for Claude Code, Codex, Claude Desktop, Cursor, or any HTTP MCP client.</p>
                 </div>
                 <div class="ft-hero-stats" v-if="activeProduct">
                     <div>
@@ -43,7 +43,15 @@
             </div>
         </section>
 
-        <div class="ft-toolbar">
+        <div class="ft-mcp-empty" v-if="showEmptyBanner">
+            <div>
+                <strong>No Fluent plugins are exposing MCP yet.</strong>
+                <p>Install or update a Fluent plugin with MCP support. Once a plugin registers its MCP endpoint, it will appear here with tools, status, and connection snippets.</p>
+            </div>
+            <button class="ft-btn ft-btn-ghost" @click="getOverview()">Refresh</button>
+        </div>
+
+        <div class="ft-toolbar" v-if="products.length">
             <div class="ft-channels" role="tablist">
                 <button
                     v-for="product in products"
@@ -195,6 +203,9 @@ export default {
     computed: {
         products() {
             return this.overview.products || [];
+        },
+        showEmptyBanner() {
+            return !this.loading && !this.products.length;
         },
         activeProduct() {
             return this.products.find(product => product.slug === this.activeProductSlug) || this.products[0] || null;

@@ -39,6 +39,33 @@
     gap: 18px;
   }
 
+  .ft-mcp-empty {
+    align-items: center;
+    background: var(--warn-soft);
+    border: 1px solid oklch(88% 0.05 70);
+    border-radius: 12px;
+    color: oklch(40% 0.11 70);
+    display: flex;
+    gap: 18px;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    padding: 18px 20px;
+
+    strong {
+      color: var(--text);
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    p {
+      font-size: 13px;
+      margin: 0;
+      max-width: 760px;
+    }
+  }
+
   .ft-panel {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -243,6 +270,7 @@
   .ft-app {
     .ft-topbar,
     .ft-hero-inner,
+    .ft-mcp-empty,
     .ft-panel-head {
       align-items: stretch;
       flex-direction: column;
