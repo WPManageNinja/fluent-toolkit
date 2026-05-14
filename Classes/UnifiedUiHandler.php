@@ -672,7 +672,7 @@ class UnifiedUiHandler
 
             $key = $item['key'];
 
-            if ($key === 'help') {
+            if ($key === 'help' || $key === 'front') {
                 continue;
             }
 
@@ -898,6 +898,6 @@ class UnifiedUiHandler
             return $icons[$key];
         }
 
-        return $key;
+        return '';
     }
 }
