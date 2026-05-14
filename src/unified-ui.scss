@@ -1,0 +1,911 @@
+/* ──────────────────────────────────────────────────────────
+   Fluent Unified UI — Stripe-inspired sidebar shell
+   ────────────────────────────────────────────────────────── */
+@use 'unified-ui/index' as *;
+
+/* ── App shell ───────────────────────────────────────────── */
+.fluent_uui {
+    display: flex;
+    align-items: stretch;
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--fui-text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────── */
+.fluent_ui_sidebar {
+    width: var(--fui-sidebar-width);
+    flex: 0 0 var(--fui-sidebar-width);
+    background: var(--fui-primary-bg);
+    border-right: 1px solid var(--fui-border);
+    padding: 14px 12px 0 12px;
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    height: 100vh;
+    overflow-y: auto;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 100;
+}
+
+/* ── Workspace switcher ──────────────────────────────────── */
+.fui-workspace-wrap {
+    position: relative;
+    margin: 0 0 14px;
+}
+
+.fui-workspace-wrap .fui-workspace {
+    margin: 0;
+}
+
+.fui-workspace {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 10px;
+    margin: 0 0 14px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+    transition: background-color .12s ease;
+    -webkit-appearance: none;
+            appearance: none;
+
+    &:hover,
+    &:focus {
+        background: var(--fui-bg);
+        outline: none;
+    }
+    &:hover {
+        .fui-workspace-caret {
+            opacity: 1;
+        }
+    }
+
+    &:focus-visible {
+        box-shadow: 0 0 0 2px rgba(99, 91, 255, 0.35);
+    }
+}
+
+.fui-workspace-icon {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    border-radius: 7px;
+    object-fit: cover;
+    display: block;
+    background: var(--fui-surface-hover);
+}
+
+.fui-workspace-icon--initial {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--fui-text);
+    color: var(--fui-text-inverse);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.fui-workspace-info {
+    flex: 1 1 auto;
+    min-width: 0;
+    line-height: 1.25;
+}
+
+.fui-workspace-name {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--fui-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    letter-spacing: -0.005em;
+}
+
+.fui-workspace-sub {
+    font-size: 11.5px;
+    color: var(--fui-text-soft);
+    margin-top: 1px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fui-workspace-caret {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+    opacity: 0.7;
+    transition: opacity .1s ease;
+    opacity: 0;
+    svg {
+        width: 18px;
+        height: 18px;
+    }
+}
+
+/* ── Workspace dropdown menu ─────────────────────────────── */
+.fui-workspace-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: var(--fui-primary-bg);
+    border: 1px solid var(--fui-border);
+    border-radius: 10px;
+    padding: 6px;
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.02),
+        0 6px 20px -4px rgba(15, 15, 15, 0.12),
+        0 2px 6px rgba(15, 15, 15, 0.05);
+    min-width: 200px;
+}
+
+.fui-workspace-menu[hidden] {
+    display: none;
+}
+
+.fui-workspace-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--fui-text);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.3;
+    transition: background-color .12s ease, color .12s ease;
+    cursor: pointer;
+    &:hover,
+    &:focus {
+        background: var(--fui-bg);
+        color: var(--fui-text);
+        text-decoration: none;
+        outline: none;
+    }
+    &:focus-visible {
+        box-shadow: 0 0 0 2px rgba(99, 91, 255, 0.35);
+    }
+    &--danger {
+        color: #c4321a;
+        &:hover {
+            background: oklch(96% 0.04 25);
+            color: #a32814;
+        }
+    }
+}
+
+.fui-workspace-menu-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
+    color: var(--fui-text-soft);
+}
+
+.fui-workspace-menu-item--danger {
+    .fui-workspace-menu-icon {
+        color: currentColor;
+        opacity: 0.8;
+    }
+}
+
+.fui-workspace-menu-divider {
+    height: 1px;
+    background: var(--fui-border);
+    margin: 4px 0;
+}
+
+/* ── Main nav (current app's primary items) ──────────────── */
+.fui-main-nav {
+    display: block;
+    margin-bottom: 18px;
+}
+
+.fui-main-nav > ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* Scrollbar — subtle */
+.fluent_ui_sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.fluent_ui_sidebar::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 3px;
+}
+
+.fluent_ui_sidebar:hover::-webkit-scrollbar-thumb {
+    background: #d4d2cf;
+}
+
+/* Section heading — small caps, soft */
+.fluent_ui_sidebar h4 {
+    margin: 4px 0 8px;
+    padding: 0 10px;
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fui-text-soft);
+    line-height: 1.4;
+}
+
+/* ── Product section (logo+title as visual separator) ────── */
+.fui-product-section {
+    margin: 0;
+    padding: 0;
+    + .fui-product-section {
+        border-top: 1px solid var(--fui-border);
+        margin-top: 10px;
+        padding-top: 10px;
+    }
+}
+
+.fui-product-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 7px 10px;
+    margin-bottom: 4px;
+    border: 0;
+    background: transparent;
+    color: var(--fui-text);
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background-color .12s ease;
+    -webkit-appearance: none;
+            appearance: none;
+
+    &:hover,
+    &:focus {
+        background: var(--fui-bg);
+        color: var(--fui-text);
+        text-decoration: none;
+        outline: none;
+    }
+    &:hover {
+        .fui-item-chevron {
+            opacity: 1;
+        }
+    }
+    &:focus-visible {
+        box-shadow: 0 0 0 2px rgba(99, 91, 255, 0.35);
+    }
+    .fui-item-chevron {
+        transform: rotate(-90deg);
+        opacity: 0;
+    }
+}
+
+.fui-product-mark {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    display: block;
+    flex: 0 0 18px;
+}
+
+.fui-product-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--fui-text);
+    letter-spacing: -0.01em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fui-product-section.is-open > .fui-product-header .fui-item-chevron {
+    opacity: 1;
+}
+
+.fui-product-nav {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 0 5px;
+    display: none;
+}
+
+.fui-product-section.is-open > .fui-product-nav {
+    display: block;
+}
+
+/* Non-current product's items — muted (they navigate away on click) */
+.fui-product-section:not(.fui-product-section--current) .fui-apps-menu-item {
+    color: var(--fui-text-soft);
+}
+
+.fui-product-section:not(.fui-product-section--current) .fui-apps-menu-item:hover {
+    color: var(--fui-text);
+}
+
+.fui-product-section:not(.fui-product-section--current) .fui-app-icon {
+    opacity: 0.75;
+}
+
+/* ── Menu list ───────────────────────────────────────────── */
+.fluent_ui_sidebar ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.fluent_ui_sidebar li {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.fluent_ui_sidebar li::before,
+.fluent_ui_sidebar li::marker {
+    content: none;
+}
+
+/* ── Menu item ───────────────────────────────────────────── */
+.fui-product-nav .fui-item .fui-apps-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    margin: 1px 0;
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--fui-text-soft);
+    font-size: 13.5px;
+    font-weight: 500;
+    line-height: 1.3;
+    transition: background-color .12s ease, color .12s ease;
+    cursor: pointer;
+    box-shadow: none;
+    outline: none;
+
+    &:hover,
+    &:focus {
+        background: var(--fui-bg);
+        color: var(--fui-text);
+        text-decoration: none;
+        box-shadow: none;
+        outline: none;
+    }
+    &:focus-visible {
+        box-shadow: 0 0 0 2px rgba(99, 91, 255, 0.35);
+    }
+}
+
+.fui-product-nav {
+    .fui-apps-menu-item {
+        &.active {
+            background: var(--fui-bg);
+            color: var(--fui-text);
+            font-weight: 500;
+        }
+    }
+}
+
+.fui-apps-menu-item {
+    &.active {
+        &:hover {
+            background: var(--fui-bg);
+            color: var(--fui-text);
+        }
+    }
+}
+
+.fui-app-title {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ── Icons ───────────────────────────────────────────────── */
+.fui-app-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+    color: currentColor;
+}
+
+.fui-app-icon svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    color: inherit;
+}
+
+.fui-app-icon--img img {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    display: block;
+}
+
+/* ── Parent items with a submenu ─────────────────────────── */
+.fui-item {
+    list-style: none;
+}
+
+.fui-item--has-sub > .fui-apps-menu-item.is-parent-active,
+.fui-item--has-sub > .fui-apps-submenu-item.is-parent-active {
+    color: var(--fui-text);
+    background: transparent;
+    font-weight: 600;
+}
+
+.fui-item--has-sub > .fui-apps-menu-item.is-parent-active:hover,
+.fui-item--has-sub > .fui-apps-submenu-item.is-parent-active:hover {
+    background: var(--fui-bg);
+}
+
+/* ── Submenu (third-level, e.g. Contacts → Tags) ─────────── */
+.fluent_ui_sidebar .fui-submenu {
+    list-style: none;
+    margin: 1px 0 4px;
+    padding: 0 0 0 14px;
+    display: none;
+}
+
+.fluent_ui_sidebar .fui-item--has-sub.is-open > .fui-submenu {
+    display: block;
+}
+
+/* ── Chevron on parent items (clickable to toggle) ───────── */
+.fui-item-chevron {
+    margin-left: auto;
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--fui-text-soft);
+    cursor: pointer;
+    transition: background-color .12s ease, transform .15s ease, opacity .15s ease;
+}
+
+.fui-item-chevron:hover {
+    background: var(--fui-primary-bg);
+    opacity: 1;
+}
+.fui-item--has-sub.is-open > .fui-apps-menu-item .fui-item-chevron {
+    transform: rotate(180deg);
+    opacity: 0.85;
+}
+
+.fui-apps-submenu-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 10px;
+    margin: 1px 0;
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--fui-text-soft);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.3;
+    transition: background-color .12s ease, color .12s ease;
+    box-shadow: none;
+    outline: none;
+    &:hover,
+    &:focus {
+        background: var(--fui-bg);
+        color: var(--fui-text);
+        text-decoration: none;
+        box-shadow: none;
+        outline: none;
+    }
+    &:focus-visible {
+        box-shadow: 0 0 0 2px rgba(99, 91, 255, 0.35);
+    }
+    &.active {
+        background: var(--fui-bg);
+        color: var(--fui-text);
+        font-weight: 500;
+    }
+}
+
+
+/* Products section sits right after the current app's nav */
+.fluent_ui_sidebar {
+    .fui-products {
+        margin-top: 4px;
+        margin-bottom: 14px;
+    }
+}
+
+/* ── Main content area ───────────────────────────────────── */
+.fui-app-content {
+    flex: 1 1 auto;
+    min-width: 0;
+    background: var(--fui-bg);
+    min-height: 100vh;
+    box-sizing: border-box;
+    margin: 0 0 0 20px;
+}
+
+/* WordPress notices inside content area — tighter spacing */
+.fui-app-content .notice,
+.fui-app-content .updated,
+.fui-app-content .error {
+    margin: 12px 20px;
+}
+
+/* ── Mobile chrome ───────────────────────────────────────── */
+.fui-mobile-toggle {
+    display: none;
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 1002;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    border: 1px solid var(--fui-border);
+    background: var(--fui-surface);
+    color: var(--fui-text);
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(15, 15, 15, 0.06);
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    -webkit-appearance: none;
+            appearance: none;
+}
+
+.fui-mobile-toggle:hover {
+    background: var(--fui-surface-hover);
+}
+
+.fui-mobile-toggle-bars,
+.fui-mobile-toggle-bars::before,
+.fui-mobile-toggle-bars::after {
+    display: block;
+    width: 16px;
+    height: 1.75px;
+    background: currentColor;
+    border-radius: 2px;
+    transition: transform .2s ease, opacity .2s ease, top .2s ease;
+}
+
+.fui-mobile-toggle-bars {
+    position: relative;
+}
+
+.fui-mobile-toggle-bars::before,
+.fui-mobile-toggle-bars::after {
+    content: '';
+    position: absolute;
+    left: 0;
+}
+
+.fui-mobile-toggle-bars::before { top: -5px; }
+.fui-mobile-toggle-bars::after  { top: 5px; }
+
+.fluent_uui.is-mobile-open .fui-mobile-toggle-bars {
+    background: transparent;
+}
+
+.fluent_uui.is-mobile-open .fui-mobile-toggle-bars::before {
+    top: 0;
+    transform: rotate(45deg);
+}
+
+.fluent_uui.is-mobile-open .fui-mobile-toggle-bars::after {
+    top: 0;
+    transform: rotate(-45deg);
+}
+
+.fui-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 15, 15, 0.35);
+    z-index: 1000;
+    animation: fui-fade-in .15s ease;
+}
+
+
+// Sidebar Footer
+.fui-sidebar-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+    border-top: 1px solid var(--fui-border);
+    padding: 12px 16px;
+    margin: auto -12px 0 -12px;
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    background: var(--fui-primary-bg);
+    &--right,
+    &--left {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        a {
+            display: block;
+            color: var(--fui-text-soft);
+            &:hover {
+                color: var(--fui-text);
+            }
+            svg {
+                width: 20px;
+                height: 20px;
+                display: block;
+            }
+        }
+    }
+}
+
+// Theme toggle button + dropdown
+.fui-theme-wrap {
+    position: relative;
+}
+
+.fui-theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--fui-text-soft);
+    cursor: pointer;
+    -webkit-appearance: none;
+            appearance: none;
+    transition: background-color .12s ease, color .12s ease;
+
+    &:hover,
+    &:focus {
+        background: var(--fui-bg);
+        color: var(--fui-text);
+        outline: none;
+    }
+    &:focus-visible {
+        box-shadow: 0 0 0 2px rgba(99, 91, 255, 0.35);
+    }
+
+    > span {
+        display: block;
+        svg {
+            display: block;
+        }
+    }
+    .fui-theme-icon--dark { display: none; }
+
+    &.is-dark {
+        .fui-theme-icon--light { display: none; }
+        .fui-theme-icon--dark  { display: block; }
+    }
+}
+
+.fui-theme-dropdown {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 0;
+    z-index: 1000;
+    background: var(--fui-primary-bg);
+    border: 1px solid var(--fui-border);
+    border-radius: 8px;
+    padding: 6px;
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.02),
+        0 -4px 20px -4px rgba(15, 15, 15, 0.12),
+        0 2px 6px rgba(15, 15, 15, 0.05);
+    min-width: 150px;
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+    transform-origin: bottom;
+    transition: .1s;
+    display: block;
+
+    &[hidden] {
+        opacity: 0;
+        visibility: hidden;
+        transform: scale(0.5);
+    }
+}
+
+.fui-theme-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 7px 10px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--fui-text);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    -webkit-appearance: none;
+            appearance: none;
+    transition: background-color .12s ease;
+
+    > svg:first-child {
+        color: var(--fui-text-soft);
+        flex: 0 0 16px;
+    }
+
+    .fui-theme-check {
+        margin-left: auto;
+        opacity: 0;
+        color: var(--fui-text-soft);
+    }
+
+    &:hover,
+    &:focus {
+        background: var(--fui-bg);
+        outline: none;
+    }
+    &:focus-visible {
+        box-shadow: 0 0 0 2px rgba(99, 91, 255, 0.35);
+    }
+
+    &.is-active {
+        .fui-theme-check { opacity: 1; }
+    }
+}
+
+@keyframes fui-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 1100px) {
+    :root {
+        --fui-sidebar-width: 220px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .fluent_uui {
+        .fcrm_settings_sidebar {
+            position: absolute;
+            left: -160px;
+            height: calc(100vh - 57px);
+            &.is-open {
+                left: 0;
+            }
+        }
+        .fcrm_settings_menu_overlay {
+            height: calc(100vh - 57px);
+        }
+        .fluentcrm-app.is-settings-page {
+            .fcrm_settings_inner {
+                padding-left: 0;
+            }
+        }
+    }
+}
+
+@media (max-width: 960px) {
+    .auto-fold #wpcontent, .auto-fold #wpfooter {
+        margin-left: 0;
+    }
+
+}
+@media (max-width: 900px) {
+    :root {
+        --fui-sidebar-width: 200px;
+    }
+
+    .fui-app-content {
+        margin-left: 12px;
+    }
+}
+
+@media (max-width: 782px) {
+    #wpbody {
+        padding-top: 0;
+    }
+    .fluent_uui {
+        .fcrm_settings_sidebar {
+            height: 100vh;
+            position: fixed;
+            padding-top: 0;
+        }
+        .fcrm_settings_menu_overlay {
+            height: 100vh;
+        }
+        .fluentcrm-app.is-settings-page {
+            .fluentcrm-body {
+                height: auto;
+            }
+
+            .fcrm_settings_content {
+                .fcrm_settings {
+                    max-height: inherit;
+                    min-height: inherit;
+                    overscroll-behavior: inherit;
+                }
+            }
+        }
+    }
+    .fui-mobile-toggle {
+        display: inline-flex;
+    }
+
+    .fluent_uui.is-mobile-open .fui-backdrop {
+        display: block;
+    }
+
+    .fluent_ui_sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        height: 100vh;
+        width: 280px;
+        max-width: 86vw;
+        flex: none;
+        padding: 64px 12px 0 12px;
+        transform: translateX(-100%);
+        transition: transform .25s ease;
+        z-index: 1001;
+        box-shadow: 6px 0 24px -8px rgba(15, 15, 15, 0.18);
+        will-change: transform;
+        opacity: 0;
+    }
+
+    .fluent_uui.is-mobile-open .fluent_ui_sidebar {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    .fui-app-content {
+        margin-left: 0;
+        padding-top: 64px;
+    }
+
+    /* Workspace dropdown sits within the drawer — keep it anchored */
+    .fui-workspace-menu {
+        right: 0;
+    }
+}
+
+
+.fluentcrm-app.is-settings-page .fluentcrm-body {
+   // position: relative;
+}

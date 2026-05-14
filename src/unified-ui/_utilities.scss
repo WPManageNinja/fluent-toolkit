@@ -1,0 +1,158 @@
+
+/* ── WP chrome reset ─────────────────────────────────────── */
+#adminmenumain {
+  display: none !important;
+}
+
+#wpadminbar,
+#wpfooter {
+  display: none !important;
+}
+
+body .fcrm_topbar, body #fluent-boards-app {
+  top: 0;
+}
+
+body #wpbody-content {
+  padding-bottom: 0;
+}
+
+body #wpbody-content #fct_admin_menu_holder .fct_admin_menu_wrap {
+  top: 0;
+  width: 100%;
+  position: sticky;
+}
+
+div#fct_admin_menu_holder {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+}
+
+#fluent_cart_plugin_app {
+  padding-top: 0;
+}
+.fct_admin_menu_wrap.fct_global_menu_wrap {
+  top: 0;
+  position: sticky;
+  width: 100%;
+}
+
+body #wpcontent,
+body #wpfooter {
+  margin-left: 0;
+}
+
+body #wpcontent {
+  padding-left: 0;
+}
+
+html.wp-toolbar {
+  padding-top: 0 !important;
+}
+
+body.wp-admin {
+  background: var(--fui-bg);
+}
+
+select {
+  background: var(--fui-primary-bg);
+  border: 1px solid var(--fui-border);
+  border-radius: 8px;
+}
+.fluent_uui {
+  .fluentcrm-app.is-settings-page {
+    margin-top: 0;
+    .fluentcrm-body {
+      position: relative;
+      height: 100vh;
+      margin-top: 0;
+    }
+    .fcrm_settings_inner {
+      padding-left: 271px;
+      &.is-collapsed {
+        padding-left: 78px;
+      }
+    }
+    .fcrm_settings_content {
+      .fcrm_settings {
+        max-height: 100vh;
+        min-height: 100vh;
+      }
+    }
+  }
+  .fct-settings-nav-container,
+  .fcrm_settings_sidebar {
+    left: 0;
+    height: 100vh;
+  }
+
+  //#alpha_app .fframe_app,
+  #fluent-booking-app .fframe_main-menu-items,
+  .ff_header,
+  .fcrm_topbar,
+  #fct_admin_menu_holder {
+    display: none;
+  }
+  .fct-setting-container {
+    position: relative;
+    height: 100vh;
+  }
+  #fct_admin_app_wrapper {
+    padding-top: 0;
+  }
+  #fluent_cart_plugin_app.fct_settings_page_plugin_app_wrap {
+    padding: 0;
+  }
+  .fct-settings-nav-content-inner {
+    max-height: 100vh;
+    min-height: 100vh;
+  }
+  .fct-settings-nav-content {
+    padding-left: 260px;
+  }
+  .fs_setup .fs_sticky_footer {
+    left: 0;
+    z-index: 50;
+    .fs_footer_content {
+      padding-left: 240px;
+    }
+  }
+  .fs_dashboard_wrapper {
+    padding-top: 0;
+  }
+}
+
+/* ── Workspace menu: theme select ────────────────────────── */
+.fui-workspace-menu-theme {
+  padding: 6px 8px;
+
+  &--label {
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 16px;
+    margin-bottom: 4px;
+  }
+  .fui-theme-select {
+    width: 100%;
+    padding: 5px 10px;
+    border: 1px solid var(--fui-border);
+    border-radius: 8px;
+    background: var(--fui-primary-bg) url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%206l5%205%205-5%202%201-7%207-7-7%202-1z%22%20fill%3D%22%23555%22%2F%3E%3C%2Fsvg%3E') no-repeat right 8px top 50%;
+    background-size: 12px 12px;
+    color: var(--fui-text-soft);
+    font-size: 12.5px;
+    font-family: inherit;
+    cursor: pointer;
+    outline: none;
+    transition: border-color .15s, color .15s;
+    line-height: 20px;
+    margin: 0;
+    font-weight: 500;
+
+    &:hover, &:focus {
+      border-color: var(--fui-text-faint);
+      color: var(--fui-text);
+    }
+  }
+}
