@@ -177,11 +177,15 @@ class Updater
         // Restore our filter
         add_filter( 'pre_set_site_transient_update_plugins', [ $this, 'check_update' ] );
 
-        // Render the standard "update available" row
-        if ( ! function_exists( 'wp_plugin_update_row' ) ) {
-            require_once ABSPATH . 'wp-admin/includes/update.php';
+        // Only render the row ourselves if WP hasn't already hooked its own renderer
+        // (WP registers wp_plugin_update_row at admin_init 20, only if the transient
+        // had our entry at that point; otherwise the row would not appear at all).
+        if ( ! has_action( 'after_plugin_row_' . $this->name, 'wp_plugin_update_row' ) ) {
+            if ( ! function_exists( 'wp_plugin_update_row' ) ) {
+                require_once ABSPATH . 'wp-admin/includes/update.php';
+            }
+            wp_plugin_update_row( $file, $plugin );
         }
-        wp_plugin_update_row( $file, $plugin );
     }
 
 
@@ -230,6 +234,13 @@ class Updater
 
         if (false !== $api_request_transient) {
             $_data = $api_request_transient;
+
+            // WP expects these as associative arrays, not stdClass
+            foreach (['sections', 'banners', 'icons', 'contributors'] as $field) {
+                if (isset($_data->$field) && is_object($_data->$field)) {
+                    $_data->$field = (array) $_data->$field;
+                }
+            }
         }
 
         return $_data;
