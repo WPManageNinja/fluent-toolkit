@@ -651,7 +651,9 @@
         justify-content: space-between;
         gap: 8px;
         a {
-            display: block;
+            &:not(.fui-sidebar-settings-btn) {
+                display: block;
+            }
             color: var(--fui-text-soft);
             &:hover {
                 color: var(--fui-text);
@@ -670,6 +672,7 @@
     position: relative;
 }
 
+.fui-sidebar-settings-btn,
 .fui-theme-toggle {
     display: inline-flex;
     align-items: center;
@@ -700,6 +703,8 @@
         display: block;
         svg {
             display: block;
+            height: 18px;
+            width: 18px;
         }
     }
     .fui-theme-icon--dark { display: none; }
