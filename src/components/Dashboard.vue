@@ -13,7 +13,6 @@
                 </div>
             </div>
             <div class="ft-topbar-actions">
-                <ViewTabs :active-view="activeView" @navigate="$emit('navigate', $event)" />
                 <el-button
                     v-if="appVars.require_update"
                     :loading="installing"
@@ -41,7 +40,7 @@
             <div class="ft-unified-copy">
                 <span class="ft-unified-eyebrow">Unified Fluent workspace</span>
                 <h1>Fluent Unified UI</h1>
-                <p>Keep Fluent plugin controls, agent access, and early access tools organized in one clean workspace.</p>
+                <p>Turn on a unified Fluent workspace that brings your Fluent tools into one cleaner, focused and easier-to-manage experience.</p>
             </div>
             <div class="ft-unified-control">
                 <div>
@@ -168,19 +167,8 @@
 </template>
 
 <script type="text/babel">
-import ViewTabs from './ViewTabs.vue';
-
 export default {
     name: 'Dashboard',
-    components: {
-        ViewTabs,
-    },
-    props: {
-        activeView: {
-            type: String,
-            default: 'dashboard',
-        },
-    },
     emits: ['navigate'],
     data() {
         return {
