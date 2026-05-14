@@ -54,3 +54,46 @@ html.wp-toolbar {
 body.wp-admin {
   background: var(--fui-bg);
 }
+
+select {
+  background: var(--fui-primary-bg);
+  border: 1px solid var(--fui-border);
+  border-radius: 8px;
+}
+
+/* ── Sidebar: theme toggle footer ────────────────────────── */
+.fui-sidebar-footer {
+  padding: 12px 12px;
+  border-top: 1px solid var(--fui-border);
+  flex-shrink: 0;
+  margin-top: auto;
+  position: sticky;
+  bottom: 0;
+  background: var(--fui-primary-bg);
+  margin-left: -12px;
+  margin-right: -12px;
+  box-shadow: 0 0 30px rgba(0, 0, 0,0.1);
+}
+
+.fluent_ui_sidebar {
+  .fui-theme-select {
+    width: 100%;
+    padding: 5px 10px;
+    border: 1px solid var(--fui-border);
+    border-radius: 8px;
+    background: var(--fui-primary-bg);
+    color: var(--fui-text-soft);
+    font-size: 12.5px;
+    font-family: inherit;
+    cursor: pointer;
+    outline: none;
+    transition: border-color .15s, color .15s;
+    line-height: 20px;
+    margin: 0;
+    font-weight: 500;
+    &:hover,&:focus {
+      border-color: var(--fui-border);
+      color: var(--fui-text);
+    }
+  }
+}
