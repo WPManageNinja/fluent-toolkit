@@ -1,0 +1,56 @@
+
+/* ── WP chrome reset ─────────────────────────────────────── */
+#adminmenumain {
+  display: none !important;
+}
+
+#wpadminbar,
+#wpfooter {
+  display: none !important;
+}
+
+body .fcrm_topbar, body #fluent-boards-app {
+  top: 0;
+}
+
+body #wpbody-content {
+  padding-bottom: 0;
+}
+
+body #wpbody-content #fct_admin_menu_holder .fct_admin_menu_wrap {
+  top: 0;
+  width: 100%;
+  position: sticky;
+}
+
+div#fct_admin_menu_holder {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+}
+
+#fluent_cart_plugin_app {
+  padding-top: 0;
+}
+.fct_admin_menu_wrap.fct_global_menu_wrap {
+  top: 0;
+  position: sticky;
+  width: 100%;
+}
+
+body #wpcontent,
+body #wpfooter {
+  margin-left: 0;
+}
+
+body #wpcontent {
+  padding-left: 0;
+}
+
+html.wp-toolbar {
+  padding-top: 0 !important;
+}
+
+body.wp-admin {
+  background: var(--fui-bg);
+}

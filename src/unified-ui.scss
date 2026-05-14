@@ -1,82 +1,7 @@
 /* ──────────────────────────────────────────────────────────
    Fluent Unified UI — Stripe-inspired sidebar shell
    ────────────────────────────────────────────────────────── */
-
-:root {
-    --wp-admin--admin-bar--height: 0px;
-
-    /* Sidebar palette */
-    --fui-sidebar-width: 240px;
-    --fui-bg: var(--fc-secondary-bg, #fff);
-    --fui-surface: #ffffff;
-    --fui-surface-hover: #f6f5f4;
-    --fui-surface-active: #f1edff;
-    --fui-border: #ebe9e6;
-    --fui-text: var(--fc-primary-text, #0E121B);
-    --fui-text-muted: #4f4f55;
-    --fui-text-soft: #8a8a93;
-    --fui-text-faint: #a8a7ad;
-    --fui-accent: #635bff; /* Stripe purple */
-    --fui-accent-hover: #5851e6;
-    --fui-shadow: 0 0 0 1px rgba(0, 0, 0, 0.02), 0 1px 3px rgba(15, 15, 15, 0.04);
-}
-
-/* ── WP chrome reset ─────────────────────────────────────── */
-#adminmenumain {
-    display: none !important;
-}
-
-#wpadminbar,
-#wpfooter {
-    display: none !important;
-}
-
-body .fcrm_topbar, body #fluent-boards-app {
-    top: 0;
-}
-
-body #wpbody-content {
-    padding-bottom: 0;
-}
-
-body #wpbody-content #fct_admin_menu_holder .fct_admin_menu_wrap {
-    top: 0;
-    width: 100%;
-    position: sticky;
-}
-
-div#fct_admin_menu_holder {
-    position: sticky;
-    top: 0;
-    z-index: 999;
-}
-
-#fluent_cart_plugin_app {
-    padding-top: 0;
-}
-
-.fct_admin_menu_wrap.fct_global_menu_wrap {
-    top: 0;
-    position: sticky;
-    width: 100%;
-}
-
-body #wpcontent,
-body #wpfooter {
-    margin-left: 0;
-}
-
-body #wpcontent {
-    padding-left: 0;
-}
-
-html.wp-toolbar {
-    padding-top: 0 !important;
-}
-
-body.wp-admin {
-    background: var(--fui-bg);
-}
+@use 'unified-ui/index' as *;
 
 /* ── App shell ───────────────────────────────────────────── */
 .fluent_uui {
@@ -353,18 +278,17 @@ body.wp-admin {
     transition: background-color .12s ease;
     -webkit-appearance: none;
             appearance: none;
-}
 
-.fui-product-header:hover,
-.fui-product-header:focus {
-    background: var(--fui-surface-hover);
-    color: var(--fui-text);
-    text-decoration: none;
-    outline: none;
-}
-
-.fui-product-header:focus-visible {
-    box-shadow: 0 0 0 2px rgba(99, 91, 255, 0.35);
+    &:hover,
+    &:focus {
+        background: var(--fui-bg);
+        color: var(--fui-text);
+        text-decoration: none;
+        outline: none;
+    }
+    &:focus-visible {
+        box-shadow: 0 0 0 2px rgba(99, 91, 255, 0.35);
+    }
 }
 
 .fui-product-mark {
@@ -387,29 +311,7 @@ body.wp-admin {
     white-space: nowrap;
 }
 
-.fui-product-chevron {
-    margin-left: auto;
-    width: 18px;
-    height: 18px;
-    flex: 0 0 18px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--fui-text-soft);
-    opacity: 0.6;
-    transition: transform .15s ease, opacity .12s ease;
-}
-
-.fui-product-chevron::before {
-    content: '';
-    width: 12px;
-    height: 12px;
-    background-color: currentColor;
-    -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M4 6l4 4 4-4' stroke='black' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>") center / 11px no-repeat;
-            mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M4 6l4 4 4-4' stroke='black' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>") center / 11px no-repeat;
-}
-
-.fui-product-section.is-open > .fui-product-header .fui-product-chevron {
+.fui-product-section.is-open > .fui-product-header .fui-item-chevron {
     transform: rotate(180deg);
     opacity: 0.85;
 }
@@ -460,12 +362,12 @@ body.wp-admin {
 .fui-product-nav .fui-item .fui-apps-menu-item {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     padding: 7px 10px;
     margin: 1px 0;
     border-radius: 6px;
     text-decoration: none;
-    color: var(--fui-text-muted);
+    color: var(--fui-text-soft);
     font-size: 13.5px;
     font-weight: 500;
     line-height: 1.3;
@@ -473,30 +375,37 @@ body.wp-admin {
     cursor: pointer;
     box-shadow: none;
     outline: none;
+
+    &:hover,
+    &:focus {
+        background: var(--fui-bg);
+        color: var(--fui-text);
+        text-decoration: none;
+        box-shadow: none;
+        outline: none;
+    }
+    &:focus-visible {
+        box-shadow: 0 0 0 2px rgba(99, 91, 255, 0.35);
+    }
 }
 
-.fui-apps-menu-item:hover,
-.fui-apps-menu-item:focus {
-    background: var(--fui-surface-hover);
-    color: var(--fui-text);
-    text-decoration: none;
-    box-shadow: none;
-    outline: none;
+.fui-product-nav {
+    .fui-apps-menu-item {
+        &.active {
+            background: var(--fui-bg);
+            color: var(--fui-text);
+            font-weight: 500;
+        }
+    }
 }
 
-.fui-apps-menu-item:focus-visible {
-    box-shadow: 0 0 0 2px rgba(99, 91, 255, 0.35);
-}
-
-.fui-product-nav .fui-apps-menu-item.active {
-    background: var(--fui-surface-active);
-    color: var(--fui-accent);
-    font-weight: 600;
-}
-
-.fui-apps-menu-item.active:hover {
-    background: var(--fui-surface-active);
-    color: var(--fui-accent);
+.fui-apps-menu-item {
+    &.active {
+        &:hover {
+            background: var(--fui-bg);
+            color: var(--fui-text);
+        }
+    }
 }
 
 .fui-app-title {
@@ -546,7 +455,7 @@ body.wp-admin {
 
 .fui-item--has-sub > .fui-apps-menu-item.is-parent-active:hover,
 .fui-item--has-sub > .fui-apps-submenu-item.is-parent-active:hover {
-    background: var(--fui-surface-hover);
+    background: var(--fui-bg);
 }
 
 /* ── Submenu (third-level, e.g. Contacts → Tags) ─────────── */
@@ -564,9 +473,9 @@ body.wp-admin {
 /* ── Chevron on parent items (clickable to toggle) ───────── */
 .fui-item-chevron {
     margin-left: auto;
-    width: 22px;
-    height: 22px;
-    flex: 0 0 22px;
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
     border-radius: 4px;
     display: inline-flex;
     align-items: center;
@@ -577,20 +486,10 @@ body.wp-admin {
     opacity: 0.6;
 }
 
-.fui-item-chevron::before {
-    content: '';
-    width: 12px;
-    height: 12px;
-    background-color: currentColor;
-    -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M4 6l4 4 4-4' stroke='black' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>") center / 11px no-repeat;
-            mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M4 6l4 4 4-4' stroke='black' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>") center / 11px no-repeat;
-}
-
 .fui-item-chevron:hover {
     background: var(--fui-surface-hover);
     opacity: 1;
 }
-
 .fui-item--has-sub.is-open > .fui-apps-menu-item .fui-item-chevron {
     transform: rotate(180deg);
     opacity: 0.85;
@@ -599,42 +498,35 @@ body.wp-admin {
 .fui-apps-submenu-item {
     display: flex;
     align-items: center;
-    padding: 5px 10px;
+    padding: 8px 10px;
     margin: 1px 0;
     border-radius: 6px;
     text-decoration: none;
-    color: var(--fui-text-muted);
+    color: var(--fui-text-soft);
     font-size: 13px;
-    font-weight: 400;
+    font-weight: 500;
     line-height: 1.3;
     transition: background-color .12s ease, color .12s ease;
     box-shadow: none;
     outline: none;
+    &:hover,
+    &:focus {
+        background: var(--fui-bg);
+        color: var(--fui-text);
+        text-decoration: none;
+        box-shadow: none;
+        outline: none;
+    }
+    &:focus-visible {
+        box-shadow: 0 0 0 2px rgba(99, 91, 255, 0.35);
+    }
+    &.active {
+        background: var(--fui-bg);
+        color: var(--fui-text);
+        font-weight: 500;
+    }
 }
 
-.fui-apps-submenu-item:hover,
-.fui-apps-submenu-item:focus {
-    background: var(--fui-surface-hover);
-    color: var(--fui-text);
-    text-decoration: none;
-    box-shadow: none;
-    outline: none;
-}
-
-.fui-apps-submenu-item:focus-visible {
-    box-shadow: 0 0 0 2px rgba(99, 91, 255, 0.35);
-}
-
-.fui-apps-submenu-item.active {
-    background: var(--fui-surface-active);
-    color: var(--fui-accent);
-    font-weight: 600;
-}
-
-.fui-apps-submenu-item.active:hover {
-    background: var(--fui-surface-active);
-    color: var(--fui-accent);
-}
 
 /* Products section sits right after the current app's nav */
 .fluent_ui_sidebar .fui-products {
