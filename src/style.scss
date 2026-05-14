@@ -1,3 +1,4 @@
+@use "./mcp";
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
 @import "~element-plus/theme-chalk/el-notification.css";
 @import "~element-plus/theme-chalk/el-loading.css";
@@ -536,9 +537,5 @@
       &:hover { text-decoration: underline; }
     }
   }
-}
 
-@media (max-width: 782px) {
-  .ft-app {
-  }
 }
