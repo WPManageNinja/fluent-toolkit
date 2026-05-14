@@ -284,6 +284,7 @@
     .fui-item-chevron {
         transform: rotate(-90deg);
         opacity: 0;
+        transition: background-color .12s ease, transform .25s ease, opacity .15s ease;
     }
 }
 
@@ -309,17 +310,20 @@
 
 .fui-product-section.is-open > .fui-product-header .fui-item-chevron {
     opacity: 1;
+    transform: rotate(0deg);
 }
 
 .fui-product-nav {
     list-style: none;
     margin: 0;
     padding: 0 0 0 5px;
-    display: none;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.28s ease;
 }
 
 .fui-product-section.is-open > .fui-product-nav {
-    display: block;
+    max-height: 800px;
 }
 
 /* Non-current product's items — muted (they navigate away on click) */
@@ -456,13 +460,16 @@
 /* ── Submenu (third-level, e.g. Contacts → Tags) ─────────── */
 .fluent_ui_sidebar .fui-submenu {
     list-style: none;
-    margin: 1px 0 4px;
+    margin: 1px 0 0;
     padding: 0 0 0 14px;
-    display: none;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease;
 }
 
 .fluent_ui_sidebar .fui-item--has-sub.is-open > .fui-submenu {
-    display: block;
+    max-height: 600px;
+    margin-bottom: 4px;
 }
 
 /* ── Chevron on parent items (clickable to toggle) ───────── */
