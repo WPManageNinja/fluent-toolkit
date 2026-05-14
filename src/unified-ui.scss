@@ -66,6 +66,11 @@
         background: var(--fui-bg);
         outline: none;
     }
+    &:hover {
+        .fui-workspace-caret {
+            opacity: 1;
+        }
+    }
 
     &:focus-visible {
         box-shadow: 0 0 0 2px rgba(99, 91, 255, 0.35);
@@ -118,19 +123,16 @@
 }
 
 .fui-workspace-caret {
-    width: 16px;
-    height: 16px;
-    flex: 0 0 16px;
-    background-color: var(--fui-text-soft);
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
     opacity: 0.7;
-    transition: transform .15s ease;
-    -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M4 6l4 4 4-4' stroke='black' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>") center / 13px no-repeat;
-            mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M4 6l4 4 4-4' stroke='black' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>") center / 13px no-repeat;
-}
-
-.fui-workspace-wrap.is-open .fui-workspace-caret {
-    transform: rotate(180deg);
-    opacity: 0.9;
+    transition: opacity .1s ease;
+    opacity: 0;
+    svg {
+        width: 18px;
+        height: 18px;
+    }
 }
 
 /* ── Workspace dropdown menu ─────────────────────────────── */
@@ -253,7 +255,9 @@
     margin: 0;
     padding: 0;
     + .fui-product-section {
-        margin-top: 4px;
+        border-top: 1px solid var(--fui-border);
+        margin-top: 10px;
+        padding-top: 10px;
     }
 }
 
@@ -282,8 +286,17 @@
         text-decoration: none;
         outline: none;
     }
+    &:hover {
+        .fui-item-chevron {
+            opacity: 1;
+        }
+    }
     &:focus-visible {
         box-shadow: 0 0 0 2px rgba(99, 91, 255, 0.35);
+    }
+    .fui-item-chevron {
+        transform: rotate(-90deg);
+        opacity: 0;
     }
 }
 
@@ -308,8 +321,7 @@
 }
 
 .fui-product-section.is-open > .fui-product-header .fui-item-chevron {
-    transform: rotate(180deg);
-    opacity: 0.85;
+    opacity: 1;
 }
 
 .fui-product-nav {
@@ -479,7 +491,6 @@
     color: var(--fui-text-soft);
     cursor: pointer;
     transition: background-color .12s ease, transform .15s ease, opacity .15s ease;
-    opacity: 0.6;
 }
 
 .fui-item-chevron:hover {
@@ -635,6 +646,33 @@
     }
 }
 
+@media (max-width: 1024px) {
+    .fluent_uui {
+        .fcrm_settings_sidebar {
+            position: absolute;
+            left: -160px;
+            height: calc(100vh - 57px);
+            &.is-open {
+                left: 0;
+            }
+        }
+        .fcrm_settings_menu_overlay {
+            height: calc(100vh - 57px);
+        }
+        .fluentcrm-app.is-settings-page {
+            .fcrm_settings_inner {
+                padding-left: 0;
+            }
+        }
+    }
+}
+
+@media (max-width: 960px) {
+    .auto-fold #wpcontent, .auto-fold #wpfooter {
+        margin-left: 0;
+    }
+
+}
 @media (max-width: 900px) {
     :root {
         --fui-sidebar-width: 200px;
@@ -646,6 +684,32 @@
 }
 
 @media (max-width: 782px) {
+    #wpbody {
+        padding-top: 0;
+    }
+    .fluent_uui {
+        .fcrm_settings_sidebar {
+            height: 100vh;
+            position: fixed;
+            padding-top: 0;
+        }
+        .fcrm_settings_menu_overlay {
+            height: 100vh;
+        }
+        .fluentcrm-app.is-settings-page {
+            .fluentcrm-body {
+                height: auto;
+            }
+
+            .fcrm_settings_content {
+                .fcrm_settings {
+                    max-height: inherit;
+                    min-height: inherit;
+                    overscroll-behavior: inherit;
+                }
+            }
+        }
+    }
     .fui-mobile-toggle {
         display: inline-flex;
     }
