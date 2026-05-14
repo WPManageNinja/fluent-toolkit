@@ -1,3 +1,12 @@
 {
-    "/dist/app.js": "/dist/app.js"
+    "/dist/app.js": "/dist/app.js",
+    "/dist/images/fluentboards_icon.svg": "/dist/images/fluentboards_icon.svg",
+    "/dist/images/fluentbooking_icon.svg": "/dist/images/fluentbooking_icon.svg",
+    "/dist/images/fluentbooking_logo.svg": "/dist/images/fluentbooking_logo.svg",
+    "/dist/images/fluentcart_icon.svg": "/dist/images/fluentcart_icon.svg",
+    "/dist/images/fluentcart_logo.svg": "/dist/images/fluentcart_logo.svg",
+    "/dist/images/fluentcrm-logo.svg": "/dist/images/fluentcrm-logo.svg",
+    "/dist/images/fluentcrm_icon.svg": "/dist/images/fluentcrm_icon.svg",
+    "/dist/images/fluentforms_icon.svg": "/dist/images/fluentforms_icon.svg",
+    "/dist/images/fluentforms_logo.svg": "/dist/images/fluentforms_logo.svg"
 }

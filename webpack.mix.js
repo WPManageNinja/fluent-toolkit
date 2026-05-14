@@ -36,4 +36,5 @@ mix
         config.plugins = config.plugins.filter(
             (plugin) => !['ProgressPlugin', 'WebpackBarPlugin'].includes(plugin.constructor.name)
         );
-    });
+    })
+    .copy('src/images', 'dist/images');
