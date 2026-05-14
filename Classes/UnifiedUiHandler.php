@@ -146,6 +146,11 @@ class UnifiedUiHandler
         ?>
         <script>
         (function () {
+            var hasDarkMode = <?php echo !empty($currentApp['has_dark_mode']) ? 'true' : 'false'; ?>;
+            if (!hasDarkMode) {
+                document.body.classList.remove('fluent_theme_dark');
+                return;
+            }
             var savedMode = localStorage.getItem('fluent_theme_mode') || 'system';
             var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             var resolvedMode = savedMode.indexOf(':') !== -1 ? savedMode.split(':').pop() : savedMode;
@@ -468,10 +473,15 @@ class UnifiedUiHandler
                     });
 
                     // Theme toggle dropdown
+                    var hasDarkMode = <?php echo !empty($currentApp['has_dark_mode']) ? 'true' : 'false'; ?>;
                     var themeToggle = document.getElementById('fui-theme-toggle');
                     var themeDropdown = document.getElementById('fui-theme-dropdown');
 
                     function applyTheme(mode) {
+                        if (!hasDarkMode) {
+                            document.body.classList.remove('fluent_theme_dark');
+                            return;
+                        }
                         var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
                         var isDark = mode === 'dark' || (mode === 'system' && prefersDark);
                         document.body.classList.remove('fluent_theme_dark');
