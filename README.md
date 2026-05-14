@@ -1,17 +1,22 @@
-# Fluent Toolkit v2.0.0
+# Fluent Toolkit v2.0.2
 
-Beta builds. Add-ons. One place.
+Unified UI. MCP connector. Beta builds. Add-ons. One place.
 
-Get early access to release candidates, install companion add-ons, and track update availability across the Fluent ecosystem — all from your WordPress dashboard.
+Connect your Fluent plugins under one roof. Fluent Toolkit gives you a unified admin workspace, an MCP connector for AI agents, early access to release candidates, companion add-on installs, and update visibility across the Fluent ecosystem from your WordPress dashboard.
 
 ---
 
 ### Download
 
-Download the latest plugin zip from the [Latest Release](https://github.com/WPManageNinja/fluent-toolkit/releases/latest) section of this repository.
+Primary download: [fluent-toolkit.zip](https://static.wpmanageninja.com/fluent-toolkit.zip)
+
+You can also find packaged builds in the [Latest Release](https://github.com/WPManageNinja/fluent-toolkit/releases/latest) section of this repository.
 
 ### Features
 
+- Unified UI for a cleaner shared Fluent workspace across supported Fluent products
+- MCP connector page for enabling product MCP tools and copying client-ready connection snippets
+- Client snippets for Codex, GitHub Copilot, Claude Desktop, Cursor, and generic HTTP MCP clients
 - Browse and install beta builds & release candidates for Fluent plugins
 - Install companion add-ons alongside core plugins
 - Load the official WordPress MCP Adapter as a bundled, replaceable dependency fallback
@@ -22,14 +27,33 @@ Download the latest plugin zip from the [Latest Release](https://github.com/WPMa
 
 ### How to Use
 
-1. Open the [Latest Release](https://github.com/WPManageNinja/fluent-toolkit/releases/latest) and download the plugin zip from the release assets
+1. Download the latest plugin zip from [static.wpmanageninja.com/fluent-toolkit.zip](https://static.wpmanageninja.com/fluent-toolkit.zip)
 2. Install on your WordPress site (staging preferred)
 3. Activate the plugin
 4. Go to **Dashboard → Fluent Toolkit** in the WordPress admin
-5. Install beta builds, RCs, or companion add-ons
-6. Provide feedback at: https://community.wpmanageninja.com/portal
+5. Turn on **Fluent Unified UI** if you want the shared Fluent admin workspace
+6. Open **MCP** to review available Fluent MCP tools and copy a client connection snippet
+7. Install beta builds, RCs, or companion add-ons
+8. Provide feedback at: https://community.wpmanageninja.com/portal
 
 ---
+
+### Unified UI
+
+Fluent Toolkit can turn supported Fluent product screens into one shared admin workspace. The unified UI adds a consistent sidebar, product switching, workspace controls, and shared styling for active Fluent products such as CRM, Forms, Commerce, Support Tickets, Appointments, and Projects.
+
+Unified UI is controlled from the Toolkit dashboard and can be enabled or disabled without changing the underlying product data.
+
+### MCP Connector
+
+The MCP connector helps site admins connect AI clients to Fluent products that expose Model Context Protocol tools. From the MCP page, you can:
+
+- See each product endpoint, tool count, status, and adapter availability
+- Enable or disable Toolkit-supported MCP access, starting with FluentCRM
+- Create WordPress Application Passwords for client authentication
+- Copy ready-to-use connection snippets for Codex, GitHub Copilot, Claude Desktop, Cursor, or any HTTP MCP client
+
+MCP routes still rely on WordPress and product-level authentication. Toolkit provides the management UI, connector snippets, and adapter fallback.
 
 ### Development
 
@@ -50,6 +74,9 @@ Toolkit only bundles the adapter fallback. Authentication and authorization for 
 ---
 
 ### Changelog
+
+#### 2.0.2
+- Bug fixes and release packaging updates
 
 #### 2.0.0
 - `McpManager` — per-product MCP enable/disable, status API, AJAX handlers wired into the toolkit settings
