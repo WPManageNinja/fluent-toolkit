@@ -87,6 +87,9 @@ class UnifiedUiHandler
                 echo '</div></div>';
             }, 9999999);
 
+            // disable CRM Admin Menu
+            add_filter('fluent_crm/render_top_menu_bar', '__return_false');
+
             // disable top menu
             add_filter('show_admin_bar', '__return_false', 9999);
 
@@ -103,7 +106,22 @@ class UnifiedUiHandler
     {
         global $plugin_page;
 
-        $currentApp = isset($this->apps[$plugin_page]) ? $this->apps[$plugin_page] : [];
+        $currentAppSlug = $plugin_page;
+        $subPageToApp = [
+            'fluent_forms_all_entries'     => 'fluent_forms',
+            'fluent_forms_reports'         => 'fluent_forms',
+            'fluent_forms_transfer'        => 'fluent_forms',
+            'fluent_forms_add_ons'         => 'fluent_forms',
+            'fluent_forms_settings'        => 'fluent_forms',
+            'fluent_forms_payment_entries' => 'fluent_forms',
+            'fluent_forms_smtp'            => 'fluent_forms',
+            'fluent_forms_docs'            => 'fluent_forms',
+        ];
+        if (isset($subPageToApp[$plugin_page])) {
+            $currentAppSlug = $subPageToApp[$plugin_page];
+        }
+
+        $currentApp = isset($this->apps[$currentAppSlug]) ? $this->apps[$currentAppSlug] : [];
         $siteName = get_bloginfo('name');
         $siteIcon = function_exists('get_site_icon_url') ? get_site_icon_url(64) : '';
         ?>
@@ -140,7 +158,11 @@ class UnifiedUiHandler
                             <div class="fui-workspace-sub"><?php echo esc_html($currentApp['title']); ?></div>
                         <?php endif; ?>
                     </div>
-                    <span class="fui-workspace-caret" aria-hidden="true"></span>
+                    <span class="fui-workspace-caret" aria-hidden="true">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10.0001 10.879L13.7126 7.1665L14.7731 8.227L10.0001 13L5.22705 8.227L6.28755 7.1665L10.0001 10.879Z" fill="currentColor"></path>
+                        </svg>
+                    </span>
                 </button>
                 <div class="fui-workspace-menu" role="menu" hidden>
                     <a href="<?php echo esc_url(admin_url()); ?>" class="fui-workspace-menu-item" role="menuitem">
@@ -195,7 +217,7 @@ class UnifiedUiHandler
             <?php if (!empty($visibleApps)): ?>
                 <div class="fui-products">
                     <?php foreach ($visibleApps as $slug => $app):
-                        $isCurrent = ($slug === $plugin_page);
+                        $isCurrent = ($slug === $currentAppSlug);
                         $appItems = isset($app['items']) ? $app['items'] : [];
                         ?>
                         <section
@@ -218,11 +240,12 @@ class UnifiedUiHandler
                                     <?php foreach ($appItems as $itemKey => $item):
                                         $itemHash = parse_url($item['url'], PHP_URL_FRAGMENT);
                                         $hasSub = $isCurrent && !empty($item['sub_menu']);
+                                        $isServerActive = $isCurrent && !$itemHash && ($itemKey === $plugin_page);
                                         ?>
                                         <li class="fui-item<?php echo $hasSub ? ' fui-item--has-sub is-open' : ''; ?>">
                                             <a href="<?php echo esc_url($item['url']); ?>"
-                                               class="fui-apps-menu-item"
-                                                <?php echo $isCurrent ? 'data-fui-hash="' . ($itemHash ? '#' . esc_attr($itemHash) : '') . '"' : ''; ?>>
+                                               class="fui-apps-menu-item<?php echo $isServerActive ? ' active' : ''; ?>"
+                                               <?php echo ($isCurrent && $itemHash) ? 'data-fui-hash="#' . esc_attr($itemHash) . '"' : ''; ?>>
                                                 <?php if (!empty($item['icon_svg'])): ?>
                                                     <span class="fui-app-icon"><?php echo $item['icon_svg']; ?></span>
                                                 <?php endif; ?>
