@@ -32,8 +32,10 @@ mix.webpackConfig({
 
 mix
     .js('src/app.js', 'dist/app.js').vue({ version: 3 })
+    .sass('src/unified-ui.scss', 'dist/unified-ui.css')
     .override((config) => {
         config.plugins = config.plugins.filter(
             (plugin) => !['ProgressPlugin', 'WebpackBarPlugin'].includes(plugin.constructor.name)
         );
-    });
+    })
+    .copy('src/images', 'dist/images');

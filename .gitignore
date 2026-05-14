@@ -5,3 +5,6 @@ auto-imports.d.ts
 components.d.ts
 *.html
 /builds
+.idea
+.DS_Store
+refs
