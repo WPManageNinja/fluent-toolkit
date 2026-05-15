@@ -224,7 +224,7 @@ class UnifiedUiHandler
                                     d="M6 3H4a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-2"/><path d="M9 3h4v4"/><path
                                     d="m13 3-6 6"/></svg>
                         </span>
-                        Visit Site
+                        <?php esc_html_e('Visit Site', 'fluent-toolkit'); ?>
                     </a>
                     <div class="fui-workspace-menu-divider" role="none"></div>
                     <a href="<?php echo esc_url(wp_logout_url()); ?>"
@@ -235,7 +235,7 @@ class UnifiedUiHandler
                                     d="M10 12v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v1"/><path
                                     d="M13 8H6"/><path d="m11 6 2 2-2 2"/></svg>
                         </span>
-                        Log Out
+                        <?php esc_html_e('Log Out', 'fluent-toolkit'); ?>
                     </a>
                 </div>
             </div>
