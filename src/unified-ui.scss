@@ -838,15 +838,21 @@
     :root {
         --fui-sidebar-width: 200px;
     }
-
-    .fui-app-content {
-        margin-left: 12px;
-    }
 }
 
 @media (max-width: 782px) {
+    body #wpcontent {
+        padding-left: 0 !important;
+    }
     #wpbody {
         padding-top: 0;
+    }
+    .fluent_uui {
+        .ff_global_setting_wrap,
+        .ff_tools_wrap,
+        #ff_reports {
+            margin-left: 0;
+        }
     }
     .fluent_uui {
         .fcrm_settings_sidebar {
@@ -904,6 +910,7 @@
 
     .fui-app-content {
         margin-left: 0;
+        padding-left: 0;
         padding-top: 64px;
     }
 
