@@ -152,6 +152,20 @@ select {
     padding-top: 24px;
     padding-bottom: 24px;
   }
+
+  .fcrm-route-loading-bar {
+    top: 0;
+  }
+  .ff_tools_wrap {
+    .ff_admin_menu_wrapper {
+      min-height: 100vh;
+    }
+  }
+  .ff_global_setting_wrap,
+  .ff_tools_wrap,
+  #ff_reports {
+    margin-left: -20px;
+  }
 }
 
 /* ── Workspace menu: theme select ────────────────────────── */

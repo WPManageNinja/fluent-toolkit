@@ -562,6 +562,81 @@
     margin: 12px 20px;
 }
 
+/* ── Facebook-style mobile quick-nav bar ─────────────────── */
+.fui-mobile-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background: var(--fui-surface);
+    border-top: 1px solid var(--fui-border);
+    z-index: 1002;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 4px 0 8px;
+    box-sizing: border-box;
+    box-shadow: 0 -1px 4px rgba(15, 15, 15, 0.08);
+}
+
+.fui-mobile-nav-links {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    overflow: hidden;
+    min-width: 0;
+    gap: 6px;
+    justify-content: space-between;
+}
+
+.fui-mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--fui-text-muted);
+    font-size: 10px;
+    line-height: 1.2;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.fui-mobile-nav-item:hover {
+    background: var(--fui-surface-hover);
+    color: var(--fui-text);
+}
+
+.fui-mobile-nav-item.active {
+    color: var(--fui-accent);
+}
+
+.fui-mobile-nav-icon {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.fui-mobile-nav-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.fui-mobile-nav-label {
+    max-width: 64px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 /* ── Mobile chrome ───────────────────────────────────────── */
 .fui-mobile-toggle {
     display: none;
@@ -838,15 +913,21 @@
     :root {
         --fui-sidebar-width: 200px;
     }
-
-    .fui-app-content {
-        margin-left: 12px;
-    }
 }
 
 @media (max-width: 782px) {
+    body #wpcontent {
+        padding-left: 0 !important;
+    }
     #wpbody {
         padding-top: 0;
+    }
+    .fluent_uui {
+        .ff_global_setting_wrap,
+        .ff_tools_wrap,
+        #ff_reports {
+            margin-left: 0;
+        }
     }
     .fluent_uui {
         .fcrm_settings_sidebar {
@@ -871,7 +952,17 @@
             }
         }
     }
-    .fui-mobile-toggle {
+    .fui-mobile-nav {
+        display: flex;
+    }
+
+    .fui-mobile-nav .fui-mobile-toggle {
+        position: static;
+        top: auto;
+        left: auto;
+        z-index: auto;
+        box-shadow: none;
+        flex-shrink: 0;
         display: inline-flex;
     }
 
@@ -888,7 +979,7 @@
         width: 280px;
         max-width: 86vw;
         flex: none;
-        padding: 64px 12px 0 12px;
+        padding: 12px 12px 64px 12px;
         transform: translateX(-100%);
         transition: transform .25s ease;
         z-index: 1001;
@@ -904,7 +995,9 @@
 
     .fui-app-content {
         margin-left: 0;
-        padding-top: 64px;
+        padding-left: 0;
+        padding-top: 0;
+        padding-bottom: 64px;
     }
 
     /* Workspace dropdown sits within the drawer — keep it anchored */

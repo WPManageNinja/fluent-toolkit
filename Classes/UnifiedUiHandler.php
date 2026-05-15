@@ -161,10 +161,27 @@ class UnifiedUiHandler
         </script>
 
         <div class="fluent_uui">
-        <button type="button" class="fui-mobile-toggle" aria-label="<?php echo esc_attr__('Toggle menu', 'fluent-toolkit'); ?>" aria-controls="fui-sidebar"
-                aria-expanded="false">
-            <span class="fui-mobile-toggle-bars" aria-hidden="true"></span>
-        </button>
+        <?php
+        $mobileNavItems = !empty($currentApp['items']) ? array_slice(array_values($currentApp['items']), 0, 4) : [];
+        ?>
+        <div class="fui-mobile-nav" role="navigation" aria-label="<?php echo esc_attr__('Quick navigation', 'fluent-toolkit'); ?>">
+            <div class="fui-mobile-nav-links">
+                <?php foreach ($mobileNavItems as $item): ?>
+                <a href="<?php echo esc_url($item['url']); ?>"
+                   class="fui-mobile-nav-item"
+                   <?php echo !empty(parse_url($item['url'], PHP_URL_FRAGMENT)) ? 'data-fui-hash="#' . esc_attr(parse_url($item['url'], PHP_URL_FRAGMENT)) . '"' : ''; ?>>
+                    <?php if (!empty($item['icon_svg'])): ?>
+                        <span class="fui-mobile-nav-icon" aria-hidden="true"><?php echo $item['icon_svg']; ?></span>
+                    <?php endif; ?>
+                    <span class="fui-mobile-nav-label"><?php echo esc_html($item['title']); ?></span>
+                </a>
+                <?php endforeach; ?>
+                <button type="button" class="fui-mobile-toggle" aria-label="<?php echo esc_attr__('Toggle menu', 'fluent-toolkit'); ?>" aria-controls="fui-sidebar"
+                        aria-expanded="false">
+                    <span class="fui-mobile-toggle-bars" aria-hidden="true"></span>
+                </button>
+            </div>
+        </div>
         <div class="fui-backdrop" hidden></div>
         <div id="fui-sidebar" class="fluent_ui_sidebar">
 
@@ -410,6 +427,26 @@ class UnifiedUiHandler
                                     parentLink.classList.add('is-parent-active');
                                 }
                             }
+                        }
+
+                        // Sync active state on mobile nav items
+                        var mobileNav = document.querySelector('.fui-mobile-nav');
+                        if (mobileNav) {
+                            var mobileLinks = mobileNav.querySelectorAll('.fui-mobile-nav-item[data-fui-hash]');
+                            var mobileBestEl = null;
+                            var mobileBestLen = -1;
+                            mobileLinks.forEach(function (el) {
+                                el.classList.remove('active');
+                                var target = normalize(el.getAttribute('data-fui-hash'));
+                                if (!target) return;
+                                if (current === target || (target !== '#' && current.indexOf(target) === 0)) {
+                                    if (target.length >= mobileBestLen) {
+                                        mobileBestLen = target.length;
+                                        mobileBestEl = el;
+                                    }
+                                }
+                            });
+                            if (mobileBestEl) mobileBestEl.classList.add('active');
                         }
                     }
 
