@@ -72,6 +72,7 @@ class AdminMenu
         wp_localize_script('fluent-toolkit-script', 'fluentToolkitVars', [
             'ajax_url'           => admin_url('admin-ajax.php'),
             'nonce'              => wp_create_nonce('fluent_toolkit_nonce'),
+            'plugin_url'         => FLUENT_TOOLKIT_PLUGIN_URL,
             'version'            => FLUENT_TOOLKIT_VERSION,
             'source_version'     => $sourceVersion,
             'require_update'     => $requireUpdate,

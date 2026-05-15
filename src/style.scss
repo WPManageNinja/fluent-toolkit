@@ -56,6 +56,12 @@
     gap: 12px;
   }
 
+  .ft-brand-logo {
+    width: 132px;
+    height: auto;
+    display: block;
+  }
+
   .ft-brand-mark {
     width: 36px;
     height: 36px;
@@ -83,7 +89,6 @@
   .ft-brand-version {
     color: var(--text-soft);
     font-size: 12px;
-    margin-left: 6px;
     font-family: 'JetBrains Mono', monospace;
   }
 

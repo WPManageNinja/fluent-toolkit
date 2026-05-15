@@ -938,7 +938,8 @@
             margin: 0;
         }
         .fs_tickets_view_wrapper {
-            width: auto;
+            width: 100%;
+            margin: 0;
         }
         #fct_admin_app_wrapper #fluent_cart_plugin_app {
             padding: 0;
@@ -968,6 +969,17 @@
         .fct-settings-nav-content {
             margin-left: -20px;
         }
+        #alpha_app {
+            .fframe_body {
+                padding-left: 0;
+            }
+        }
+        #fluent-booking-app {
+            padding-left: 0;
+        }
+        .fframe_menu.fframe_menu_small_screen.fframe_menu_small_screen_open {
+            left: 0;
+        }
     }
 }
 
@@ -984,6 +996,10 @@
 }
 
 @media (max-width: 782px) {
+    .el-dialog,
+    .el-drawer {
+        width: 90% !important;
+    }
     .auto-fold #wpcontent,
     body #wpcontent {
         padding: 0 !important;
@@ -1088,9 +1104,25 @@
             padding-left: 0;
             padding-right: 0;
         }
+        .fbs-dashboard-home,
+        #alpha_app .fframe_body,
         .ff_form_wrap {
             padding-left: 15px;
             padding-right: 15px;
+        }
+        #alpha_app .fs_mailboxes,
+        .fs_tickets_view_wrapper {
+            padding-top: 15px;
+        }
+        #fluent-booking-app {
+            padding-left: 15px;
+            .fl_app {
+                margin-right: 15px;
+            }
+        }
+        #fluent-boards-app .fframe_main-menu-items,
+        #fluent-boards-app .fframe_body {
+            margin-left: 0 !important;
         }
     }
     .fui-mobile-nav {

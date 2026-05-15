@@ -4,13 +4,8 @@
         <!-- Topbar -->
         <header class="ft-topbar">
             <div class="ft-brand">
-                <div class="ft-brand-mark"></div>
-                <div>
-                    <div class="ft-brand-name">
-                        FluentKit
-                        <span class="ft-brand-version">v{{ appVars.version }}</span>
-                    </div>
-                </div>
+                <img class="ft-brand-logo" :src="brandLogoUrl" alt="FluentKit logo" />
+                <span class="ft-brand-version">v{{ appVars.version }}</span>
             </div>
             <div class="ft-topbar-actions">
                 <el-button
@@ -28,15 +23,6 @@
         </header>
 
         <section class="ft-unified-panel" v-loading="unifiedUiSaving" element-loading-text="Saving Unified UI status...">
-            <div class="ft-unified-icon" aria-hidden="true">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M4 7h16"/>
-                    <path d="M4 12h16"/>
-                    <path d="M4 17h16"/>
-                    <path d="M8 4v16"/>
-                    <path d="M16 4v16"/>
-                </svg>
-            </div>
             <div class="ft-unified-copy">
                 <span class="ft-unified-eyebrow">Unified Fluent workspace</span>
                 <h1>Fluent Unified UI</h1>
@@ -182,6 +168,10 @@ export default {
         };
     },
     computed: {
+        brandLogoUrl() {
+            const pluginUrl = (this.appVars && this.appVars.plugin_url) ? this.appVars.plugin_url : '';
+            return `${pluginUrl}dist/images/logo.svg`;
+        },
         installedCount() {
             return this.betaPlugins.filter(p => p.installed_version).length;
         },

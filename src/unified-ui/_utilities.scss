@@ -14,7 +14,7 @@ body .fcrm_topbar, body #fluent-boards-app {
 }
 
 body #wpbody-content {
-  padding-bottom: 0;
+  padding-bottom: 0 !important;
 }
 
 body #wpbody-content #fct_admin_menu_holder .fct_admin_menu_wrap {
@@ -60,6 +60,10 @@ select {
   background: var(--fui-primary-bg);
   border: 1px solid var(--fui-border);
   border-radius: 8px;
+}
+.fluentcrm_page_fluent-boards #wpbody #fbs_tasks_wrapper,
+.toplevel_page_fluent-boards #wpbody #fbs_tasks_wrapper {
+  height: calc(100vh - 140px);
 }
 .fluent_uui {
   .fluentcrm-app.is-settings-page {
@@ -194,6 +198,28 @@ select {
       overflow: auto;
       padding: 0;
     }
+  }
+  .fs_combined_top_bar {
+    top: 0;
+  }
+  #alpha_app {
+    .fs_mailboxes {
+      padding-top: 0;
+    }
+  }
+  #fluent-booking-app .fcal_dashboard .fcal_dashboard_chat_wrap {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    .fcal_dashboard_report_sidebar {
+      max-width: 100%;
+    }
+  }
+  .fluentboards_databox {
+    height: calc(100vh - 60px);
+  }
+  .fbs-dashboard-home {
+    padding-left: 20px;
+    padding-right: 20px;
   }
 }
 
