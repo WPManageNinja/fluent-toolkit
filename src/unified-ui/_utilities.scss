@@ -87,6 +87,9 @@ select {
     left: 0;
     height: 100vh;
   }
+  .fct-settings-nav-container {
+    left: -20px;
+  }
 
   #alpha_app .fframe_app,
   #fluent-booking-app .fframe_main-menu-items,
@@ -96,7 +99,7 @@ select {
     display: none;
   }
   .fl_app.fluent-cart-admin-pages {
-    padding: 24px
+    padding: 24px 24px 24px 0;
   }
   .fct_report_page_plugin_app_wrap {
     .fl_app.fluent-cart-admin-pages {
@@ -123,9 +126,11 @@ select {
     max-height: 100vh;
     min-height: 100vh;
   }
-  .fct-report-body,
   .fct-settings-nav-content {
-    padding-left: 260px;
+    padding-left: 240px;
+  }
+  .fct-report-body {
+    padding-left: 240px;
   }
   .fs_setup .fs_sticky_footer {
     left: 0;
@@ -163,8 +168,7 @@ select {
     }
   }
   .ff_global_setting_wrap,
-  .ff_tools_wrap,
-  #ff_reports {
+  .ff_tools_wrap {
     margin-left: -20px;
   }
   #fluent-booking-app {
@@ -172,6 +176,24 @@ select {
   }
   .fs_customers {
     padding-top: 0;
+  }
+  #fct_admin_app_wrapper {
+    margin-left: 0;
+    width: 100%;
+  }
+  .ff_form_wrap {
+    padding-left: 0;
+    padding-right: 20px;
+  }
+  .ff_global_settings_option {
+    height: 100vh;
+    padding: 24px;
+  }
+  .ff_settings_wrapper {
+    .ff_layout_section_container {
+      overflow: auto;
+      padding: 0;
+    }
   }
 }
 

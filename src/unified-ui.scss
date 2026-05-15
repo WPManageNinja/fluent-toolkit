@@ -571,7 +571,7 @@
     right: 0;
     height: 64px;
     background: var(--fui-primary-bg);
-    z-index: 20;
+    z-index: 200;
     align-items: center;
     justify-content: space-between;
     padding: 0 8px;
@@ -940,6 +940,34 @@
         .fs_tickets_view_wrapper {
             width: auto;
         }
+        #fct_admin_app_wrapper #fluent_cart_plugin_app {
+            padding: 0;
+        }
+        .fct-settings-nav-container {
+            left: -100%;
+            &.is-nav-open {
+                left: -20px;
+            }
+        }
+        #fct-report-body {
+            margin-left: -20px;
+            padding-left: 20px !important;
+        }
+        .fct-reports-view {
+            margin: 0;
+        }
+        .fct-report-body-inner {
+            padding-left: 0;
+            padding-right: 20px;
+        }
+        .fct-report-body {
+            .fct-report-filter-wrap {
+                margin-left: -20px;
+            }
+        }
+        .fct-settings-nav-content {
+            margin-left: -20px;
+        }
     }
 }
 
@@ -1022,6 +1050,47 @@
             .fcrm_reports_sidebar {
                 height: calc(100vh - 47px);
             }
+        }
+        #fct_admin_app_wrapper #fluent_cart_plugin_app {
+            padding: 0 0 30px 0 !important;
+            margin: 0;
+        }
+        .fl_app.fluent-cart-admin-pages {
+            margin: 0;
+            padding: 15px;
+            .fluent-cart-admin-pages {
+                padding: 0;
+            }
+        }
+        #fct-report-body {
+            margin-left: 0;
+        }
+        .fct-report-body,
+        .fct-settings-nav-content-inner {
+            max-height: calc(100vh - 64px);
+            min-height: calc(100vh - 64px);
+        }
+        .fct-settings-nav-container.is-nav-open {
+            left: 0;
+        }
+        .fct-settings-nav-content {
+            margin-left: 0;
+        }
+        .fct-setting-container {
+            .setting-wrap-inner {
+                padding: 20px 15px;
+            }
+            .setting-wrap {
+                margin-bottom: 0;
+            }
+        }
+        .ff_layout_section_container {
+            padding-left: 0;
+            padding-right: 0;
+        }
+        .ff_form_wrap {
+            padding-left: 15px;
+            padding-right: 15px;
         }
     }
     .fui-mobile-nav {
