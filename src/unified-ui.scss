@@ -569,12 +569,12 @@
     bottom: 0;
     left: 0;
     right: 0;
-    height: 74px;
+    height: 64px;
     background: var(--fui-primary-bg);
     z-index: 20;
     align-items: center;
     justify-content: space-between;
-    padding: 0 12px;
+    padding: 0 8px;
     box-sizing: border-box;
     box-shadow: 0px -8px 32px -12px #33333314;
 }
@@ -618,27 +618,26 @@
 }
 
 .fui-mobile-nav-icon {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-}
-
-.fui-mobile-nav-icon svg {
-    width: 20px;
-    height: 20px;
+    svg {
+        width: 18px;
+        height: 18px;
+    }
 }
 
 .fui-mobile-nav-label {
-    max-width: 100px;
+    max-width: 70px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     font-weight: 500;
-    font-size: 12px;
-    line-height: 20px;
+    font-size: 11px;
+    line-height: 14px;
     text-align: center;
 }
 
@@ -907,6 +906,7 @@
             position: absolute;
             left: -160px;
             height: calc(100vh - 57px);
+            padding-bottom: 64px;
             &.is-open {
                 left: 0;
             }
@@ -956,11 +956,12 @@
 }
 
 @media (max-width: 782px) {
+    .auto-fold #wpcontent,
     body #wpcontent {
-        padding-left: 0 !important;
+        padding: 0 !important;
     }
     #wpbody {
-        padding-top: 0;
+        padding: 0;
     }
     .fluent_uui {
         .ff_global_setting_wrap,
@@ -979,6 +980,7 @@
         .fluentcrm-app.is-settings-page {
             .fluentcrm-body {
                 height: auto;
+                z-index: 1;
             }
 
             .fcrm_settings_content {
@@ -1014,6 +1016,12 @@
         }
         .fs_narrow_promo {
             margin: 0;
+        }
+        .fcrm_reports_home {
+            .fcrm_reports_sidebar_overlay,
+            .fcrm_reports_sidebar {
+                height: calc(100vh - 47px);
+            }
         }
     }
     .fui-mobile-nav {
@@ -1070,7 +1078,18 @@
     }
 }
 
-
-.fluentcrm-app.is-settings-page .fluentcrm-body {
-   // position: relative;
+@media (max-width: 500px) {
+    .fluent_uui {
+        .fluentcrm-app {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+        .fcrm_page_header_top_nav_wrapper {
+            margin: -15px -15px 0 -15px;
+        }
+        .fluentcrm-app.is-settings-page {
+            padding-left: 0;
+            padding-right: 0;
+        }
+    }
 }
