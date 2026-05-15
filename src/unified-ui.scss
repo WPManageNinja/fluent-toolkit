@@ -1104,6 +1104,8 @@
             padding-left: 0;
             padding-right: 0;
         }
+        .fluent_boards-box,
+        .fbs_welcome-settings,
         .fbs-dashboard-home,
         #alpha_app .fframe_body,
         .ff_form_wrap {
@@ -1123,6 +1125,10 @@
         #fluent-boards-app .fframe_main-menu-items,
         #fluent-boards-app .fframe_body {
             margin-left: 0 !important;
+        }
+        .fbs_report {
+            margin: 0;
+            padding: 20px 15px;
         }
     }
     .fui-mobile-nav {
