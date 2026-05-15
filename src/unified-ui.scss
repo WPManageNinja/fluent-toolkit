@@ -570,12 +570,12 @@
     left: 0;
     right: 0;
     height: 64px;
-    background: var(--fui-surface);
+    background: var(--fui-primary-bg);
     border-top: 1px solid var(--fui-border);
     z-index: 1002;
     align-items: center;
     justify-content: space-between;
-    padding: 0 4px 0 8px;
+    padding: 0 8px;
     box-sizing: border-box;
     box-shadow: 0 -1px 4px rgba(15, 15, 15, 0.08);
 }
@@ -595,7 +595,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 3px;
+    gap: 4px;
     padding: 6px 10px;
     border-radius: 8px;
     text-decoration: none;
@@ -605,15 +605,19 @@
     font-weight: 500;
     white-space: nowrap;
     transition: background 0.15s ease, color 0.15s ease;
-}
 
-.fui-mobile-nav-item:hover {
-    background: var(--fui-surface-hover);
-    color: var(--fui-text);
-}
-
-.fui-mobile-nav-item.active {
-    color: var(--fui-accent);
+    &:hover {
+        background: var(--fui-bg);
+        color: var(--fui-text);
+    }
+    &:focus {
+        background: var(--fui-bg);
+        color: var(--fui-text);
+        box-shadow: none;
+    }
+    &.active {
+        color: var(--fui-text);
+    }
 }
 
 .fui-mobile-nav-icon {
@@ -648,7 +652,7 @@
     height: 40px;
     border-radius: 8px;
     border: 1px solid var(--fui-border);
-    background: var(--fui-surface);
+    background: var(--fui-primary-bg);
     color: var(--fui-text);
     cursor: pointer;
     box-shadow: 0 1px 3px rgba(15, 15, 15, 0.06);
@@ -657,10 +661,10 @@
     padding: 0;
     -webkit-appearance: none;
             appearance: none;
-}
 
-.fui-mobile-toggle:hover {
-    background: var(--fui-surface-hover);
+    &:hover {
+        background: var(--fui-bg);
+    }
 }
 
 .fui-mobile-toggle-bars,
@@ -676,14 +680,14 @@
 
 .fui-mobile-toggle-bars {
     position: relative;
+    &::before,
+    &::after {
+        content: '';
+        position: absolute;
+        left: 0;
+    }
 }
 
-.fui-mobile-toggle-bars::before,
-.fui-mobile-toggle-bars::after {
-    content: '';
-    position: absolute;
-    left: 0;
-}
 
 .fui-mobile-toggle-bars::before { top: -5px; }
 .fui-mobile-toggle-bars::after  { top: 5px; }
@@ -899,6 +903,11 @@
             .fcrm_settings_inner {
                 padding-left: 0;
             }
+        }
+
+        #fluent-booking-app,
+        #alpha_app {
+            margin-left: 0;
         }
     }
 }
