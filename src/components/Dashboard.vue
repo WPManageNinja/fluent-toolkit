@@ -7,7 +7,7 @@
                 <div class="ft-brand-mark"></div>
                 <div>
                     <div class="ft-brand-name">
-                        Fluent Toolkit
+                        FluentKit
                         <span class="ft-brand-version">v{{ appVars.version }}</span>
                     </div>
                 </div>

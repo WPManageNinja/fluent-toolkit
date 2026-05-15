@@ -571,7 +571,7 @@
     right: 0;
     height: 74px;
     background: var(--fui-primary-bg);
-    z-index: 1002;
+    z-index: 1000;
     align-items: center;
     justify-content: space-between;
     padding: 0 12px;
@@ -1043,7 +1043,7 @@
         width: 280px;
         max-width: 86vw;
         flex: none;
-        padding: 12px 12px 74px 12px;
+        padding: 12px 12px 0 12px;
         transform: translateX(-100%);
         transition: transform .25s ease, opacity .25s ease;
         z-index: 1001;
