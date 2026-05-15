@@ -176,9 +176,14 @@ class UnifiedUiHandler
                     <span class="fui-mobile-nav-label"><?php echo esc_html($item['title']); ?></span>
                 </a>
                 <?php endforeach; ?>
-                <button type="button" class="fui-mobile-toggle" aria-label="<?php echo esc_attr__('Toggle menu', 'fluent-toolkit'); ?>" aria-controls="fui-sidebar"
+                <button type="button" class="fui-mobile-toggle fui-mobile-nav-item" aria-label="<?php echo esc_attr__('Toggle menu', 'fluent-toolkit'); ?>" aria-controls="fui-sidebar"
                         aria-expanded="false">
-                    <span class="fui-mobile-toggle-bars" aria-hidden="true"></span>
+                    <span class="fui-mobile-nav-icon">
+                        <span class="fui-mobile-toggle-bars" aria-hidden="true"></span>
+                    </span>
+                    <span class="fui-mobile-nav-label">
+                        <?php echo esc_html__('Menu', 'fluent-toolkit'); ?>
+                    </span>
                 </button>
             </div>
         </div>

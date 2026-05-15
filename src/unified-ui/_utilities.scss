@@ -142,11 +142,12 @@ select {
     margin-top: -24px;
   }
   .fs_inside_activity_menu_tab_header {
-    top: 0;
+    top: 0 !important;
   }
   .fs_reports_wrapper {
     top: 0;
     left: 239px;
+    background: none;
   }
   .fcal_onboard_wrap {
     padding-top: 24px;
@@ -168,6 +169,9 @@ select {
   }
   #fluent-booking-app {
     padding-top: 20px;
+  }
+  .fs_customers {
+    padding-top: 0;
   }
 }
 

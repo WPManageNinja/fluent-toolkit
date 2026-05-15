@@ -569,15 +569,14 @@
     bottom: 0;
     left: 0;
     right: 0;
-    height: 64px;
+    height: 74px;
     background: var(--fui-primary-bg);
-    border-top: 1px solid var(--fui-border);
     z-index: 1002;
     align-items: center;
     justify-content: space-between;
-    padding: 0 8px;
+    padding: 0 12px;
     box-sizing: border-box;
-    box-shadow: 0 -1px 4px rgba(15, 15, 15, 0.08);
+    box-shadow: 0px -8px 32px -12px #33333314;
 }
 
 .fui-mobile-nav-links {
@@ -606,6 +605,7 @@
     white-space: nowrap;
     transition: background 0.15s ease, color 0.15s ease;
 
+    &.active,
     &:hover {
         background: var(--fui-bg);
         color: var(--fui-text);
@@ -614,9 +614,6 @@
         background: var(--fui-bg);
         color: var(--fui-text);
         box-shadow: none;
-    }
-    &.active {
-        color: var(--fui-text);
     }
 }
 
@@ -635,10 +632,14 @@
 }
 
 .fui-mobile-nav-label {
-    max-width: 64px;
+    max-width: 100px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 20px;
+    text-align: center;
 }
 
 /* ── Mobile chrome ───────────────────────────────────────── */
@@ -648,17 +649,22 @@
     top: 12px;
     left: 12px;
     z-index: 1002;
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    border: 1px solid var(--fui-border);
-    background: var(--fui-primary-bg);
+    width: auto;
+    height: auto;
+    box-shadow: none;
+    background: none;
+    border: none;
+    //width: 40px;
+    //height: 40px;
+    //border-radius: 8px;
+    //border: 1px solid var(--fui-border);
+    //background: var(--fui-primary-bg);
     color: var(--fui-text);
     cursor: pointer;
-    box-shadow: 0 1px 3px rgba(15, 15, 15, 0.06);
+    //box-shadow: 0 1px 3px rgba(15, 15, 15, 0.06);
     align-items: center;
     justify-content: center;
-    padding: 0;
+    //padding: 0;
     -webkit-appearance: none;
             appearance: none;
 
@@ -884,6 +890,12 @@
     :root {
         --fui-sidebar-width: 220px;
     }
+
+    .fluent_uui {
+        .fs_reports_wrapper {
+            left: 220px;
+        }
+    }
 }
 
 @media (max-width: 1024px) {
@@ -908,6 +920,22 @@
         #fluent-booking-app,
         #alpha_app {
             margin-left: 0;
+        }
+        .fs_reports_wrapper {
+            .fs_box_wrapper {
+                padding-top: 0;
+            }
+        }
+        .fframe_body {
+            .fs_tk_inner_sidebar {
+                margin-top: 0;
+            }
+        }
+        .fs_tickets_view {
+            margin: 0;
+        }
+        .fs_tickets_view_wrapper {
+            width: auto;
         }
     }
 }
@@ -937,8 +965,6 @@
         #ff_reports {
             margin-left: 0;
         }
-    }
-    .fluent_uui {
         .fcrm_settings_sidebar {
             height: 100vh;
             position: fixed;
@@ -959,6 +985,32 @@
                     overscroll-behavior: inherit;
                 }
             }
+        }
+
+        .fs_reports_wrapper {
+            position: relative;
+            left: 0;
+        }
+        #alpha_app {
+            .fframe_body {
+                padding-top: 0;
+            }
+        }
+        .fs_reports_layout {
+            .fs_reports_content {
+                padding-left: 0;
+                padding-right: 0;
+            }
+        }
+        .fs_tickets_view_wrapper {
+            margin: 0;
+            width: 100%;
+        }
+        .fs_customers {
+            padding-top: 20px;
+        }
+        .fs_narrow_promo {
+            margin: 0;
         }
     }
     .fui-mobile-nav {
