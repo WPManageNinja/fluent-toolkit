@@ -585,7 +585,7 @@
     flex: 1;
     overflow: hidden;
     min-width: 0;
-    gap: 6px;
+    gap: 1px;
     justify-content: space-between;
 }
 
@@ -654,17 +654,10 @@
     box-shadow: none;
     background: none;
     border: none;
-    //width: 40px;
-    //height: 40px;
-    //border-radius: 8px;
-    //border: 1px solid var(--fui-border);
-    //background: var(--fui-primary-bg);
-    color: var(--fui-text);
+    color: var(--fui-text-soft);
     cursor: pointer;
-    //box-shadow: 0 1px 3px rgba(15, 15, 15, 0.06);
     align-items: center;
     justify-content: center;
-    //padding: 0;
     -webkit-appearance: none;
             appearance: none;
 
@@ -678,10 +671,10 @@
 .fui-mobile-toggle-bars::after {
     display: block;
     width: 16px;
-    height: 1.75px;
+    height: 1.5px;
     background: currentColor;
     border-radius: 2px;
-    transition: transform .2s ease, opacity .2s ease, top .2s ease;
+    transition: all .2s ease;
 }
 
 .fui-mobile-toggle-bars {
@@ -690,26 +683,36 @@
     &::after {
         content: '';
         position: absolute;
-        left: 0;
+        left: 50%;
+        width: 9px;
+        transform: translateX(-50%);
+    }
+    &::before {
+        top: -5px;
+    }
+    &::after  {
+        top: 5px;
     }
 }
 
-
-.fui-mobile-toggle-bars::before { top: -5px; }
-.fui-mobile-toggle-bars::after  { top: 5px; }
-
-.fluent_uui.is-mobile-open .fui-mobile-toggle-bars {
-    background: transparent;
-}
-
-.fluent_uui.is-mobile-open .fui-mobile-toggle-bars::before {
-    top: 0;
-    transform: rotate(45deg);
-}
-
-.fluent_uui.is-mobile-open .fui-mobile-toggle-bars::after {
-    top: 0;
-    transform: rotate(-45deg);
+.fluent_uui {
+    &.is-mobile-open {
+        .fui-mobile-toggle-bars {
+            background: transparent;
+            &::before {
+                width: 16px;
+                left: 0;
+                top: 0;
+                transform: rotate(45deg) translateX(0);
+            }
+            &::after {
+                width: 16px;
+                left: 0;
+                top: 0;
+                transform: rotate(-45deg) translateX(0);
+            }
+        }
+    }
 }
 
 .fui-backdrop {
@@ -1040,9 +1043,9 @@
         width: 280px;
         max-width: 86vw;
         flex: none;
-        padding: 12px 12px 64px 12px;
+        padding: 12px 12px 74px 12px;
         transform: translateX(-100%);
-        transition: transform .25s ease;
+        transition: transform .25s ease, opacity .25s ease;
         z-index: 1001;
         box-shadow: 6px 0 24px -8px rgba(15, 15, 15, 0.18);
         will-change: transform;
