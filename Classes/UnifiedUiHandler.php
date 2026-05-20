@@ -99,7 +99,7 @@ class UnifiedUiHandler
             remove_all_actions('admin_notices');
             $hookName = 'toplevel_page_' . $plugin_page;
             if($isFfSubPage) {
-                $hookName = 'fluent-forms_page_'.$plugin_page;
+                $hookName = get_plugin_page_hookname($plugin_page, 'fluent_forms');
             }
 
             add_action($hookName, [$this, 'pushUnifiedUiToTop'], 1);
