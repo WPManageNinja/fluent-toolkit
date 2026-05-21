@@ -790,49 +790,72 @@ class UnifiedUiHandler
 
     protected function getFormsMenu()
     {
-        if (!defined('FLUENTFORM_VERSION')) {
+        if (!defined('FLUENTFORM_VERSION') || !class_exists('\FluentForm\App\Modules\Acl\Acl')) {
             return [];
         }
 
+        $Acl     = '\FluentForm\App\Modules\Acl\Acl';
         $baseUrl = admin_url('admin.php?page=');
 
-        $menuItems = [
-            'fluent_forms'             => [
+        $menuItems = [];
+
+        if ($Acl::hasPermission('fluentform_dashboard_access') || $Acl::hasPermission('fluentform_settings_manager')) {
+            $menuItems['fluent_forms'] = [
                 'title'    => __('Forms', 'fluent-toolkit'),
                 'url'      => $baseUrl . 'fluent_forms',
                 'icon_svg' => $this->getIcon('forms')
-            ],
-            'fluent_forms_all_entries' => [
+            ];
+        }
+
+        if ($Acl::hasPermission('fluentform_entries_viewer')) {
+            $menuItems['fluent_forms_all_entries'] = [
                 'title'    => __('Entries', 'fluent-toolkit'),
                 'url'      => $baseUrl . 'fluent_forms_all_entries',
                 'icon_svg' => $this->getIcon('entries')
-            ],
-            'fluent_forms_reports'     => [
+            ];
+            $menuItems['fluent_forms_reports'] = [
                 'title'    => __('Reports', 'fluent-toolkit'),
                 'url'      => $baseUrl . 'fluent_forms_reports',
                 'icon_svg' => $this->getIcon('reports')
-            ],
-            'fluent_forms_transfer'    => [
+            ];
+        }
+
+        if ($Acl::hasPermission('fluentform_settings_manager')) {
+            $menuItems['fluent_forms_transfer'] = [
                 'title'    => __('Tools', 'fluent-toolkit'),
                 'url'      => $baseUrl . 'fluent_forms_transfer',
                 'icon_svg' => $this->getIcon('tools')
-            ],
-            'fluent_forms_add_ons'     => [
+            ];
+            $menuItems['fluent_forms_add_ons'] = [
                 'title'    => __('Integrations', 'fluent-toolkit'),
                 'url'      => $baseUrl . 'fluent_forms_add_ons',
                 'icon_svg' => $this->getIcon('integrations')
-            ],
-            'payments'                 => [
+            ];
+        }
+
+        if ($Acl::hasPermission('fluentform_view_payments')) {
+            $menuItems['payments'] = [
                 'title'    => __('Payments', 'fluent-toolkit'),
                 'url'      => $baseUrl . 'fluent_forms_settings#payments/general_settings',
                 'icon_svg' => $this->getIcon('money')
-            ],
-            'fluent_forms_settings'    => [
+            ];
+        }
+
+        if ($Acl::hasPermission('fluentform_settings_manager')) {
+            $menuItems['fluent_forms_settings'] = [
                 'title'    => __('Global Settings', 'fluent-toolkit'),
                 'url'      => $baseUrl . 'fluent_forms_settings#settings',
                 'icon_svg' => $this->getIcon('settings')
-            ]
-        ];
+            ];
+        }
+
+        if ($Acl::hasPermission('fluentform_dashboard_access') || $Acl::hasPermission('fluentform_settings_manager')) {
+            $menuItems['fluent_forms_docs'] = [
+                'title'    => __('Support', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'fluent_forms_docs',
+                'icon_svg' => $this->getIcon('docs')
+            ];
+        }
 
         return $menuItems;
     }
