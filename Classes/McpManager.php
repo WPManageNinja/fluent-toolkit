@@ -25,9 +25,9 @@ class McpManager
         /**
          * Register MCP products shown in Fluent Toolkit's MCP page.
          *
-         * This hook is intentionally read-only. It only collects product
-         * display/status data. Toolkit owns toggle writes through explicit
-         * manual handlers in McpManager::setProductMcpEnabled().
+         * This hook collects product display/status data. Products that need
+         * Toolkit toggles can register their own handlers with the
+         * fluent_kit/mcp_toggle_handlers filter.
          *
          * Supported product array keys:
          * - name or title: Display name.
@@ -41,7 +41,7 @@ class McpManager
          * @param array $products MCP product definitions.
          * @param array $adapter  Adapter status details.
          */
-        $products = apply_filters('fluent_toolkit/mcp_products', $products, $adapter);
+        $products = apply_filters('fluent_kit/mcp_products', $products, $adapter);
         $products = array_values(array_filter(array_map([__CLASS__, 'normalizeProduct'], (array) $products)));
 
         return [
@@ -52,17 +52,24 @@ class McpManager
 
     public static function setProductMcpEnabled($slug, $enabled)
     {
-        $slug = sanitize_key($slug);
+        $slug = self::canonicalProductSlug(sanitize_key($slug));
         $enabled = (bool) $enabled;
+        $handler = self::toggleHandler($slug);
 
-        if ($slug === 'fluent-crm') {
-            return self::setFluentCrmMcpEnabled($enabled);
+        if (!$handler || empty($handler['set_enabled']) || !is_callable($handler['set_enabled'])) {
+            return new \WP_Error(
+                'fluent_toolkit_mcp_toggle_not_supported',
+                __('This MCP product cannot be toggled by Fluent Toolkit.', 'fluent-toolkit')
+            );
         }
 
-        return new \WP_Error(
-            'fluent_toolkit_mcp_toggle_not_supported',
-            __('This MCP product cannot be toggled by Fluent Toolkit.', 'fluent-toolkit')
-        );
+        $result = call_user_func($handler['set_enabled'], $enabled);
+
+        if (is_wp_error($result)) {
+            return $result;
+        }
+
+        return $enabled;
     }
 
     public static function fluentCrmMcpEnabled()
@@ -121,17 +128,27 @@ class McpManager
         }
 
         $slug = self::firstFilled($product, ['slug']);
-        $slug = $slug ? sanitize_key($slug) : sanitize_key(str_replace(' ', '-', $name));
+        $slug = self::canonicalProductSlug($slug, $name);
 
         if (!$slug) {
             return null;
         }
 
         $enabled = self::readEnabledValue($product);
+        $handler = self::toggleHandler($slug);
+
+        if ($handler && !empty($handler['get_enabled']) && is_callable($handler['get_enabled'])) {
+            $enabled = (bool) call_user_func($handler['get_enabled']);
+        }
+
         $status = self::firstFilled($product, ['status', 'mcp_status']);
 
         if (!$status) {
             $status = $enabled ? 'ready' : 'disabled';
+        }
+
+        if (!$enabled && $status === 'ready') {
+            $status = 'disabled';
         }
 
         return [
@@ -148,7 +165,101 @@ class McpManager
 
     private static function hasManualToggleHandler($slug)
     {
-        return in_array($slug, ['fluent-crm'], true);
+        $handler = self::toggleHandler($slug);
+
+        return $handler && !empty($handler['set_enabled']) && is_callable($handler['set_enabled']);
+    }
+
+    private static function toggleHandler($slug)
+    {
+        $slug = self::canonicalProductSlug($slug);
+        $handlers = self::toggleHandlers();
+
+        return isset($handlers[$slug]) ? $handlers[$slug] : null;
+    }
+
+    private static function toggleHandlers()
+    {
+        $handlers = [
+            'fluent-crm' => [
+                'get_enabled' => [__CLASS__, 'fluentCrmMcpEnabled'],
+                'set_enabled' => [__CLASS__, 'setFluentCrmMcpEnabled'],
+            ],
+        ];
+
+        /**
+         * Register MCP enable/disable handlers for products shown in Toolkit.
+         *
+         * Handler format:
+         * $handlers['fluent-boards'] = [
+         *     'get_enabled' => function () { return fluent_boards_get_option('mcp_enabled', 'yes') === 'yes'; },
+         *     'set_enabled' => function ($enabled) { fluent_boards_update_option('mcp_enabled', $enabled ? 'yes' : 'no'); },
+         * ];
+         *
+         * @since 2.0.3
+         *
+         * @param array $handlers Toggle handlers keyed by MCP product slug.
+         */
+        $handlers = self::applyDeprecatedToggleHandlers($handlers);
+        $handlers = apply_filters('fluent_kit/mcp_toggle_handlers', $handlers);
+
+        if (!is_array($handlers)) {
+            return [];
+        }
+
+        $normalized = [];
+
+        foreach ($handlers as $slug => $handler) {
+            $slug = self::canonicalProductSlug($slug);
+
+            if (is_callable($handler)) {
+                $handler = [
+                    'set_enabled' => $handler,
+                ];
+            }
+
+            if (!is_array($handler) || !$slug) {
+                continue;
+            }
+
+            $normalized[$slug] = $handler;
+        }
+
+        return $normalized;
+    }
+
+    private static function canonicalProductSlug($slug, $name = '')
+    {
+        if ($slug) {
+            return sanitize_key($slug);
+        }
+
+        $name = preg_replace('/(?<=[a-z0-9])([A-Z])/', '-$1', $name);
+        $name = str_replace(['_', ' '], '-', $name);
+
+        return sanitize_key($name);
+    }
+
+    private static function applyDeprecatedToggleHandlers($handlers)
+    {
+        if (!function_exists('has_filter') || !has_filter('fluent_toolkit/mcp_toggle_handlers')) {
+            return $handlers;
+        }
+
+        if (function_exists('apply_filters_deprecated')) {
+            return apply_filters_deprecated(
+                'fluent_toolkit/mcp_toggle_handlers',
+                [$handlers],
+                '2.0.3',
+                'fluent_kit/mcp_toggle_handlers'
+            );
+        }
+
+        if (function_exists('_deprecated_hook')) {
+            _deprecated_hook('fluent_toolkit/mcp_toggle_handlers', '2.0.3', 'fluent_kit/mcp_toggle_handlers');
+        }
+
+        return apply_filters('fluent_toolkit/mcp_toggle_handlers', $handlers);
     }
 
     private static function firstFilled($source, $keys)
