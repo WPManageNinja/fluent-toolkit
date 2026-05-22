@@ -246,7 +246,7 @@
     }
 }
 
-.fui-product-header {
+.fui-product-header_btn {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -259,10 +259,18 @@
     text-align: left;
     font: inherit;
     cursor: pointer;
+    text-decoration: none;
     border-radius: 6px;
     transition: background-color .12s ease;
     -webkit-appearance: none;
             appearance: none;
+
+    &.active_link {
+      background: var(--fui-bg);
+      color: var(--fui-text);
+      font-weight: 500;
+      width: auto;
+    }
 
     &:hover,
     &:focus {

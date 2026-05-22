@@ -68,6 +68,15 @@ class UnifiedUiHandler
                 'items'    => $this->getBoardsMenu(),
                 'has_dark_mode' => false
             ],
+            'fluent-auth' => [
+                'disabled' => !defined('FLUENT_AUTH_VERSION'),
+                'title'    => 'Auth & Security',
+                'icon'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentauth_icon.svg',
+                'logo'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentauth_icon.svg',
+                'items'    => [],
+                'base_url' => admin_url('admin.php?page=fluent-auth#/'),
+                'has_dark_mode' => false
+            ],
             'fluent-toolkit' => [
                 'disabled' => true,
                 'title'   => 'FluentKit',
@@ -252,21 +261,31 @@ class UnifiedUiHandler
                         $isCurrent = ($slug === $currentAppSlug);
                         $appItems = isset($app['items']) ? $app['items'] : [];
                         ?>
-                        <section
-                            class="fui-product-section<?php echo $isCurrent ? ' fui-product-section--current is-open' : ''; ?>">
-                            <button type="button" class="fui-product-header"
+                        <section class="fui-product-section<?php echo $isCurrent ? ' fui-product-section--current is-open' : ''; ?>">
+                            <?php if (empty($appItems) && isset($app['base_url'])): ?>
+                                <a href="<?php echo $app['base_url']; ?>" class="fui-product-header_btn <?php echo $isCurrent ? 'active_link' : ''; ?>"
+                                        aria-expanded="<?php echo $isCurrent ? 'true' : 'false'; ?>">
+                                    <?php if (!empty($app['icon'])): ?>
+                                        <img class="fui-product-mark" src="<?php echo esc_url($app['icon']); ?>" alt=""/>
+                                    <?php endif; ?>
+                                    <span class="fui-product-name"><?php echo esc_html($app['title']); ?></span>
+                                </a>
+                            <?php else: ?>
+                            <button type="button" class="fui-product-header fui-product-header_btn"
                                     aria-expanded="<?php echo $isCurrent ? 'true' : 'false'; ?>">
                                 <?php if (!empty($app['icon'])): ?>
                                     <img class="fui-product-mark" src="<?php echo esc_url($app['icon']); ?>" alt=""/>
                                 <?php endif; ?>
                                 <span class="fui-product-name"><?php echo esc_html($app['title']); ?></span>
-                                <span class="fui-item-chevron" aria-hidden="true">
-                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M10.0001 10.879L13.7126 7.1665L14.7731 8.227L10.0001 13L5.22705 8.227L6.28755 7.1665L10.0001 10.879Z" fill="currentColor"/>
-                                    </svg>
-                                </span>
+                                <?php if (!empty($appItems)): ?>
+                                    <span class="fui-item-chevron" aria-hidden="true">
+                                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M10.0001 10.879L13.7126 7.1665L14.7731 8.227L10.0001 13L5.22705 8.227L6.28755 7.1665L10.0001 10.879Z" fill="currentColor"/>
+                                        </svg>
+                                    </span>
+                                <?php endif; ?>
                             </button>
-
+                            <?php endif; ?>
                             <?php if (!empty($appItems)): ?>
                                 <ul class="fui-product-nav">
                                     <?php foreach ($appItems as $itemKey => $item):
