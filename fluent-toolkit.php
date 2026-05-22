@@ -74,9 +74,7 @@ class FluentToolkitBootstrap
 
             }, 10, 2);
 
-            if (!defined('WP_MCP_VERSION')) {
-                require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'libs/mcp-adapter/mcp-adapter.php';
-            }
+            \FluentToolkit\Mcp\AdapterBootstrap::boot();
         }, 999);
 
         (new \FluentToolkit\Classes\UnifiedUiHandler())->register();
@@ -323,6 +321,7 @@ class FluentToolkitBootstrap
 
     private function loadClasses()
     {
+        require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'includes/Mcp/AdapterBootstrap.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/AdminMenu.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/ToolkitHelper.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/McpManager.php';
