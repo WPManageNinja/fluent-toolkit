@@ -1,4 +1,4 @@
-# Fluent Toolkit v2.0.2
+# Fluent Toolkit v2.0.5
 
 Unified UI. MCP connector. Beta builds. Add-ons. One place.
 
@@ -74,6 +74,9 @@ Toolkit only bundles the adapter fallback. Authentication and authorization for 
 ---
 
 ### Changelog
+
+#### 2.0.5
+- Fixed standalone MCP Adapter collision handling
 
 #### 2.0.2
 - Bug fixes and release packaging updates
