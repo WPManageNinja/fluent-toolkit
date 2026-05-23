@@ -866,59 +866,38 @@ class UnifiedUiHandler
             return [];
         }
 
-        $baseUrl = admin_url('admin.php?page=fluent-support#/');
+        if (!method_exists('\FluentSupport\App\Hooks\Handlers\Menu', 'getMenuItems')) {
+            return [];
+        }
 
-        $menuItems = [
-            'dashboard'        => [
-                'title'    => __('Dashboard', 'fluent-toolkit'),
-                'url'      => $baseUrl,
-                'icon_svg' => $this->getIcon('dashboard')
-            ],
-            'tickets'        => [
-                'title'    => __('Tickets', 'fluent-toolkit'),
-                'url'      => $baseUrl . 'tickets',
-                'icon_svg' => $this->getIcon('tickets')
-            ],
-            'reports'        => [
-                    'title'    => __('Reports', 'fluent-toolkit'),
-                    'url'      => $baseUrl . 'reports',
-                    'icon_svg' => $this->getIcon('reports')
-            ],
-            'mailboxes'        => [
-                    'title'    => __('Business Inboxes', 'fluent-toolkit'),
-                    'url'      => $baseUrl . 'mailboxes',
-                    'icon_svg' => $this->getIcon('mailboxes')
-            ],
-            'activity'        => [
-                    'title'    => __('Activities', 'fluent-toolkit'),
-                    'url'      => $baseUrl . 'activity',
-                    'icon_svg' => $this->getIcon('activities')
-            ],
-            'customers'        => [
-                    'title'    => __('Customers', 'fluent-toolkit'),
-                    'url'      => $baseUrl . 'customers',
-                    'icon_svg' => $this->getIcon('customers')
-            ],
-            'more'        => [
-                'title'    => __('More', 'fluent-toolkit'),
-                'url'  => '#',
-                'icon_svg' => $this->getIcon('more'),
-                'sub_menu' => [
-                    'saved_replies' => [
-                        'title' => __('Saved Replies', 'fluent-toolkit'),
-                        'url' => $baseUrl . 'saved-replies',
-                    ],
-                    'workflows' => [
-                        'title' => __('Workflows', 'fluent-toolkit'),
-                        'url' => $baseUrl . 'workflows',
-                    ]
-                ]
-            ]
-        ];
+        $menuItems = (new \FluentSupport\App\Hooks\Handlers\Menu())->getMenuItems();
 
+        if (!$menuItems) {
+            return [];
+        }
 
-        return $menuItems;
+        $formattedItems = [];
 
+        foreach ($menuItems as $itemKey => $item) {
+            $formattedItems[$itemKey] = [
+                'title'    => $item['label'],
+                'url'      => $item['permalink'],
+                'icon_svg' => $this->getIcon($itemKey)
+            ];
+
+            if (!empty($item['children'])) {
+                $subItems = [];
+                foreach ($item['children'] as $subKey => $subItem) {
+                    $subItems[$subKey] = [
+                        'title' => $subItem['label'],
+                        'url'   => $subItem['permalink']
+                    ];
+                }
+                $formattedItems[$itemKey]['sub_menu'] = $subItems;
+            }
+        }
+
+        return $formattedItems;
     }
 
     protected function getIcon($key)
