@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('FLUENT_TOOLKIT_VERSION', '2.0.4');
+define('FLUENT_TOOLKIT_VERSION', '2.0.3');
 define('FLUENT_TOOLKIT_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('FLUENT_TOOLKIT_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('FLUENT_TOOLKIT_PLUGIN_FILE', __FILE__);
@@ -45,26 +45,21 @@ class FluentToolkitBootstrap
              * Plugin Updater
              */
             new \FluentToolkit\Classes\Updater('https://kit.wpmanageninja.com/kit-version', FLUENT_TOOLKIT_PLUGIN_FILE, array(
-                'version'   => FLUENT_TOOLKIT_VERSION,
-                'license'   => '12345',
-                'item_name' => 'FluentKit',
-                'item_id'   => '101',
-                'author'    => 'wpmanageninja'
-            ),
-                array(
-                    'license_status' => 'valid',
-                    'admin_page_url' => admin_url('admin.php?page=fluent-toolkit'),
-                    'purchase_url'   => 'https://wpmanageninja.com',
-                    'plugin_title'   => 'FluentKit'
-                )
-            );
+                'version' => FLUENT_TOOLKIT_VERSION,
+                'license' => '12345',
+                'item_id' => '101',
+                'author'  => 'wpmanageninja'
+            ));
 
             add_filter('plugin_row_meta', function ($links, $pluginFile) {
                 if (plugin_basename(FLUENT_TOOLKIT_PLUGIN_FILE) !== $pluginFile) {
                     return $links;
                 }
 
-                $checkUpdateUrl = esc_url(admin_url('plugins.php?fluent-toolkit-check-update=' . time()));
+                $checkUpdateUrl = esc_url(wp_nonce_url(
+                    admin_url('plugins.php?fluent-toolkit-check-update=1'),
+                    'fluent-toolkit-check-update'
+                ));
 
                 $row_meta = array(
                     'check_update' => '<a style="color: #583fad;font-weight: 600;" href="' . $checkUpdateUrl . '" aria-label="' . esc_attr__('Check Update', 'fluent-toolkit') . '">' . esc_html__('Check Update', 'fluent-toolkit') . '</a>',

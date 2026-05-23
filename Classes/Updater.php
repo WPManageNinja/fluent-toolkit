@@ -2,419 +2,224 @@
 
 namespace FluentToolkit\Classes;
 
-// Exit if accessed directly
-if ( ! defined( 'ABSPATH' ) ) {
+if (!defined('ABSPATH')) {
     exit;
 }
 
+/**
+ * Plugin updater. Hooks into WordPress's plugin update pipeline:
+ *
+ *   pre_set_site_transient_update_plugins → inject our entry
+ *   plugins_api                           → serve "View details" payload
+ *
+ * Talks to an EDD Software Licensing endpoint (edd_action=get_version) and
+ * caches the response in a site transient.
+ */
 class Updater
 {
-    private $api_url = '';
-    private $api_data = array();
-    private $name = '';
-    private $slug = '';
-    private $version = '';
-    private $license_status = '';
-    private $admin_page_url = '';
-    private $purchase_url = '';
-    private $plugin_title = '';
+    const CACHE_TTL       = 12 * HOUR_IN_SECONDS;
+    const ERROR_CACHE_TTL = HOUR_IN_SECONDS;
 
-    private $response_transient_key;
+    /** @var string */
+    private $api_url;
+
+    /** @var array{version?:string,license?:string,item_id?:string|int,author?:string} */
+    private $api_data;
+
+    /** @var string e.g. "fluent-toolkit/fluent-toolkit.php" */
+    private $plugin_file;
+
+    /** @var string e.g. "fluent-toolkit" */
+    private $slug;
+
+    /** @var string Installed plugin version. */
+    private $version;
+
+    /** @var string Site transient key for the cached API response. */
+    private $cache_key;
 
     /**
-     * Class constructor.
-     *
-     * @uses plugin_basename()
-     * @uses hook()
-     *
-     * @param string $_api_url The URL pointing to the custom API endpoint.
-     * @param string $_plugin_file Path to the plugin file.
-     * @param array $_api_data Optional data to send with API calls.
-     * @param array $_plugin_update_data Optional data to generate link for activating or purchasing.
-     *                                      Needs admin_page_url, purchase_url, plugin_name, license_status to work
+     * @param string $api_url     EDD Software Licensing endpoint URL.
+     * @param string $plugin_file Absolute path to the main plugin file.
+     * @param array  $api_data    Must include 'version'; may include 'license', 'item_id', 'author'.
      */
-    function __construct($_api_url, $_plugin_file, $_api_data = null, $_plugin_update_data = [])
+    public function __construct($api_url, $plugin_file, array $api_data)
     {
-        $this->api_url = untrailingslashit($_api_url);
-        $this->api_data = $_api_data;
-        $this->name = plugin_basename($_plugin_file);
-        $this->slug = basename($_plugin_file, '.php');
+        $this->api_url     = untrailingslashit($api_url);
+        $this->api_data    = $api_data;
+        $this->plugin_file = plugin_basename($plugin_file);
+        $this->slug        = basename($plugin_file, '.php');
+        $this->version     = isset($api_data['version']) ? $api_data['version'] : '';
+        $this->cache_key   = 'fluent_toolkit_updater_' . md5($this->plugin_file);
 
-        $this->response_transient_key = md5(sanitize_key($this->name) . 'response_transient');
-
-        $this->version = $_api_data['version'];
-
-
-        if (is_array($_plugin_update_data)
-            && isset($_plugin_update_data['license_status'], $_plugin_update_data['admin_page_url'], $_plugin_update_data['purchase_url'], $_plugin_update_data['plugin_title'])
-        ) {
-            $this->license_status = $_plugin_update_data ['license_status'];
-            $this->admin_page_url = $_plugin_update_data['admin_page_url'];
-            $this->purchase_url = $_plugin_update_data['purchase_url'];
-            $this->plugin_title = $_plugin_update_data['plugin_title'];
-        }
-        // Set up hooks.
-        $this->init();
+        add_filter('pre_set_site_transient_update_plugins', [$this, 'inject_update'], 51);
+        add_filter('plugins_api', [$this, 'plugin_information'], 10, 3);
+        add_action('delete_site_transient_update_plugins', [$this, 'clear_cache']);
+        add_action('admin_init', [$this, 'handle_force_check']);
     }
 
     /**
-     * Set up WordPress filters to hook into WP's update process.
+     * Inject our update entry into WordPress's update_plugins transient.
      *
-     * @uses add_filter()
-     *
-     * @return void
+     * @param mixed $transient
+     * @return object
      */
-    public function init()
+    public function inject_update($transient)
     {
-        $this->maybe_delete_transients();
-
-        add_filter('pre_set_site_transient_update_plugins', array($this, 'check_update'), 51);
-        add_action( 'delete_site_transient_update_plugins', [ $this, 'delete_transients' ] );
-
-        add_filter('plugins_api', array($this, 'plugins_api_filter'), 10, 3);
-        remove_action( 'after_plugin_row_' . $this->name, 'wp_plugin_update_row' );
-
-        add_action( 'after_plugin_row_' . $this->name, [ $this, 'show_update_notification' ], 10, 2 );
-
-    }
-
-    function remove_plugin_update_message()
-    {
-        remove_action('after_plugin_row_' . $this->name, 'wp_plugin_update_row', 10, 2);
-    }
-
-    function check_update($_transient_data)
-    {
-        global $pagenow;
-
-        if (!is_object($_transient_data)) {
-            $_transient_data = new \stdClass();
+        if (!is_object($transient)) {
+            $transient = new \stdClass();
         }
 
-        if ('plugins.php' === $pagenow && is_multisite()) {
-            return $_transient_data;
+        if ('' === $this->version) {
+            return $transient;
         }
 
-        return $this->check_transient_data($_transient_data);
-    }
-
-    private function check_transient_data($_transient_data)
-    {
-        if (!is_object($_transient_data)) {
-            $_transient_data = new \stdClass();
+        $info = $this->get_remote_version();
+        if (!$info || empty($info->new_version)) {
+            return $transient;
         }
 
-        $version_info = $this->get_transient($this->response_transient_key);
-
-        if (false === $version_info || !is_object($version_info)) {
-            $api_response = $this->api_request('plugin_latest_version', array('slug' => $this->slug));
-            if (is_wp_error($api_response) || !is_object($api_response)) {
-                $version_info = new \stdClass();
-                $version_info->error = true;
-            } else {
-                $version_info = $api_response;
-            }
-            $this->set_transient($this->response_transient_key, $version_info);
-        }
-
-        if (!empty($version_info->error)) {
-            return $_transient_data;
-        }
-
-        if (isset($version_info->new_version)) {
-            if (!isset($_transient_data->response) || !is_array($_transient_data->response)) {
-                $_transient_data->response = array();
-            }
-            if (!isset($_transient_data->checked) || !is_array($_transient_data->checked)) {
-                $_transient_data->checked = array();
-            }
-            if (version_compare($this->version, $version_info->new_version, '<')) {
-                $_transient_data->response[$this->name] = $version_info;
-            } else {
-                if (!isset($_transient_data->no_update) || !is_array($_transient_data->no_update)) {
-                    $_transient_data->no_update = array();
-                }
-                $_transient_data->no_update[$this->name] = $version_info;
-            }
-            $_transient_data->last_checked = time();
-            $_transient_data->checked[$this->name] = $this->version;
-        }
-
-        return $_transient_data;
-    }
-
-    /**
-     * show update notification row -- needed for multisite subsites, because WP won't tell you otherwise!
-     *
-     * @param string $file
-     * @param array $plugin
-     */
-    public function show_update_notification($file, $plugin)
-    {
-        if ( is_network_admin() ) {
-            return;
-        }
-
-        if ( ! current_user_can( 'update_plugins' ) ) {
-            return;
-        }
-
-
-        if ( $this->name !== $file ) {
-            return;
-        }
-
-
-        // Remove our filter on the site transient
-        remove_filter( 'pre_set_site_transient_update_plugins', [ $this, 'check_update' ] );
-
-        $update_cache = get_site_transient( 'update_plugins' );
-
-        $update_cache = $this->check_transient_data( $update_cache );
-
-        set_site_transient( 'update_plugins', $update_cache );
-
-        // Restore our filter
-        add_filter( 'pre_set_site_transient_update_plugins', [ $this, 'check_update' ] );
-
-        // Only render the row ourselves if WP hasn't already hooked its own renderer
-        // (WP registers wp_plugin_update_row at admin_init 20, only if the transient
-        // had our entry at that point; otherwise the row would not appear at all).
-        if ( ! has_action( 'after_plugin_row_' . $this->name, 'wp_plugin_update_row' ) ) {
-            if ( ! function_exists( 'wp_plugin_update_row' ) ) {
-                require_once ABSPATH . 'wp-admin/includes/update.php';
-            }
-            wp_plugin_update_row( $file, $plugin );
-        }
-    }
-
-
-    /**
-     * Updates information on the "View version x.x details" page with custom data.
-     *
-     * @uses api_request()
-     *
-     * @param mixed $_data
-     * @param string $_action
-     * @param object $_args
-     *
-     * @return object $_data
-     */
-    function plugins_api_filter($_data, $_action = '', $_args = null)
-    {
-        if ( 'plugin_information' !== $_action ) {
-            return $_data;
-        }
-
-        if(!isset($_args->slug)) {
-            return $_data;
-        }
-
-        if($_args->slug !== $this->slug) {
-            return $_data;
-        }
-
-        $cache_key = $this->slug.'_api_request_' . substr( md5( serialize( $this->slug ) ), 0, 15 );
-        $api_request_transient = get_site_transient( $cache_key );
-
-        if ( empty( $api_request_transient ) ) {
-            $to_send = array(
-                'slug'   => $this->slug,
-                'is_ssl' => is_ssl(),
-                'fields' => array(
-                    'banners' => false,
-                    'reviews' => false
-                )
-            );
-            $api_request_transient = $this->api_request('plugin_information', $to_send);
-
-            // Expires in 2 days
-            set_site_transient( $cache_key, $api_request_transient, DAY_IN_SECONDS * 2 );
-        }
-
-        if (false !== $api_request_transient) {
-            $_data = $api_request_transient;
-
-            // WP expects these as associative arrays, not stdClass
-            foreach (['sections', 'banners', 'icons', 'contributors'] as $field) {
-                if (isset($_data->$field) && is_object($_data->$field)) {
-                    $_data->$field = (array) $_data->$field;
-                }
+        foreach (['response', 'no_update', 'checked'] as $bucket) {
+            if (!isset($transient->$bucket) || !is_array($transient->$bucket)) {
+                $transient->$bucket = [];
             }
         }
 
-        return $_data;
-    }
-
-
-    /**
-     * Disable SSL verification in order to prevent download update failures
-     *
-     * @param array $args
-     * @param string $url
-     *
-     * @return object $array
-     */
-    function http_request_args($args, $url)
-    {
-        // If it is an https request and we are performing a package download, disable ssl verification
-        if (strpos($url, 'https://') !== false && strpos($url, 'edd_action=package_download')) {
-            $args['sslverify'] = false;
-        }
-
-        return $args;
-    }
-
-    /**
-     * Calls the API and, if successful, returns the object delivered by the API.
-     *
-     * @uses get_bloginfo()
-     * @uses wp_remote_post()
-     * @uses is_wp_error()
-     *
-     * @param string $_action The requested action.
-     * @param array $_data Parameters for the API action.
-     *
-     * @return false|object
-     */
-    private function api_request($_action, $_data)
-    {
-
-        global $wp_version;
-
-        $data = array_merge($this->api_data, $_data);
-
-        if ($data['slug'] != $this->slug) {
-            return;
-        }
-
-        if ($this->api_url == home_url()) {
-            return false; // Don't allow a plugin to ping itself
-        }
-
-        $siteUrl = home_url();
-        if (is_multisite()) {
-            $siteUrl = network_site_url();
-        }
-
-        $api_params = array(
-            'edd_action' => 'get_version',
-            'license'    => !empty($data['license']) ? $data['license'] : '',
-            'item_id'    => isset($data['item_id']) ? $data['item_id'] : false,
-            'slug'       => $data['slug'],
-            'author'     => $data['author'],
-            'url'        => $siteUrl
-        );
-
-        $request = wp_remote_post($this->api_url,
-            array('timeout' => 15, 'sslverify' => false, 'body' => $api_params));
-
-        if (!is_wp_error($request)) {
-            $request = json_decode(wp_remote_retrieve_body($request));
-        }
-
-        if ($request && isset($request->sections)) {
-            $request->sections = maybe_unserialize($request->sections);
-            $request->slug = $this->slug;
+        if (version_compare($this->version, $info->new_version, '<')) {
+            $transient->response[$this->plugin_file] = $info;
         } else {
-            $request = false;
+            $transient->no_update[$this->plugin_file] = $info;
         }
 
-        return $request;
+        $transient->checked[$this->plugin_file] = $this->version;
+        $transient->last_checked = time();
+
+        return $transient;
     }
 
-    public function show_changelog()
+    /**
+     * Serve the "View version details" modal.
+     *
+     * @param false|object|array $result
+     * @param string             $action
+     * @param object|null        $args
+     * @return false|object|array
+     */
+    public function plugin_information($result, $action = '', $args = null)
     {
-        if (empty($_REQUEST['edd_sl_action']) || 'view_plugin_changelog' != $_REQUEST['edd_sl_action']) {
-            return;
+        if ('plugin_information' !== $action) {
+            return $result;
+        }
+        if (!is_object($args) || empty($args->slug) || $args->slug !== $this->slug) {
+            return $result;
         }
 
-        if (empty($_REQUEST['plugin'])) {
-            return;
+        $info = $this->get_remote_version();
+        if (!$info) {
+            return $result;
         }
 
-        if (empty($_REQUEST['slug'])) {
+        return $info;
+    }
+
+    /**
+     * Force-check entry point: GET ?fluent-toolkit-check-update=… on any admin page.
+     */
+    public function handle_force_check()
+    {
+        if (!isset($_GET['fluent-toolkit-check-update'])) {
             return;
         }
-
         if (!current_user_can('update_plugins')) {
-            wp_die(__('You do not have permission to install plugin updates', 'fluent-toolkit'), __('Error', 'fluent-toolkit'),
-                array('response' => 403));
+            return;
         }
+        check_admin_referer('fluent-toolkit-check-update');
 
-        $response = $this->api_request('plugin_latest_version', array('slug' => $_REQUEST['slug']));
+        $this->clear_cache();
+        delete_site_transient('update_plugins');
 
-        if ($response && isset($response->sections['changelog'])) {
-            echo '<div style="background:#fff;padding:10px;">' . $response->sections['changelog'] . '</div>';
-        }
-
+        wp_safe_redirect(admin_url('plugins.php?s=fluent-toolkit&plugin_status=all'));
         exit;
     }
 
-    private function maybe_delete_transients()
+    public function clear_cache()
     {
-        global $pagenow;
+        delete_site_transient($this->cache_key);
+    }
 
-        if ('update-core.php' === $pagenow && isset($_GET['force-check'])) {
-            $this->delete_transients();
+    /**
+     * Fetch (or return cached) version info from the remote.
+     *
+     * @return object|false
+     */
+    private function get_remote_version()
+    {
+        $cached = get_site_transient($this->cache_key);
+        if (is_object($cached)) {
+            return empty($cached->error) ? $cached : false;
         }
 
-        if(isset($_GET['fluent-toolkit-check-update'])) {
-            if ( current_user_can( 'update_plugins' ) ) {
-                $this->delete_transients();
-
-                // Remove our filter on the site transient
-                remove_filter( 'pre_set_site_transient_update_plugins', [ $this, 'check_update' ] );
-
-                $update_cache = get_site_transient( 'update_plugins' );
-
-                $update_cache = $this->check_transient_data( $update_cache );
-
-                set_site_transient( 'update_plugins', $update_cache );
-
-                // Restore our filter
-                add_filter( 'pre_set_site_transient_update_plugins', [ $this, 'check_update' ] );
-
-                wp_redirect(admin_url('plugins.php?s=fluent-toolkit&plugin_status=all'));
-                exit();
-            }
-        }
-    }
-
-    public function delete_transients()
-    {
-        $this->delete_transient($this->response_transient_key);
-    }
-
-    protected function delete_transient($cache_key)
-    {
-        delete_option($cache_key);
-    }
-
-    protected function get_transient($cache_key)
-    {
-        $cache_data = get_option($cache_key);
-
-        if (empty($cache_data['timeout']) || current_time('timestamp') > $cache_data['timeout']) {
-            // Cache is expired.
+        $response = $this->remote_request();
+        if (!$response) {
+            $error = new \stdClass();
+            $error->error = true;
+            set_site_transient($this->cache_key, $error, self::ERROR_CACHE_TTL);
             return false;
         }
 
-        return $cache_data['value'];
+        set_site_transient($this->cache_key, $response, self::CACHE_TTL);
+        return $response;
     }
 
-    protected function set_transient($cache_key, $value, $expiration = 0)
+    /**
+     * @return object|false
+     */
+    private function remote_request()
     {
-        if (empty($expiration)) {
-            $expiration = strtotime('+12 hours', current_time('timestamp'));
+        if ($this->api_url === untrailingslashit(home_url())) {
+            return false;
         }
 
-        $data = [
-            'timeout' => $expiration,
-            'value'   => $value,
-        ];
+        $site_url = is_multisite() ? network_site_url() : home_url();
 
-        update_option($cache_key, $data, 'no');
+        $response = wp_remote_post($this->api_url, [
+            'timeout'   => 15,
+            'sslverify' => false,
+            'body'      => [
+                'edd_action' => 'get_version',
+                'license'    => isset($this->api_data['license']) ? $this->api_data['license'] : '',
+                'item_id'    => isset($this->api_data['item_id']) ? $this->api_data['item_id'] : '',
+                'slug'       => $this->slug,
+                'author'     => isset($this->api_data['author']) ? $this->api_data['author'] : '',
+                'url'        => $site_url,
+            ],
+        ]);
+
+        if (is_wp_error($response) || 200 !== wp_remote_retrieve_response_code($response)) {
+            return false;
+        }
+
+        $data = json_decode(wp_remote_retrieve_body($response));
+        if (!is_object($data) || empty($data->new_version)) {
+            return false;
+        }
+
+        if (isset($data->sections)) {
+            $data->sections = maybe_unserialize($data->sections);
+        }
+
+        // WP 6.9+ list_plugin_updates() reads $update->icons['svg'] with bracket
+        // access; json_decode returns these fields as stdClass, which fatals.
+        // Cast once at write time so cached payloads are already correct.
+        foreach (['icons', 'banners', 'sections', 'contributors'] as $field) {
+            if (isset($data->$field) && is_object($data->$field)) {
+                $data->$field = (array) $data->$field;
+            }
+        }
+
+        $data->slug   = $this->slug;
+        $data->plugin = $this->plugin_file;
+
+        return $data;
     }
-
 }
