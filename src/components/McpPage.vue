@@ -264,6 +264,8 @@ export default {
                                 WP_API_URL: endpoint,
                                 WP_API_USERNAME: user,
                                 WP_API_PASSWORD: password,
+                                OAUTH_ENABLED: 'false',
+                                NODE_TLS_REJECT_UNAUTHORIZED: '0',
                             },
                         },
                     },

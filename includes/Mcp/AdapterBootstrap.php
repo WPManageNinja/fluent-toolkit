@@ -14,7 +14,7 @@ class AdapterBootstrap
             return true;
         }
 
-        if (self::bundledFallbackDisabled() || self::standalonePluginInstalled() || self::adapterNamespaceLoaded()) {
+        if (self::bundledFallbackDisabled() || self::standalonePluginActivationRequest() || self::adapterNamespaceLoaded()) {
             return false;
         }
 
@@ -55,19 +55,23 @@ class AdapterBootstrap
             && FLUENT_TOOLKIT_DISABLE_BUNDLED_MCP_ADAPTER;
     }
 
-    private static function standalonePluginInstalled()
+    private static function standalonePluginActivationRequest()
     {
-        if (!defined('WP_PLUGIN_DIR')) {
+        $actions = function_exists('wp_unslash')
+            ? wp_unslash([$_REQUEST['action'] ?? '', $_REQUEST['action2'] ?? ''])
+            : [$_REQUEST['action'] ?? '', $_REQUEST['action2'] ?? ''];
+
+        if (!array_intersect($actions, ['activate', 'activate-selected'])) {
             return false;
         }
 
-        $standaloneFile = rtrim(WP_PLUGIN_DIR, '/\\') . '/' . self::STANDALONE_PLUGIN_FILE;
+        $plugins = isset($_REQUEST['checked']) && is_array($_REQUEST['checked']) ? $_REQUEST['checked'] : [];
+        $plugins[] = $_REQUEST['plugin'] ?? '';
+        $plugins = function_exists('wp_unslash') ? wp_unslash($plugins) : $plugins;
 
-        if (!file_exists($standaloneFile)) {
-            return false;
-        }
-
-        return realpath($standaloneFile) !== realpath(self::bundledAdapterFile());
+        return in_array(self::STANDALONE_PLUGIN_FILE, array_map(function ($plugin) {
+            return is_string($plugin) ? ltrim(str_replace('\\', '/', trim($plugin)), '/') : '';
+        }, $plugins), true);
     }
 
     private static function adapterNamespaceLoaded()
