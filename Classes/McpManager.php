@@ -2,6 +2,8 @@
 
 namespace FluentToolkit\Classes;
 
+use FluentToolkit\Mcp\AdapterBootstrap;
+
 defined('ABSPATH') || exit;
 
 class McpManager
@@ -14,7 +16,7 @@ class McpManager
     {
         $adapter = [
             'available' => self::adapterAvailable(),
-            'provider'  => defined('WP_MCP_VERSION') ? 'available' : 'missing',
+            'provider'  => AdapterBootstrap::provider(),
         ];
         $products = [];
 
@@ -348,6 +350,6 @@ class McpManager
 
     private static function adapterAvailable()
     {
-        return defined('WP_MCP_VERSION') && class_exists('\WP\MCP\Core\McpAdapter') && function_exists('wp_register_ability');
+        return AdapterBootstrap::available();
     }
 }

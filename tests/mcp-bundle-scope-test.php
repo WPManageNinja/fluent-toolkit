@@ -30,6 +30,10 @@ $forbiddenPatterns = [
 ];
 
 foreach ($productionFiles as $file) {
+    if (!file_exists($file)) {
+        continue;
+    }
+
     $contents = file_get_contents($file);
     foreach ($forbiddenPatterns as $pattern) {
         if (strpos($contents, $pattern) !== false) {
