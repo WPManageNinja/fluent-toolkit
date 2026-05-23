@@ -1,8 +1,8 @@
-# Fluent Toolkit v2.0.5
+# FluentKit v2.0.5
 
 Unified UI. MCP connector. Beta builds. Add-ons. One place.
 
-Connect your Fluent plugins under one roof. Fluent Toolkit gives you a unified admin workspace, an MCP connector for AI agents, early access to release candidates, companion add-on installs, and update visibility across the Fluent ecosystem from your WordPress dashboard.
+Connect your Fluent plugins under one roof. FluentKit gives you a unified admin workspace, an MCP connector for AI agents, early access to release candidates, companion add-on installs, and update visibility across the Fluent ecosystem from your WordPress dashboard.
 
 ---
 
