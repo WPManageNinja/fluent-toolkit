@@ -124,7 +124,11 @@ class AdminMenu
 
     private static function pluginIcon()
     {
-        $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><path d="M32.6667 15L46.2681 15C47.2953 15 47.8212 16.2314 47.1109 16.9734L30.3333 34.5H16.7319C15.7047 34.5 15.1788 33.2686 15.8891 32.5266L32.6667 15Z" fill="black"/><path d="M34.4108 50L46.7576 50C47.7018 50 48.2549 48.9369 47.713 48.1637L40.5892 38H26L34.4108 50Z" fill="black"/></svg>';
+        // Monochrome silhouette — the rounded square is filled and the two "F" marks
+        // are cut out as holes via fill-rule="evenodd". WP's admin menu masks SVG
+        // icons to a single color, so a multi-color logo flattens into one shape;
+        // this version preserves the F cut-outs against any menu color scheme.
+        $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><path fill-rule="evenodd" clip-rule="evenodd" d="M6.4 0H57.6A6.4 6.4 0 0 1 64 6.4V57.6A6.4 6.4 0 0 1 57.6 64H6.4A6.4 6.4 0 0 1 0 57.6V6.4A6.4 6.4 0 0 1 6.4 0ZM15 25.7273C15 18.6982 20.6982 13 27.7273 13H30.9091V38.4545C30.9091 45.4836 25.2109 51.1818 18.1818 51.1818H15V25.7273ZM34.0909 35.2727C34.0909 28.2436 39.7891 22.5454 46.8182 22.5454H50V38.4545C50 45.4836 44.3018 51.1818 37.2727 51.1818H34.0909V35.2727Z" fill="black"/></svg>';
 
         return 'data:image/svg+xml;base64,' . base64_encode($svg);
     }

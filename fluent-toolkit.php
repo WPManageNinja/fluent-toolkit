@@ -30,7 +30,7 @@ class FluentToolkitBootstrap
         add_action('wp_ajax_fluent-beta-install', array($this, 'installBetaPlugin'));
         add_action('wp_ajax_fluent_beta_get_beta_versions', array($this, 'getBetaVersions'));
         add_action('wp_ajax_fluent_toolkit_activate_plugin', array($this, 'activatePlugin'));
-        add_action('wp_ajax_fluent_toolkit_unified_ui_toggle', array($this, 'toggleUnifiedUi'));
+        add_action('wp_ajax_fluent_toolkit_save_dashboard_settings', array($this, 'saveDashboardSettings'));
         add_action('wp_ajax_fluent_toolkit_mcp_overview', array($this, 'fetchMcpOverview'));
         add_action('wp_ajax_fluent_toolkit_mcp_toggle', array($this, 'toggleMcpAccess'));
 
@@ -271,24 +271,43 @@ class FluentToolkitBootstrap
         wp_send_json(\FluentToolkit\Classes\McpManager::status(), 200);
     }
 
-    public function toggleUnifiedUi()
+    public function saveDashboardSettings()
     {
         $this->verifySettingsAjaxRequest();
 
-        $enabled = isset($_POST['enabled']) ? sanitize_text_field($_POST['enabled']) : '';
-        $enabled = in_array($enabled, ['yes', 'true', '1', 'on'], true);
+        $allowedKeys = ['uinified_ui', 'merge_admin_menus', 'hide_app_headers'];
+        $incoming = isset($_POST['settings']) && is_array($_POST['settings']) ? $_POST['settings'] : [];
+
         $settings = get_option('_fluent_kit_settings', []);
         if (!is_array($settings)) {
             $settings = [];
         }
 
-        $settings['uinified_ui'] = $enabled ? 'yes' : 'no';
+        $wasUnifiedUiEnabled = !empty($settings['uinified_ui']) && $settings['uinified_ui'] === 'yes';
+        $hadMergeAdminMenus = isset($settings['merge_admin_menus']);
+
+        foreach ($allowedKeys as $key) {
+            if (!array_key_exists($key, $incoming)) {
+                continue;
+            }
+            $value = sanitize_text_field($incoming[$key]);
+            $settings[$key] = in_array($value, ['yes', 'true', '1', 'on'], true) ? 'yes' : 'no';
+        }
+
+        // First-time Unified UI activation: default merge_admin_menus to 'yes'.
+        // Existing users who already had Unified UI enabled (and never saw this setting)
+        // keep their individual top-level menus visible until they opt in explicitly.
+        $isNowEnabling = !$wasUnifiedUiEnabled
+            && isset($settings['uinified_ui']) && $settings['uinified_ui'] === 'yes';
+        if ($isNowEnabling && !$hadMergeAdminMenus && !array_key_exists('merge_admin_menus', $incoming)) {
+            $settings['merge_admin_menus'] = 'yes';
+        }
+
         update_option('_fluent_kit_settings', $settings);
 
         wp_send_json([
-            'message' => $enabled
-                ? __('Unified UI enabled.', 'fluent-toolkit')
-                : __('Unified UI disabled.', 'fluent-toolkit'),
+            'message'  => __('Settings saved.', 'fluent-toolkit'),
+            'settings' => $settings,
         ], 200);
     }
 

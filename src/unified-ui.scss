@@ -26,12 +26,20 @@
     align-self: flex-start;
     height: 100vh;
     overflow-y: auto;
+    overflow-x: hidden;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     gap: 4px;
     z-index: 100;
     scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    &::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+        display: none;
+    }
 }
 
 /* ── Workspace switcher ──────────────────────────────────── */
@@ -781,7 +789,7 @@
         justify-content: space-between;
         gap: 8px;
         a {
-            &:not(.fui-sidebar-settings-btn) {
+            &:not(.fui-sidebar-settings-btn):not(.fui-wordpress-menu-link) {
                 display: block;
             }
             color: var(--fui-text-soft);
@@ -795,6 +803,45 @@
             }
         }
     }
+}
+
+// WP menu trigger — pairs the WordPress mark with a chevron affordance so
+// the icon reads as "opens a drawer" rather than just a logo. Chevron
+// rotates 180° while the drawer is open.
+.fui-wordpress-menu-link {
+    align-items: center;
+    border-radius: 6px;
+    display: inline-flex !important;
+    gap: 2px;
+    padding: 4px 6px 4px 4px;
+    transition: background-color .12s ease, color .12s ease;
+
+    &:hover,
+    &:focus-visible {
+        background: var(--fui-bg);
+    }
+
+    .fui-wp-mark {
+        width: 20px;
+        height: 20px;
+    }
+
+    .fui-wp-chevron {
+        width: 14px;
+        height: 14px;
+        opacity: .7;
+        transition: transform .2s ease, opacity .12s ease;
+    }
+
+    &:hover .fui-wp-chevron,
+    &:focus-visible .fui-wp-chevron {
+        opacity: 1;
+    }
+}
+
+body.fui-wp-menu-open .fui-wordpress-menu-link .fui-wp-chevron {
+    transform: rotate(180deg);
+    opacity: 1;
 }
 
 // Theme toggle button + dropdown

@@ -60,6 +60,28 @@ body.fui-wp-menu-open .fluent_uui {
   margin-left: var(--fui-wp-menu-width);
 }
 
+/* On mobile the unified sidebar is a fixed overlay at z-index 1001, so the
+   WP drawer (z-index 200 by default) would slide in behind it. Bump it
+   above the sidebar and let it claim full mobile-drawer width so the
+   native menu is actually visible and tappable. */
+@media (max-width: 782px) {
+  #adminmenumain {
+    width: 280px !important;
+    max-width: 86vw;
+    z-index: 1002;
+  }
+
+  body.fui-wp-menu-open .fluent_uui {
+    /* Drawer overlays content on mobile — no push needed. */
+    margin-left: 0;
+  }
+
+  #fct_admin_app_wrapper #fct_admin_menu_holder, .fui-app-content .ff_header {
+    margin-left: 0;
+  }
+
+}
+
 /* Drop the Collapse Menu button — meaningless in a drawer. */
 #adminmenu #collapse-menu {
   display: none !important;
@@ -117,6 +139,11 @@ div#fct_admin_menu_holder {
   position: sticky;
   top: 0;
   z-index: 999;
+  margin-left: -20px;
+}
+
+.ff_header {
+  margin-left: -20px;
 }
 
 #fluent_cart_plugin_app {
@@ -155,6 +182,40 @@ select {
 .toplevel_page_fluent-boards #wpbody #fbs_tasks_wrapper {
   height: calc(100vh - 140px);
 }
+
+.fs_main_navbar {
+  top: 0 !important;
+  width: calc(100% - 240px);
+}
+
+.fui-has-app-headers {
+  &.fui_app_fluent-support {
+    .fframe_app {
+      padding-bottom: 50px;
+      @media screen and (max-width: 782px) {
+        padding-bottom: 60px;
+      }
+    }
+    .fs_view_ticket, .fs_tk_inner_sidebar.has-view-route, .fs_tickets_tiny_nav {
+      margin-top: 20px;
+      padding-top: 0;
+    }
+  }
+
+  &.fui_app_fluent-booking {
+    #fluent-booking-app {
+      padding-top: 0px;
+    }
+  }
+
+  button.el-button.el-button--default.fbs_full_screen_btn {
+    display: none;
+  }
+
+
+}
+
+
 .fluent_uui {
   .fluentcrm-app.is-settings-page {
     margin-top: 0;
@@ -185,13 +246,16 @@ select {
     left: -20px;
   }
 
-  #alpha_app .fframe_app,
-  #fluent-booking-app .fframe_main-menu-items,
-  .ff_header,
-  .fcrm_topbar,
-  #fct_admin_menu_holder {
-    display: none;
+  &.fui-hide-app-headers {
+    #alpha_app .fframe_app,
+    #fluent-booking-app .fframe_main-menu-items,
+    .ff_header,
+    .fcrm_topbar,
+    #fct_admin_menu_holder {
+      display: none;
+    }
   }
+
   .fl_app.fluent-cart-admin-pages {
     padding: 24px 24px 24px 0;
   }

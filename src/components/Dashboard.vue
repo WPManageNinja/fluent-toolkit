@@ -22,27 +22,87 @@
             </div>
         </header>
 
-        <section class="ft-unified-panel" v-loading="unifiedUiSaving" element-loading-text="Saving Unified UI status...">
-            <div class="ft-unified-copy">
-                <span class="ft-unified-eyebrow">Unified Fluent workspace</span>
-                <h1>Fluent Unified UI</h1>
-                <p>Turn on a unified Fluent workspace that brings your Fluent tools into one cleaner, focused and easier-to-manage experience.</p>
-            </div>
-            <div class="ft-unified-control">
-                <div>
-                    <strong>Unified UI</strong>
-                    <span>{{ unifiedUiStatusLabel }}</span>
-                </div>
-                <label class="ft-switch ft-switch-large" title="Enable Fluent Unified UI">
-                    <input
-                        type="checkbox"
-                        :checked="unifiedUiEnabled"
-                        :disabled="unifiedUiSaving"
-                        @change="toggleUnifiedUi($event.target.checked)"
-                    />
-                    <span></span>
-                </label>
-            </div>
+        <section class="ft-card ft-workspace-card" v-loading="unifiedUiSaving" element-loading-text="Saving setting...">
+            <header class="ft-card-head">
+                <span class="ft-card-eyebrow">Unified Fluent Workspace</span>
+                <h2 class="ft-card-title">Fluent Unified UI</h2>
+                <p class="ft-card-sub">Turn on a unified Fluent workspace that brings your Fluent tools into one cleaner, focused and easier-to-manage experience.</p>
+            </header>
+
+            <ul class="ft-setting-list">
+                <li class="ft-setting-item">
+                    <span class="ft-setting-icon ft-setting-icon--indigo" aria-hidden="true">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+                            <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+                            <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+                            <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+                        </svg>
+                    </span>
+                    <div class="ft-setting-text">
+                        <strong>Enable Unified UI</strong>
+                        <span>{{ unifiedUiStatusLabel }} · Replace the default Fluent admin screens with the unified workspace.</span>
+                    </div>
+                    <label class="ft-switch" title="Enable Fluent Unified UI">
+                        <input
+                            type="checkbox"
+                            :checked="unifiedUiEnabled"
+                            :disabled="unifiedUiSaving"
+                            @change="toggleUnifiedUi($event.target.checked)"
+                        />
+                        <span></span>
+                    </label>
+                </li>
+
+                <li class="ft-setting-item" :class="{ 'is-disabled': !unifiedUiEnabled }">
+                    <span class="ft-setting-icon ft-setting-icon--violet" aria-hidden="true">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="16" rx="2"/>
+                            <line x1="9" y1="4" x2="9" y2="20"/>
+                            <line x1="5.5" y1="8.5" x2="6.5" y2="8.5"/>
+                            <line x1="5.5" y1="12" x2="6.5" y2="12"/>
+                            <line x1="5.5" y1="15.5" x2="6.5" y2="15.5"/>
+                        </svg>
+                    </span>
+                    <div class="ft-setting-text">
+                        <strong>Merge admin menus</strong>
+                        <span>Hide each Fluent plugin's top-level WordPress menu so everything opens from the unified workspace.</span>
+                    </div>
+                    <label class="ft-switch" :title="unifiedUiEnabled ? 'Merge top-level Fluent menus' : 'Enable Unified UI first'">
+                        <input
+                            type="checkbox"
+                            :checked="mergeAdminMenus"
+                            :disabled="unifiedUiSaving || !unifiedUiEnabled"
+                            @change="toggleMergeAdminMenus($event.target.checked)"
+                        />
+                        <span></span>
+                    </label>
+                </li>
+
+                <li class="ft-setting-item" :class="{ 'is-disabled': !unifiedUiEnabled }">
+                    <span class="ft-setting-icon ft-setting-icon--amber" aria-hidden="true">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="16" rx="2"/>
+                            <line x1="3" y1="9" x2="21" y2="9"/>
+                            <line x1="6.5" y1="6.5" x2="7.5" y2="6.5"/>
+                            <line x1="9.5" y1="6.5" x2="10.5" y2="6.5"/>
+                        </svg>
+                    </span>
+                    <div class="ft-setting-text">
+                        <strong>Hide app headers</strong>
+                        <span>Hide the in-app headers of FluentCRM, Cart, Support, Forms, Booking and similar apps for a cleaner workspace.</span>
+                    </div>
+                    <label class="ft-switch" :title="unifiedUiEnabled ? 'Hide native app headers' : 'Enable Unified UI first'">
+                        <input
+                            type="checkbox"
+                            :checked="hideAppHeaders"
+                            :disabled="unifiedUiSaving || !unifiedUiEnabled"
+                            @change="toggleHideAppHeaders($event.target.checked)"
+                        />
+                        <span></span>
+                    </label>
+                </li>
+            </ul>
         </section>
 
         <section class="ft-hero ft-mcp-hero ft-mcp-dashboard-banner">
@@ -164,6 +224,8 @@ export default {
             loading: false,
             unifiedUiSaving: false,
             unifiedUiEnabled: (window.fluentToolkitVars.settings || {}).uinified_ui === 'yes',
+            mergeAdminMenus: (window.fluentToolkitVars.settings || {}).merge_admin_menus === 'yes',
+            hideAppHeaders: (window.fluentToolkitVars.settings || {}).hide_app_headers === 'yes',
             activeChannel: 'all',
             searchQuery: '',
             caps: Object.assign(
@@ -234,12 +296,30 @@ export default {
                 });
         },
         toggleUnifiedUi(enabled) {
+            this.saveDashboardSettings({ uinified_ui: enabled ? 'yes' : 'no' }, true);
+        },
+        toggleMergeAdminMenus(enabled) {
+            this.saveDashboardSettings({ merge_admin_menus: enabled ? 'yes' : 'no' }, false);
+        },
+        toggleHideAppHeaders(enabled) {
+            this.saveDashboardSettings({ hide_app_headers: enabled ? 'yes' : 'no' }, false);
+        },
+        saveDashboardSettings(settings, reload) {
             this.unifiedUiSaving = true;
-            this.$post('fluent_toolkit_unified_ui_toggle', {
-                enabled: enabled ? 'yes' : 'no',
-            })
-                .then(() => {
-                    window.location.reload();
+            this.$post('fluent_toolkit_save_dashboard_settings', { settings })
+                .then(response => {
+                    if (response && response.settings) {
+                        this.unifiedUiEnabled = response.settings.uinified_ui === 'yes';
+                        this.mergeAdminMenus = response.settings.merge_admin_menus === 'yes';
+                        this.hideAppHeaders = response.settings.hide_app_headers === 'yes';
+                    }
+                    if (reload) {
+                        window.location.reload();
+                        return;
+                    }
+                    if (response && response.message) {
+                        this.$notify.success(response.message);
+                    }
                 })
                 .catch(error => {
                     this.$handleError(error);
