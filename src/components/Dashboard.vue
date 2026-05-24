@@ -4,7 +4,7 @@
         <!-- Topbar -->
         <header class="ft-topbar">
             <div class="ft-brand">
-                <img class="ft-brand-logo" :src="brandLogoUrl" alt="FluentKit logo" />
+                <img class="ft-brand-logo" :src="brandLogoUrl" alt="FluentHub logo" />
                 <span class="ft-brand-version">v{{ appVars.version }}</span>
             </div>
             <div class="ft-topbar-actions">
@@ -15,8 +15,8 @@
                     @click="updateToolkit()"
                     type="danger"
                     size="small"
-                >Update Toolkit</el-button>
-                <button class="ft-iconbtn" @click="getBetaPlugins()" title="Refresh registry" aria-label="Refresh">
+                >Update FluentHub</el-button>
+                <button class="ft-iconbtn" @click="getBetaPlugins(true)" title="Refresh registry" aria-label="Refresh">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
                 </button>
             </div>
@@ -60,8 +60,8 @@
 
         <div class="ft-section-head ft-beta-head">
             <div>
-                <span class="ft-section-kicker">Beta program</span>
-                <h2>Beta / Early Access Plugins</h2>
+                <span class="ft-section-kicker">Fluent ecosystem</span>
+                <h2>Plugins &amp; Add-ons</h2>
             </div>
             <div class="ft-beta-stats">
                 <span>{{ betaPlugins.length }} available</span>
@@ -76,14 +76,13 @@
             <div v-else v-loading="installing" element-loading-text="Installing… Please wait.">
                 <div class="ft-list-head">
                     <div>Plugin</div>
-                    <div>Latest</div>
                     <div>Status</div>
                     <div style="text-align: right;">Action</div>
                 </div>
                 <div class="ft-row" v-for="(plugin, index) in filteredPlugins" :key="plugin.slug">
                     <!-- Plugin info -->
                     <div class="ft-plugin">
-                        <div class="ft-plugin-icon" :class="`ft-ic-${index % 6}`">
+                        <div class="ft-plugin-icon" :class="plugin.logo ? '' : `ft-ic-${index % 6}`">
                             <img style="max-width: 44px;" :src="plugin.logo" v-if="plugin.logo" />
                             <span v-else>{{ pluginInitials(plugin.name) }}</span>
                         </div>
@@ -105,13 +104,12 @@
                                     </template>
                                 </template>
                                 <span v-else>Not installed</span>
+                                <template v-if="plugin.changelog_url">
+                                    <span class="ft-dot-sep"></span>
+                                    <a :href="plugin.changelog_url" target="_blank" rel="noopener" class="ft-meta-link">Changelog</a>
+                                </template>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Latest version -->
-                    <div class="ft-version ft-mono">
-                        {{ plugin.has_beta_update ? plugin.beta_version : plugin.stable_version }}
                     </div>
 
                     <!-- Status -->
@@ -120,6 +118,9 @@
                         <span v-else-if="plugin.has_update || plugin.has_beta_update" class="ft-status ft-status-update">
                             <span class="ft-dot ft-dot-warn"></span>Update available
                         </span>
+                        <span v-else-if="plugin.is_active === false" class="ft-status ft-status-notinstalled">
+                            <span class="ft-dot"></span>Inactive
+                        </span>
                         <span v-else class="ft-status ft-status-ok">
                             <span class="ft-dot ft-dot-ok"></span>Up to date
                         </span>
@@ -127,10 +128,10 @@
 
                     <!-- Actions -->
                     <div class="ft-actions">
-                        <a v-if="plugin.changelog_url" :href="plugin.changelog_url" target="_blank" rel="noopener" class="ft-btn ft-btn-ghost">Changelog</a>
-                        <button v-if="!plugin.installed_version" @click="installPlugin(plugin)" class="ft-btn ft-btn-primary">Install</button>
-                        <button v-else-if="plugin.has_beta_update" @click="installPlugin(plugin, 'yes')" class="ft-btn ft-btn-accent">Update</button>
-                        <button v-else-if="plugin.has_update" @click="installPlugin(plugin)" class="ft-btn ft-btn-accent">Update</button>
+                        <button v-if="!plugin.installed_version && caps.install_plugins" @click="installPlugin(plugin)" class="ft-btn ft-btn-primary">Install</button>
+                        <button v-else-if="plugin.has_beta_update && caps.update_plugins" @click="installPlugin(plugin, 'yes')" class="ft-btn ft-btn-accent">Update to {{ plugin.beta_version }}</button>
+                        <button v-else-if="plugin.has_update && caps.update_plugins" @click="installPlugin(plugin)" class="ft-btn ft-btn-accent">Update to {{ plugin.stable_version }}</button>
+                        <button v-else-if="plugin.is_active === false && caps.activate_plugins" @click="activatePlugin(plugin)" class="ft-btn ft-btn-primary">Activate</button>
                         <span v-else>
                             --
                         </span>
@@ -138,14 +139,14 @@
                 </div>
 
                 <div v-if="filteredPlugins.length === 0" class="ft-empty">
-                    Currently, there has no beta testing available.
+                    No plugins available right now.
                 </div>
             </div>
         </div>
 
         <!-- Footer -->
         <div class="ft-footer">
-            <div>Registry synced · <span @click="getBetaPlugins()" style="cursor: pointer; color: var(--accent);">Refresh now</span></div>
+            <div>Registry synced · <span @click="getBetaPlugins(true)" style="cursor: pointer; color: var(--accent);">Refresh now</span></div>
             <!-- <div>Toggle <a href="#">beta channel</a> in settings to opt in to release candidates</div> -->
         </div>
 
@@ -165,6 +166,10 @@ export default {
             unifiedUiEnabled: (window.fluentToolkitVars.settings || {}).uinified_ui === 'yes',
             activeChannel: 'all',
             searchQuery: '',
+            caps: Object.assign(
+                { install_plugins: false, update_plugins: false, activate_plugins: false },
+                window.fluentToolkitVars.caps || {}
+            ),
         };
     },
     computed: {
@@ -215,9 +220,9 @@ export default {
                 .slice(0, 2)
                 .toUpperCase();
         },
-        getBetaPlugins() {
+        getBetaPlugins(refresh = false) {
             this.loading = true;
-            this.$get('fluent_beta_get_beta_versions')
+            this.$get('fluent_beta_get_beta_versions', refresh ? { refresh: 1 } : {})
                 .then(response => {
                     this.betaPlugins = response.beta_versions;
                 })
@@ -276,6 +281,20 @@ export default {
         updateToolkit() {
             this.installing = true;
             this.installPlugin({slug: 'fluent-toolkit'});
+        },
+        activatePlugin(plugin) {
+            this.installing = true;
+            this.$post('fluent_toolkit_activate_plugin', { slug: plugin.slug })
+                .then(response => {
+                    this.$notify.success(response.message);
+                    this.getBetaPlugins();
+                })
+                .catch(error => {
+                    this.$handleError(error);
+                })
+                .finally(() => {
+                    this.installing = false;
+                });
         },
         hideLicenseKey(licenseKey) {
             if (!licenseKey) return '';

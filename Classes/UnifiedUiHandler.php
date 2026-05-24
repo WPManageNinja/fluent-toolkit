@@ -2,6 +2,8 @@
 
 namespace FluentToolkit\Classes;
 
+use FluentCart\App\Services\Permission\PermissionManager;
+
 class UnifiedUiHandler
 {
 
@@ -19,66 +21,94 @@ class UnifiedUiHandler
             return;
         }
 
+        $supportMenu = $this->getSupportTicketsMenu();
+        $formsMenu = $this->getFormsMenu();
+        $cartMenu = $this->getCartMenu();
+        $crmMenu = $this->getCrmMenu();
+        $bookingMenu = $this->getBookingMenu();
+
+        $hasApps = $supportMenu || $formsMenu || $cartMenu || $crmMenu || $bookingMenu;
+
         $apps = [
             'fluentcrm-admin' => [
-                'disabled' => !defined('FLUENTCRM'),
-                'title'    => 'CRM',
-                'icon'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentcrm_icon.svg',
-                'logo'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentcrm-logo.svg',
-                'items'    => $this->getCrmMenu(),
-                'has_dark_mode' => true
+                'disabled'      => !$crmMenu,
+                'title'         => 'CRM',
+                'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentcrm_icon.svg',
+                'logo'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentcrm-logo.svg',
+                'items'         => $crmMenu,
+                'has_dark_mode' => true,
+                'dashboard_url' => admin_url('admin.php?page=fluentcrm-admin#/')
             ],
             'fluent-cart'     => [
-                'disabled' => !defined('FLUENTCART_VERSION'),
-                'title'    => 'Commerce',
-                'icon'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentcart_icon.svg',
-                'logo'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentcart_logo.svg',
-                'items'    => $this->getCartMenu(),
-                'has_dark_mode' => true
+                'disabled'      => !$cartMenu,
+                'title'         => 'Commerce',
+                'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentcart_icon.svg',
+                'logo'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentcart_logo.svg',
+                'items'         => $cartMenu,
+                'has_dark_mode' => true,
+                'dashboard_url' => admin_url('admin.php?page=fluent-cart#/')
             ],
             'fluent_forms'    => [
-                    'disabled' => !defined('FLUENTFORM'),
-                    'title'    => 'Forms',
-                    'icon'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentforms_icon.svg',
-                    'logo'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentforms_logo.svg',
-                    'items'    => $this->getFormsMenu(),
-                    'has_dark_mode' => false
+                'disabled'      => !$formsMenu,
+                'title'         => 'Forms',
+                'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentforms_icon.svg',
+                'logo'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentforms_logo.svg',
+                'items'         => $formsMenu,
+                'has_dark_mode' => false,
+                'dashboard_url' => admin_url('admin.php?page=fluent_forms#/')
             ],
-            'fluent-support'    => [
-                    'disabled' => !defined('FLUENT_SUPPORT_VERSION'),
-                    'title'    => 'Support Tickets',
-                    'icon'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentsupport_icon.svg',
-                    'logo'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentsupport_logo.svg',
-                    'items'    => $this->getSupportTicketsMenu(),
-                    'has_dark_mode' => false
+            'fluent-support'  => [
+                'disabled'      => !$supportMenu,
+                'title'         => 'Support Tickets',
+                'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentsupport_icon.svg',
+                'logo'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentsupport_logo.svg',
+                'items'         => $supportMenu,
+                'has_dark_mode' => false,
+                'dashboard_url' => admin_url('admin.php?page=fluent-support#/')
             ],
             'fluent-booking'  => [
-                'disabled' => !defined('FLUENT_BOOKING_VERSION'),
-                'title'    => 'Appointments',
-                'icon'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentbooking_icon.svg',
-                'logo'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentbooking_logo.svg',
-                'items'    => $this->getBookingMenu(),
-                'has_dark_mode' => false
+                'disabled'      => !$bookingMenu,
+                'title'         => 'Appointments',
+                'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentbooking_icon.svg',
+                'logo'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentbooking_logo.svg',
+                'items'         => $bookingMenu,
+                'has_dark_mode' => false,
+                'dashboard_url' => admin_url('admin.php?page=fluent-booking#/')
             ],
             'fluent-boards'   => [
-                'disabled' => !defined('FLUENT_BOARDS'),
-                'title'    => 'Projects',
-                'icon'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentboards_icon.svg',
-                'logo'     => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentboards_logo.svg',
-                'items'    => $this->getBoardsMenu(),
-                'has_dark_mode' => false
-            ],
-            'fluent-toolkit' => [
-                'disabled' => true,
-                'title'   => 'FluentKit',
+                'disabled'      => !defined('FLUENT_BOARDS'),
+                'title'         => 'Projects',
+                'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentboards_icon.svg',
+                'logo'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentboards_logo.svg',
+                'items'         => $this->getBoardsMenu(),
                 'has_dark_mode' => false,
-                'hide_on_menu' => true
+                'dashboard_url' => admin_url('admin.php?page=fluent-boards#/')
+            ],
+            'fluent-toolkit'  => [
+                'disabled'      => true,
+                'title'         => 'FluentHub',
+                'has_dark_mode' => false,
+                'hide_on_menu'  => true
             ]
         ];
 
         $this->apps = apply_filters('fluent_toolkit/unified_apps', $apps);
 
-        add_action('admin_init', function () {
+        if ($hasApps) {
+            add_filter('fluent_toolkit/admin_menu_priority', function ($priority) {
+                return 2;
+            });
+
+            add_filter('fluent_toolkit/admin_apps', function ($apps) {
+                $ourApps = $this->apps;
+                return array_filter($ourApps, function ($app) {
+                    return empty($app['disabled']);
+                });
+            });
+        }
+
+
+        add_action('admin_init', function () use ($hasApps) {
             global $plugin_page;
 
             $isFfSubPage = in_array($plugin_page, [
@@ -93,13 +123,38 @@ class UnifiedUiHandler
             ]);
 
             if (!isset($this->apps[$plugin_page]) && !$isFfSubPage) {
+                add_action('admin_head', function () {
+                    $cssSelector = '';
+                    foreach ($this->apps as $key => $app) {
+                        if (!empty($app['disabled'])) {
+                            continue;
+                        }
+                        $cssSelector .= ' #toplevel_page_' . $key . ',';
+                    }
+
+                    if (!$cssSelector) {
+                        return;
+                    }
+
+                    $cssSelector = rtrim($cssSelector, ',');
+                    ?>
+                    <style>
+                        <?php echo $cssSelector; ?>
+                        {
+                            display: none !important
+                        ;
+                        }
+                    </style>
+                    <?php
+                });
+
                 return;
             }
 
             remove_all_actions('admin_notices');
             $hookName = 'toplevel_page_' . $plugin_page;
-            if($isFfSubPage) {
-                $hookName = 'fluent-forms_page_'.$plugin_page;
+            if ($isFfSubPage) {
+                $hookName = 'fluent-forms_page_' . $plugin_page;
             }
 
             add_action($hookName, [$this, 'pushUnifiedUiToTop'], 1);
@@ -114,7 +169,8 @@ class UnifiedUiHandler
             add_filter('show_admin_bar', '__return_false', 9999);
 
             add_action('admin_enqueue_scripts', [$this, 'loadUnifiedUi']);
-        },9999);
+
+        }, 9999);
     }
 
     public function loadUnifiedUi($screen = '')
@@ -146,479 +202,506 @@ class UnifiedUiHandler
         $siteIcon = function_exists('get_site_icon_url') ? get_site_icon_url(64) : '';
         ?>
         <script>
-        (function () {
-            var hasDarkMode = <?php echo !empty($currentApp['has_dark_mode']) ? 'true' : 'false'; ?>;
-            if (!hasDarkMode) {
-                document.body.classList.remove('fluent_theme_dark');
-                return;
-            }
-            var savedMode = localStorage.getItem('fluent_theme_mode') || 'system';
-            var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            var resolvedMode = savedMode.indexOf(':') !== -1 ? savedMode.split(':').pop() : savedMode;
-            var isDark = resolvedMode === 'dark' || (resolvedMode === 'system' && prefersDark);
-            if (isDark && !document.body.classList.contains('fluent_theme_dark')) document.body.classList.add('fluent_theme_dark');
-        })();
+            (function () {
+                var hasDarkMode = <?php echo !empty($currentApp['has_dark_mode']) ? 'true' : 'false'; ?>;
+                if (!hasDarkMode) {
+                    document.body.classList.remove('fluent_theme_dark');
+                    return;
+                }
+                var savedMode = localStorage.getItem('fluent_theme_mode') || 'system';
+                var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                var resolvedMode = savedMode.indexOf(':') !== -1 ? savedMode.split(':').pop() : savedMode;
+                var isDark = resolvedMode === 'dark' || (resolvedMode === 'system' && prefersDark);
+                if (isDark && !document.body.classList.contains('fluent_theme_dark')) document.body.classList.add('fluent_theme_dark');
+            })();
         </script>
 
         <div class="fluent_uui">
-        <?php
-        $mobileNavItems = !empty($currentApp['items']) ? array_slice(array_values($currentApp['items']), 0, 4) : [];
-        ?>
-        <div class="fui-mobile-nav" role="navigation" aria-label="<?php echo esc_attr__('Quick navigation', 'fluent-toolkit'); ?>">
-            <div class="fui-mobile-nav-links">
-                <?php foreach ($mobileNavItems as $item): ?>
-                <a href="<?php echo esc_url($item['url']); ?>"
-                   class="fui-mobile-nav-item"
-                   <?php echo !empty(parse_url($item['url'], PHP_URL_FRAGMENT)) ? 'data-fui-hash="#' . esc_attr(parse_url($item['url'], PHP_URL_FRAGMENT)) . '"' : ''; ?>>
-                    <?php if (!empty($item['icon_svg'])): ?>
-                        <span class="fui-mobile-nav-icon" aria-hidden="true"><?php echo $item['icon_svg']; ?></span>
+            <?php
+            $mobileNavItems = !empty($currentApp['items']) ? array_slice(array_values($currentApp['items']), 0, 4) : [];
+            ?>
+            <div class="fui-mobile-nav" role="navigation"
+                 aria-label="<?php echo esc_attr__('Quick navigation', 'fluent-toolkit'); ?>">
+                <div class="fui-mobile-nav-links">
+                    <?php foreach ($mobileNavItems as $item): ?>
+                        <a href="<?php echo esc_url($item['url']); ?>"
+                           class="fui-mobile-nav-item"
+                            <?php echo !empty(parse_url($item['url'], PHP_URL_FRAGMENT)) ? 'data-fui-hash="#' . esc_attr(parse_url($item['url'], PHP_URL_FRAGMENT)) . '"' : ''; ?>>
+                            <?php if (!empty($item['icon_svg'])): ?>
+                                <span class="fui-mobile-nav-icon"
+                                      aria-hidden="true"><?php echo $item['icon_svg']; ?></span>
+                            <?php endif; ?>
+                            <span class="fui-mobile-nav-label"><?php echo esc_html($item['title']); ?></span>
+                        </a>
+                    <?php endforeach; ?>
+                    <?php if (empty($mobileNavItems) && count($mobileNavItems) === 0) : ?>
+                        <!-- Added This Span to match the design -->
+                        <span aria-label="<?php echo esc_attr__('Mobile Nav', 'fluent-toolkit'); ?>"></span>
                     <?php endif; ?>
-                    <span class="fui-mobile-nav-label"><?php echo esc_html($item['title']); ?></span>
-                </a>
-                <?php endforeach; ?>
-                <?php if (empty($mobileNavItems) && count($mobileNavItems) === 0) : ?>
-                <!-- Added This Span to match the design -->
-                <span aria-label="<?php echo esc_attr__('Mobile Nav', 'fluent-toolkit'); ?>"></span>
-                <?php endif; ?>
-                <button type="button" class="fui-mobile-toggle fui-mobile-nav-item" aria-label="<?php echo esc_attr__('Toggle menu', 'fluent-toolkit'); ?>" aria-controls="fui-sidebar"
-                        aria-expanded="false">
+                    <button type="button" class="fui-mobile-toggle fui-mobile-nav-item"
+                            aria-label="<?php echo esc_attr__('Toggle menu', 'fluent-toolkit'); ?>"
+                            aria-controls="fui-sidebar"
+                            aria-expanded="false">
                     <span class="fui-mobile-nav-icon">
                         <span class="fui-mobile-toggle-bars" aria-hidden="true"></span>
                     </span>
-                    <span class="fui-mobile-nav-label">
+                        <span class="fui-mobile-nav-label">
                         <?php echo esc_html__('Menu', 'fluent-toolkit'); ?>
                     </span>
-                </button>
+                    </button>
+                </div>
             </div>
-        </div>
-        <div class="fui-backdrop" hidden></div>
-        <div id="fui-sidebar" class="fluent_ui_sidebar">
+            <div class="fui-backdrop" hidden></div>
+            <div id="fui-sidebar" class="fluent_ui_sidebar">
 
-            <!-- Workspace switcher -->
-            <div class="fui-workspace-wrap">
-                <button type="button" class="fui-workspace" aria-haspopup="menu" aria-expanded="false">
-                    <?php if ($siteIcon): ?>
-                        <img class="fui-workspace-icon" src="<?php echo esc_url($siteIcon); ?>" alt=""/>
-                    <?php else: ?>
-                        <span
-                            class="fui-workspace-icon fui-workspace-icon--initial"><?php echo esc_html(mb_strtoupper(mb_substr($siteName, 0, 1))); ?></span>
-                    <?php endif; ?>
-                    <div class="fui-workspace-info">
-                        <div class="fui-workspace-name"><?php echo esc_html($siteName); ?></div>
-                        <?php if (!empty($currentApp['title'])): ?>
-                            <div class="fui-workspace-sub"><?php echo esc_html($currentApp['title']); ?></div>
+                <!-- Workspace switcher -->
+                <div class="fui-workspace-wrap">
+                    <button type="button" class="fui-workspace" aria-haspopup="menu" aria-expanded="false">
+                        <?php if ($siteIcon): ?>
+                            <img class="fui-workspace-icon" src="<?php echo esc_url($siteIcon); ?>" alt=""/>
+                        <?php else: ?>
+                            <span
+                                class="fui-workspace-icon fui-workspace-icon--initial"><?php echo esc_html(mb_strtoupper(mb_substr($siteName, 0, 1))); ?></span>
                         <?php endif; ?>
-                    </div>
-                    <span class="fui-workspace-caret" aria-hidden="true">
+                        <div class="fui-workspace-info">
+                            <div class="fui-workspace-name"><?php echo esc_html($siteName); ?></div>
+                            <?php if (!empty($currentApp['title'])): ?>
+                                <div class="fui-workspace-sub"><?php echo esc_html($currentApp['title']); ?></div>
+                            <?php endif; ?>
+                        </div>
+                        <span class="fui-workspace-caret" aria-hidden="true">
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M10.0001 10.879L13.7126 7.1665L14.7731 8.227L10.0001 13L5.22705 8.227L6.28755 7.1665L10.0001 10.879Z" fill="currentColor"></path>
+                            <path
+                                d="M10.0001 10.879L13.7126 7.1665L14.7731 8.227L10.0001 13L5.22705 8.227L6.28755 7.1665L10.0001 10.879Z"
+                                fill="currentColor"></path>
                         </svg>
                     </span>
-                </button>
-                <div class="fui-workspace-menu" role="menu" hidden>
-                    <a href="<?php echo esc_url(home_url('/')); ?>" target="_blank" rel="noopener"
-                       class="fui-workspace-menu-item" role="menuitem">
+                    </button>
+                    <div class="fui-workspace-menu" role="menu" hidden>
+                        <a href="<?php echo esc_url(home_url('/')); ?>" target="_blank" rel="noopener"
+                           class="fui-workspace-menu-item" role="menuitem">
                         <span class="fui-workspace-menu-icon" aria-hidden="true">
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
                                  stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path
                                     d="M6 3H4a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-2"/><path d="M9 3h4v4"/><path
                                     d="m13 3-6 6"/></svg>
                         </span>
-                        <?php esc_html_e('Visit Site', 'fluent-toolkit'); ?>
-                    </a>
-                    <div class="fui-workspace-menu-divider" role="none"></div>
-                    <a href="<?php echo esc_url(wp_logout_url()); ?>"
-                       class="fui-workspace-menu-item fui-workspace-menu-item--danger" role="menuitem">
+                            <?php esc_html_e('Visit Site', 'fluent-toolkit'); ?>
+                        </a>
+                        <div class="fui-workspace-menu-divider" role="none"></div>
+                        <a href="<?php echo esc_url(wp_logout_url()); ?>"
+                           class="fui-workspace-menu-item fui-workspace-menu-item--danger" role="menuitem">
                         <span class="fui-workspace-menu-icon" aria-hidden="true">
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor"
                                  stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path
                                     d="M10 12v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v1"/><path
                                     d="M13 8H6"/><path d="m11 6 2 2-2 2"/></svg>
                         </span>
-                        <?php esc_html_e('Log Out', 'fluent-toolkit'); ?>
-                    </a>
+                            <?php esc_html_e('Log Out', 'fluent-toolkit'); ?>
+                        </a>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Unified Products list (stable order — current app is expanded) -->
-            <?php
-            $visibleApps = array_filter($this->apps, function ($a) {
-                return empty($a['disabled']);
-            });
-            ?>
-            <?php if (!empty($visibleApps)): ?>
-                <div class="fui-products">
-                    <?php foreach ($visibleApps as $slug => $app):
-                        $isCurrent = ($slug === $currentAppSlug);
-                        $appItems = isset($app['items']) ? $app['items'] : [];
-                        ?>
-                        <section
-                            class="fui-product-section<?php echo $isCurrent ? ' fui-product-section--current is-open' : ''; ?>">
-                            <button type="button" class="fui-product-header"
-                                    aria-expanded="<?php echo $isCurrent ? 'true' : 'false'; ?>">
-                                <?php if (!empty($app['icon'])): ?>
-                                    <img class="fui-product-mark" src="<?php echo esc_url($app['icon']); ?>" alt=""/>
-                                <?php endif; ?>
-                                <span class="fui-product-name"><?php echo esc_html($app['title']); ?></span>
-                                <span class="fui-item-chevron" aria-hidden="true">
-                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M10.0001 10.879L13.7126 7.1665L14.7731 8.227L10.0001 13L5.22705 8.227L6.28755 7.1665L10.0001 10.879Z" fill="currentColor"/>
+                <!-- Unified Products list (stable order — current app is expanded) -->
+                <?php
+                $visibleApps = array_filter($this->apps, function ($a) {
+                    return empty($a['disabled']);
+                });
+                ?>
+                <?php if (!empty($visibleApps)): ?>
+                    <div class="fui-products">
+                        <?php foreach ($visibleApps as $slug => $app):
+                            $isCurrent = ($slug === $currentAppSlug);
+                            $appItems = isset($app['items']) ? $app['items'] : [];
+                            ?>
+                            <section
+                                class="fui-product-section<?php echo $isCurrent ? ' fui-product-section--current is-open' : ''; ?>">
+                                <button type="button" class="fui-product-header"
+                                        aria-expanded="<?php echo $isCurrent ? 'true' : 'false'; ?>">
+                                    <?php if (!empty($app['icon'])): ?>
+                                        <img class="fui-product-mark" src="<?php echo esc_url($app['icon']); ?>"
+                                             alt=""/>
+                                    <?php endif; ?>
+                                    <span class="fui-product-name"><?php echo esc_html($app['title']); ?></span>
+                                    <span class="fui-item-chevron" aria-hidden="true">
+                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
+                                         xmlns="http://www.w3.org/2000/svg">
+                                        <path
+                                            d="M10.0001 10.879L13.7126 7.1665L14.7731 8.227L10.0001 13L5.22705 8.227L6.28755 7.1665L10.0001 10.879Z"
+                                            fill="currentColor"/>
                                     </svg>
                                 </span>
-                            </button>
+                                </button>
 
-                            <?php if (!empty($appItems)): ?>
-                                <ul class="fui-product-nav">
-                                    <?php foreach ($appItems as $itemKey => $item):
-                                        $itemHash = parse_url($item['url'], PHP_URL_FRAGMENT);
-                                        $hasSub = $isCurrent && !empty($item['sub_menu']);
-                                        $isServerActive = $isCurrent && !$itemHash && ($itemKey === $plugin_page);
-                                        ?>
-                                        <li class="fui-item<?php echo $hasSub ? ' fui-item--has-sub' : ''; ?>">
-                                            <a href="<?php echo esc_url($item['url']); ?>"
-                                               class="fui-apps-menu-item<?php echo $isServerActive ? ' active' : ''; ?>"
-                                               <?php echo ($isCurrent && $itemHash) ? 'data-fui-hash="#' . esc_attr($itemHash) . '"' : ''; ?>>
-                                                <?php if (!empty($item['icon_svg'])): ?>
-                                                    <span class="fui-app-icon"><?php echo $item['icon_svg']; ?></span>
-                                                <?php endif; ?>
-                                                <span
-                                                    class="fui-app-title"><?php echo esc_html($item['title']); ?></span>
-                                                <?php if ($hasSub): ?>
-                                                    <span class="fui-item-chevron" aria-hidden="true">
-                                                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                            <path d="M10.0001 10.879L13.7126 7.1665L14.7731 8.227L10.0001 13L5.22705 8.227L6.28755 7.1665L10.0001 10.879Z" fill="currentColor"/>
+                                <?php if (!empty($appItems)): ?>
+                                    <ul class="fui-product-nav">
+                                        <?php foreach ($appItems as $itemKey => $item):
+                                            $itemHash = parse_url($item['url'], PHP_URL_FRAGMENT);
+                                            $hasSub = $isCurrent && !empty($item['sub_menu']);
+                                            $isServerActive = $isCurrent && !$itemHash && ($itemKey === $plugin_page);
+                                            ?>
+                                            <li class="fui-item<?php echo $hasSub ? ' fui-item--has-sub' : ''; ?>">
+                                                <a <?php if (!empty($item['external'])) {
+                                                    echo 'target="_blank" rel="noopener"';
+                                                } ?> href="<?php echo esc_url($item['url']); ?>"
+                                                     class="fui-apps-menu-item<?php echo $isServerActive ? ' active' : ''; ?>"
+                                                    <?php echo ($isCurrent && $itemHash) ? 'data-fui-hash="#' . esc_attr($itemHash) . '"' : ''; ?>>
+                                                    <?php if (!empty($item['icon_svg'])): ?>
+                                                        <span
+                                                            class="fui-app-icon"><?php echo $item['icon_svg']; ?></span>
+                                                    <?php endif; ?>
+                                                    <span
+                                                        class="fui-app-title"><?php echo esc_html($item['title']); ?></span>
+                                                    <?php if ($hasSub): ?>
+                                                        <span class="fui-item-chevron" aria-hidden="true">
+                                                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
+                                                             xmlns="http://www.w3.org/2000/svg">
+                                                            <path
+                                                                d="M10.0001 10.879L13.7126 7.1665L14.7731 8.227L10.0001 13L5.22705 8.227L6.28755 7.1665L10.0001 10.879Z"
+                                                                fill="currentColor"/>
                                                         </svg>
                                                     </span>
-                                                <?php endif; ?>
-                                            </a>
-                                            <?php if ($hasSub): ?>
-                                                <ul class="fui-submenu">
-                                                    <?php foreach ($item['sub_menu'] as $subKey => $subItem):
-                                                        $subHash = parse_url($subItem['url'], PHP_URL_FRAGMENT);
-                                                        ?>
-                                                        <li>
-                                                            <a href="<?php echo esc_url($subItem['url']); ?>"
-                                                               class="fui-apps-submenu-item"
-                                                               data-fui-hash="<?php echo $subHash ? '#' . esc_attr($subHash) : ''; ?>">
+                                                    <?php endif; ?>
+                                                </a>
+                                                <?php if ($hasSub): ?>
+                                                    <ul class="fui-submenu">
+                                                        <?php foreach ($item['sub_menu'] as $subKey => $subItem):
+                                                            $subHash = parse_url($subItem['url'], PHP_URL_FRAGMENT);
+                                                            ?>
+                                                            <li>
+                                                                <a href="<?php echo esc_url($subItem['url']); ?>"
+                                                                   class="fui-apps-submenu-item"
+                                                                   data-fui-hash="<?php echo $subHash ? '#' . esc_attr($subHash) : ''; ?>">
                                                                 <span
                                                                     class="fui-app-title"><?php echo esc_html($subItem['title']); ?></span>
-                                                            </a>
-                                                        </li>
-                                                    <?php endforeach; ?>
-                                                </ul>
-                                            <?php endif; ?>
-                                        </li>
-                                    <?php endforeach; ?>
-                                </ul>
-                            <?php endif; ?>
-                        </section>
-                    <?php endforeach; ?>
-                </div>
-            <?php endif; ?>
+                                                                </a>
+                                                            </li>
+                                                        <?php endforeach; ?>
+                                                    </ul>
+                                                <?php endif; ?>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                <?php endif; ?>
+                            </section>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
 
-            <div class="fui-sidebar-footer">
-                <div class="fui-sidebar-footer--left">
-                    <a href="<?php echo esc_url(admin_url()); ?>" class="fui-wordpress-menu-link" aria-label="Back to WP Admin">
-                        <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M3.32308 12C3.32308 15.4385 5.32308 18.4 8.21538 19.8077L4.07692 8.46923C3.57998 9.57999 3.3231 10.7831 3.32308 12ZM12 20.6769C13.0077 20.6769 13.9769 20.5 14.8846 20.1846L14.8231 20.0692L12.1538 12.7615L9.55385 20.3231C10.3231 20.5538 11.1462 20.6769 12 20.6769ZM13.1923 7.93077L16.3308 17.2615L17.2 14.3692C17.5692 13.1692 17.8538 12.3077 17.8538 11.5615C17.8538 10.4846 17.4692 9.74615 17.1462 9.17692C16.7 8.45385 16.2923 7.84615 16.2923 7.13846C16.2923 6.33846 16.8923 5.6 17.7538 5.6H17.8615C16.2627 4.13224 14.1704 3.31946 12 3.32308C10.5629 3.32281 9.14834 3.67979 7.88347 4.3619C6.61861 5.04402 5.54315 6.02987 4.75385 7.23077L5.30769 7.24615C6.21538 7.24615 7.61539 7.13077 7.61539 7.13077C8.09231 7.10769 8.14615 7.79231 7.67692 7.84615C7.67692 7.84615 7.20769 7.90769 6.67692 7.93077L9.84615 17.3308L11.7462 11.6385L10.3923 7.93077C10.0891 7.91404 9.78636 7.88838 9.48462 7.85385C9.01538 7.82308 9.06923 7.10769 9.53846 7.13077C9.53846 7.13077 10.9692 7.24615 11.8231 7.24615C12.7308 7.24615 14.1308 7.13077 14.1308 7.13077C14.6 7.10769 14.6615 7.79231 14.1923 7.84615C14.1923 7.84615 13.7231 7.9 13.1923 7.93077ZM16.3615 19.5C17.6742 18.7368 18.7636 17.6424 19.5208 16.3263C20.2781 15.0102 20.6767 13.5184 20.6769 12C20.6769 10.4923 20.2923 9.07692 19.6154 7.83846C19.7529 9.20099 19.5466 10.5762 19.0154 11.8385L16.3615 19.5ZM12 22C9.34784 22 6.8043 20.9464 4.92893 19.0711C3.05357 17.1957 2 14.6522 2 12C2 9.34784 3.05357 6.8043 4.92893 4.92893C6.8043 3.05357 9.34784 2 12 2C14.6522 2 17.1957 3.05357 19.0711 4.92893C20.9464 6.8043 22 9.34784 22 12C22 14.6522 20.9464 17.1957 19.0711 19.0711C17.1957 20.9464 14.6522 22 12 22Z"></path></svg>
-                    </a>
-                    <?php if (!empty($currentApp['has_dark_mode'])) : ?>
-                    <div class="fui-theme-wrap">
-                        <button type="button" class="fui-theme-toggle" id="fui-theme-toggle"
-                                aria-label="Switch theme" aria-haspopup="true" aria-expanded="false">
+                <div class="fui-sidebar-footer">
+                    <div class="fui-sidebar-footer--left">
+                        <a href="<?php echo esc_url(admin_url()); ?>" class="fui-wordpress-menu-link"
+                           aria-label="Back to WP Admin">
+                            <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M3.32308 12C3.32308 15.4385 5.32308 18.4 8.21538 19.8077L4.07692 8.46923C3.57998 9.57999 3.3231 10.7831 3.32308 12ZM12 20.6769C13.0077 20.6769 13.9769 20.5 14.8846 20.1846L14.8231 20.0692L12.1538 12.7615L9.55385 20.3231C10.3231 20.5538 11.1462 20.6769 12 20.6769ZM13.1923 7.93077L16.3308 17.2615L17.2 14.3692C17.5692 13.1692 17.8538 12.3077 17.8538 11.5615C17.8538 10.4846 17.4692 9.74615 17.1462 9.17692C16.7 8.45385 16.2923 7.84615 16.2923 7.13846C16.2923 6.33846 16.8923 5.6 17.7538 5.6H17.8615C16.2627 4.13224 14.1704 3.31946 12 3.32308C10.5629 3.32281 9.14834 3.67979 7.88347 4.3619C6.61861 5.04402 5.54315 6.02987 4.75385 7.23077L5.30769 7.24615C6.21538 7.24615 7.61539 7.13077 7.61539 7.13077C8.09231 7.10769 8.14615 7.79231 7.67692 7.84615C7.67692 7.84615 7.20769 7.90769 6.67692 7.93077L9.84615 17.3308L11.7462 11.6385L10.3923 7.93077C10.0891 7.91404 9.78636 7.88838 9.48462 7.85385C9.01538 7.82308 9.06923 7.10769 9.53846 7.13077C9.53846 7.13077 10.9692 7.24615 11.8231 7.24615C12.7308 7.24615 14.1308 7.13077 14.1308 7.13077C14.6 7.10769 14.6615 7.79231 14.1923 7.84615C14.1923 7.84615 13.7231 7.9 13.1923 7.93077ZM16.3615 19.5C17.6742 18.7368 18.7636 17.6424 19.5208 16.3263C20.2781 15.0102 20.6767 13.5184 20.6769 12C20.6769 10.4923 20.2923 9.07692 19.6154 7.83846C19.7529 9.20099 19.5466 10.5762 19.0154 11.8385L16.3615 19.5ZM12 22C9.34784 22 6.8043 20.9464 4.92893 19.0711C3.05357 17.1957 2 14.6522 2 12C2 9.34784 3.05357 6.8043 4.92893 4.92893C6.8043 3.05357 9.34784 2 12 2C14.6522 2 17.1957 3.05357 19.0711 4.92893C20.9464 6.8043 22 9.34784 22 12C22 14.6522 20.9464 17.1957 19.0711 19.0711C17.1957 20.9464 14.6522 22 12 22Z"></path>
+                            </svg>
+                        </a>
+                        <?php if (!empty($currentApp['has_dark_mode'])) : ?>
+                            <div class="fui-theme-wrap">
+                                <button type="button" class="fui-theme-toggle" id="fui-theme-toggle"
+                                        aria-label="Switch theme" aria-haspopup="true" aria-expanded="false">
                             <span class="fui-theme-icon--light">
                                 <?php echo $this->getIcon('light'); ?>
                             </span>
-                            <span class="fui-theme-icon--dark">
+                                    <span class="fui-theme-icon--dark">
                                 <?php echo $this->getIcon('dark'); ?>
                             </span>
-                        </button>
-                        <div class="fui-theme-dropdown" id="fui-theme-dropdown" role="menu" hidden>
-                            <button class="fui-theme-option" data-theme="light" role="menuitem">
-                                <?php echo $this->getIcon('light'); ?>
-                                <?php echo esc_html__('Light', 'fluent-toolkit'); ?>
-                                <span class="fui-theme-check">
+                                </button>
+                                <div class="fui-theme-dropdown" id="fui-theme-dropdown" role="menu" hidden>
+                                    <button class="fui-theme-option" data-theme="light" role="menuitem">
+                                        <?php echo $this->getIcon('light'); ?>
+                                        <?php echo esc_html__('Light', 'fluent-toolkit'); ?>
+                                        <span class="fui-theme-check">
                                     <?php echo $this->getIcon('check'); ?>
                                 </span>
-                            </button>
-                            <button class="fui-theme-option" data-theme="dark" role="menuitem">
-                                <?php echo $this->getIcon('dark'); ?>
-                                <?php echo esc_html__('Dark', 'fluent-toolkit'); ?>
-                                <span class="fui-theme-check">
+                                    </button>
+                                    <button class="fui-theme-option" data-theme="dark" role="menuitem">
+                                        <?php echo $this->getIcon('dark'); ?>
+                                        <?php echo esc_html__('Dark', 'fluent-toolkit'); ?>
+                                        <span class="fui-theme-check">
                                     <?php echo $this->getIcon('check'); ?>
                                 </span>
-                            </button>
-                            <button class="fui-theme-option" data-theme="system" role="menuitem">
-                                <?php echo $this->getIcon('system'); ?>
-                                <?php echo esc_html__('System', 'fluent-toolkit'); ?>
-                                <span class="fui-theme-check">
+                                    </button>
+                                    <button class="fui-theme-option" data-theme="system" role="menuitem">
+                                        <?php echo $this->getIcon('system'); ?>
+                                        <?php echo esc_html__('System', 'fluent-toolkit'); ?>
+                                        <span class="fui-theme-check">
                                     <?php echo $this->getIcon('check'); ?>
                                 </span>
-                            </button>
-                        </div>
+                                    </button>
+                                </div>
+                            </div>
+                        <?php endif; ?>
                     </div>
+                    <?php if (current_user_can('manage_options')) : ?>
+                        <div class="fui-sidebar-footer--right">
+                            <a class="fui-sidebar-settings-btn"
+                               href="<?php echo esc_url(admin_url('admin.php?page=fluent-toolkit#/')); ?>"
+                               aria-label="<?php echo esc_attr__('FluentToolkit Settings', 'fluent-toolkit'); ?>">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none"
+                                     stroke="currentColor">
+                                    <path
+                                        d="M262.29,192.31a64,64,0,1,0,57.4,57.4A64.13,64.13,0,0,0,262.29,192.31ZM416.39,256a154.34,154.34,0,0,1-1.53,20.79l45.21,35.46A10.81,10.81,0,0,1,462.52,326l-42.77,74a10.81,10.81,0,0,1-13.14,4.59l-44.9-18.08a16.11,16.11,0,0,0-15.17,1.75A164.48,164.48,0,0,1,325,400.8a15.94,15.94,0,0,0-8.82,12.14l-6.73,47.89A11.08,11.08,0,0,1,298.77,470H213.23a11.11,11.11,0,0,1-10.69-8.87l-6.72-47.82a16.07,16.07,0,0,0-9-12.22,155.3,155.3,0,0,1-21.46-12.57,16,16,0,0,0-15.11-1.71l-44.89,18.07a10.81,10.81,0,0,1-13.14-4.58l-42.77-74a10.8,10.8,0,0,1,2.45-13.75l38.21-30a16.05,16.05,0,0,0,6-14.08c-.36-4.17-.58-8.33-.58-12.5s.21-8.27.58-12.35a16,16,0,0,0-6.07-13.94l-38.19-30A10.81,10.81,0,0,1,49.48,186l42.77-74a10.81,10.81,0,0,1,13.14-4.59l44.9,18.08a16.11,16.11,0,0,0,15.17-1.75A164.48,164.48,0,0,1,187,111.2a15.94,15.94,0,0,0,8.82-12.14l6.73-47.89A11.08,11.08,0,0,1,213.23,42h85.54a11.11,11.11,0,0,1,10.69,8.87l6.72,47.82a16.07,16.07,0,0,0,9,12.22,155.3,155.3,0,0,1,21.46,12.57,16,16,0,0,0,15.11,1.71l44.89-18.07a10.81,10.81,0,0,1,13.14,4.58l42.77,74a10.8,10.8,0,0,1-2.45,13.75l-38.21,30a16.05,16.05,0,0,0-6.05,14.08C416.17,247.67,416.39,251.83,416.39,256Z"
+                                        style="fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;stroke-width:32px"></path>
+                                </svg>
+                            </a>
+                        </div>
                     <?php endif; ?>
+
                 </div>
-                <?php if (current_user_can('manage_options')) : ?>
-                <div class="fui-sidebar-footer--right">
-                    <a class="fui-sidebar-settings-btn" href="<?php echo esc_url(admin_url('admin.php?page=fluent-toolkit#/')); ?>" aria-label="<?php echo esc_attr__('FluentToolkit Settings', 'fluent-toolkit'); ?>">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none" stroke="currentColor"><path d="M262.29,192.31a64,64,0,1,0,57.4,57.4A64.13,64.13,0,0,0,262.29,192.31ZM416.39,256a154.34,154.34,0,0,1-1.53,20.79l45.21,35.46A10.81,10.81,0,0,1,462.52,326l-42.77,74a10.81,10.81,0,0,1-13.14,4.59l-44.9-18.08a16.11,16.11,0,0,0-15.17,1.75A164.48,164.48,0,0,1,325,400.8a15.94,15.94,0,0,0-8.82,12.14l-6.73,47.89A11.08,11.08,0,0,1,298.77,470H213.23a11.11,11.11,0,0,1-10.69-8.87l-6.72-47.82a16.07,16.07,0,0,0-9-12.22,155.3,155.3,0,0,1-21.46-12.57,16,16,0,0,0-15.11-1.71l-44.89,18.07a10.81,10.81,0,0,1-13.14-4.58l-42.77-74a10.8,10.8,0,0,1,2.45-13.75l38.21-30a16.05,16.05,0,0,0,6-14.08c-.36-4.17-.58-8.33-.58-12.5s.21-8.27.58-12.35a16,16,0,0,0-6.07-13.94l-38.19-30A10.81,10.81,0,0,1,49.48,186l42.77-74a10.81,10.81,0,0,1,13.14-4.59l44.9,18.08a16.11,16.11,0,0,0,15.17-1.75A164.48,164.48,0,0,1,187,111.2a15.94,15.94,0,0,0,8.82-12.14l6.73-47.89A11.08,11.08,0,0,1,213.23,42h85.54a11.11,11.11,0,0,1,10.69,8.87l6.72,47.82a16.07,16.07,0,0,0,9,12.22,155.3,155.3,0,0,1,21.46,12.57,16,16,0,0,0,15.11,1.71l44.89-18.07a10.81,10.81,0,0,1,13.14,4.58l42.77,74a10.8,10.8,0,0,1-2.45,13.75l-38.21,30a16.05,16.05,0,0,0-6.05,14.08C416.17,247.67,416.39,251.83,416.39,256Z" style="fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;stroke-width:32px"></path></svg>
-                    </a>
-                </div>
-                <?php endif; ?>
 
             </div>
+            <div class="fui-app-content">
 
-        </div>
-        <div class="fui-app-content">
+                <script>
+                    (function () {
+                        var sidebar = document.querySelector('.fluent_ui_sidebar');
+                        if (!sidebar) return;
 
-            <script>
-                (function () {
-                    var sidebar = document.querySelector('.fluent_ui_sidebar');
-                    if (!sidebar) return;
+                        var uuiRoot = document.querySelector('.fluent_uui');
+                        var mobileToggle = document.querySelector('.fui-mobile-toggle');
+                        var backdrop = document.querySelector('.fui-backdrop');
 
-                    var uuiRoot = document.querySelector('.fluent_uui');
-                    var mobileToggle = document.querySelector('.fui-mobile-toggle');
-                    var backdrop = document.querySelector('.fui-backdrop');
-
-                    function setMobileOpen(open) {
-                        if (!uuiRoot) return;
-                        uuiRoot.classList.toggle('is-mobile-open', open);
-                        if (mobileToggle) mobileToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-                        if (backdrop) backdrop.hidden = !open;
-                        document.body.style.overflow = open ? 'hidden' : '';
-                    }
-
-                    if (mobileToggle && uuiRoot) {
-                        mobileToggle.addEventListener('click', function () {
-                            setMobileOpen(!uuiRoot.classList.contains('is-mobile-open'));
-                        });
-                    }
-
-                    if (backdrop) {
-                        backdrop.addEventListener('click', function () {
-                            setMobileOpen(false);
-                        });
-                    }
-
-                    document.addEventListener('keydown', function (e) {
-                        if (e.key === 'Escape' && uuiRoot && uuiRoot.classList.contains('is-mobile-open')) {
-                            setMobileOpen(false);
+                        function setMobileOpen(open) {
+                            if (!uuiRoot) return;
+                            uuiRoot.classList.toggle('is-mobile-open', open);
+                            if (mobileToggle) mobileToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+                            if (backdrop) backdrop.hidden = !open;
+                            document.body.style.overflow = open ? 'hidden' : '';
                         }
-                    });
 
-                    function normalize(h) {
-                        if (!h) return '';
-                        return h.replace(/\/$/, '') || '#';
-                    }
+                        if (mobileToggle && uuiRoot) {
+                            mobileToggle.addEventListener('click', function () {
+                                setMobileOpen(!uuiRoot.classList.contains('is-mobile-open'));
+                            });
+                        }
 
-                    function applyActive() {
-                        var current = normalize(window.location.hash || '#/');
-                        var links = sidebar.querySelectorAll('[data-fui-hash]');
-                        var bestEl = null;
-                        var bestLen = -1;
+                        if (backdrop) {
+                            backdrop.addEventListener('click', function () {
+                                setMobileOpen(false);
+                            });
+                        }
 
-                        links.forEach(function (el) {
-                            el.classList.remove('active');
-                            var target = normalize(el.getAttribute('data-fui-hash'));
-                            if (!target) return;
-                            if (current === target || (target !== '#' && current.indexOf(target) === 0)) {
-                                if (target.length >= bestLen) {
-                                    bestLen = target.length;
-                                    bestEl = el;
-                                }
+                        document.addEventListener('keydown', function (e) {
+                            if (e.key === 'Escape' && uuiRoot && uuiRoot.classList.contains('is-mobile-open')) {
+                                setMobileOpen(false);
                             }
                         });
 
-                        if (bestEl) {
-                            bestEl.classList.add('active');
-                            var parentItem = bestEl.closest('.fui-item--has-sub');
-                            if (parentItem) {
-                                var parentLink = parentItem.querySelector(':scope > .fui-apps-menu-item, :scope > .fui-apps-submenu-item');
-                                if (parentLink && parentLink !== bestEl) {
-                                    parentLink.classList.add('is-parent-active');
-                                }
-                            }
+                        function normalize(h) {
+                            if (!h) return '';
+                            return h.replace(/\/$/, '') || '#';
                         }
 
-                        // Sync active state on mobile nav items
-                        var mobileNav = document.querySelector('.fui-mobile-nav');
-                        if (mobileNav) {
-                            var mobileLinks = mobileNav.querySelectorAll('.fui-mobile-nav-item[data-fui-hash]');
-                            var mobileBestEl = null;
-                            var mobileBestLen = -1;
-                            mobileLinks.forEach(function (el) {
+                        function applyActive() {
+                            var current = normalize(window.location.hash || '#/');
+                            var links = sidebar.querySelectorAll('[data-fui-hash]');
+                            var bestEl = null;
+                            var bestLen = -1;
+
+                            links.forEach(function (el) {
                                 el.classList.remove('active');
                                 var target = normalize(el.getAttribute('data-fui-hash'));
                                 if (!target) return;
                                 if (current === target || (target !== '#' && current.indexOf(target) === 0)) {
-                                    if (target.length >= mobileBestLen) {
-                                        mobileBestLen = target.length;
-                                        mobileBestEl = el;
+                                    if (target.length >= bestLen) {
+                                        bestLen = target.length;
+                                        bestEl = el;
                                     }
                                 }
                             });
-                            if (mobileBestEl) mobileBestEl.classList.add('active');
-                        }
-                    }
 
-                    applyActive();
-                    window.addEventListener('hashchange', applyActive);
-
-                    // Sidebar click delegation:
-                    //  • Product header — toggle that product's section open/closed.
-                    //  • Item chevron — toggle that item's sub-menu open/closed (no navigation).
-                    //  • Item link with sub-menu — auto-open its sub-menu while navigating.
-                    //  • Any nav link on mobile — close the drawer.
-                    sidebar.addEventListener('click', function (e) {
-                        var productHeader = e.target.closest('.fui-product-header');
-                        if (productHeader) {
-                            e.preventDefault();
-                            var section = productHeader.closest('.fui-product-section');
-                            if (section) {
-                                var isAlreadyOpen = section.classList.contains('is-open');
-                                sidebar.querySelectorAll('.fui-product-section').forEach(function (s) {
-                                    s.classList.remove('is-open');
-                                    var h = s.querySelector('.fui-product-header');
-                                    if (h) h.setAttribute('aria-expanded', 'false');
-                                });
-                                if (!isAlreadyOpen) {
-                                    section.classList.add('is-open');
-                                    productHeader.setAttribute('aria-expanded', 'true');
+                            if (bestEl) {
+                                bestEl.classList.add('active');
+                                var parentItem = bestEl.closest('.fui-item--has-sub');
+                                if (parentItem) {
+                                    var parentLink = parentItem.querySelector(':scope > .fui-apps-menu-item, :scope > .fui-apps-submenu-item');
+                                    if (parentLink && parentLink !== bestEl) {
+                                        parentLink.classList.add('is-parent-active');
+                                    }
                                 }
                             }
-                            return;
+
+                            // Sync active state on mobile nav items
+                            var mobileNav = document.querySelector('.fui-mobile-nav');
+                            if (mobileNav) {
+                                var mobileLinks = mobileNav.querySelectorAll('.fui-mobile-nav-item[data-fui-hash]');
+                                var mobileBestEl = null;
+                                var mobileBestLen = -1;
+                                mobileLinks.forEach(function (el) {
+                                    el.classList.remove('active');
+                                    var target = normalize(el.getAttribute('data-fui-hash'));
+                                    if (!target) return;
+                                    if (current === target || (target !== '#' && current.indexOf(target) === 0)) {
+                                        if (target.length >= mobileBestLen) {
+                                            mobileBestLen = target.length;
+                                            mobileBestEl = el;
+                                        }
+                                    }
+                                });
+                                if (mobileBestEl) mobileBestEl.classList.add('active');
+                            }
                         }
 
-                        var itemChevron = e.target.closest('.fui-item-chevron');
-                        if (itemChevron) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            var item = itemChevron.closest('.fui-item--has-sub');
-                            if (item) {
-                                var isAlreadyOpen = item.classList.contains('is-open');
-                                sidebar.querySelectorAll('.fui-item--has-sub').forEach(function (i) {
-                                    i.classList.remove('is-open');
-                                });
-                                if (!isAlreadyOpen) {
-                                    item.classList.add('is-open');
+                        applyActive();
+                        window.addEventListener('hashchange', applyActive);
+
+                        // Sidebar click delegation:
+                        //  • Product header — toggle that product's section open/closed.
+                        //  • Item chevron — toggle that item's sub-menu open/closed (no navigation).
+                        //  • Item link with sub-menu — auto-open its sub-menu while navigating.
+                        //  • Any nav link on mobile — close the drawer.
+                        sidebar.addEventListener('click', function (e) {
+                            var productHeader = e.target.closest('.fui-product-header');
+                            if (productHeader) {
+                                e.preventDefault();
+                                var section = productHeader.closest('.fui-product-section');
+                                if (section) {
+                                    var isAlreadyOpen = section.classList.contains('is-open');
+                                    sidebar.querySelectorAll('.fui-product-section').forEach(function (s) {
+                                        s.classList.remove('is-open');
+                                        var h = s.querySelector('.fui-product-header');
+                                        if (h) h.setAttribute('aria-expanded', 'false');
+                                    });
+                                    if (!isAlreadyOpen) {
+                                        section.classList.add('is-open');
+                                        productHeader.setAttribute('aria-expanded', 'true');
+                                    }
+                                }
+                                return;
+                            }
+
+                            var itemChevron = e.target.closest('.fui-item-chevron');
+                            if (itemChevron) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                var item = itemChevron.closest('.fui-item--has-sub');
+                                if (item) {
+                                    var isAlreadyOpen = item.classList.contains('is-open');
+                                    sidebar.querySelectorAll('.fui-item--has-sub').forEach(function (i) {
+                                        i.classList.remove('is-open');
+                                    });
+                                    if (!isAlreadyOpen) {
+                                        item.classList.add('is-open');
+                                    }
+                                }
+                                return;
+                            }
+
+                            var itemLink = e.target.closest('.fui-apps-menu-item, .fui-apps-submenu-item');
+                            if (itemLink) {
+                                var parent = itemLink.closest('.fui-item--has-sub');
+                                if (parent && parent.querySelector(':scope > .fui-apps-menu-item, :scope > .fui-apps-submenu-item') === itemLink) {
+                                    parent.classList.add('is-open');
                                 }
                             }
-                            return;
-                        }
 
-                        var itemLink = e.target.closest('.fui-apps-menu-item, .fui-apps-submenu-item');
-                        if (itemLink) {
-                            var parent = itemLink.closest('.fui-item--has-sub');
-                            if (parent && parent.querySelector(':scope > .fui-apps-menu-item, :scope > .fui-apps-submenu-item') === itemLink) {
-                                parent.classList.add('is-open');
+                            // Mobile: any real navigation link click closes the drawer
+                            if (uuiRoot && uuiRoot.classList.contains('is-mobile-open')) {
+                                var navLink = e.target.closest('.fui-apps-menu-item, .fui-apps-submenu-item');
+                                if (navLink) setMobileOpen(false);
                             }
-                        }
+                        });
 
-                        // Mobile: any real navigation link click closes the drawer
-                        if (uuiRoot && uuiRoot.classList.contains('is-mobile-open')) {
-                            var navLink = e.target.closest('.fui-apps-menu-item, .fui-apps-submenu-item');
-                            if (navLink) setMobileOpen(false);
-                        }
-                    });
+                        // Theme toggle dropdown
+                        var hasDarkMode = <?php echo !empty($currentApp['has_dark_mode']) ? 'true' : 'false'; ?>;
+                        var themeToggle = document.getElementById('fui-theme-toggle');
+                        var themeDropdown = document.getElementById('fui-theme-dropdown');
 
-                    // Theme toggle dropdown
-                    var hasDarkMode = <?php echo !empty($currentApp['has_dark_mode']) ? 'true' : 'false'; ?>;
-                    var themeToggle = document.getElementById('fui-theme-toggle');
-                    var themeDropdown = document.getElementById('fui-theme-dropdown');
-
-                    function applyTheme(mode) {
-                        if (!hasDarkMode) {
+                        function applyTheme(mode) {
+                            if (!hasDarkMode) {
+                                document.body.classList.remove('fluent_theme_dark');
+                                return;
+                            }
+                            var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                            var isDark = mode === 'dark' || (mode === 'system' && prefersDark);
                             document.body.classList.remove('fluent_theme_dark');
-                            return;
-                        }
-                        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                        var isDark = mode === 'dark' || (mode === 'system' && prefersDark);
-                        document.body.classList.remove('fluent_theme_dark');
-                        if (isDark) document.body.classList.add('fluent_theme_dark');
-                        if (mode === 'system') {
-                            localStorage.setItem('fluent_theme_mode', 'system:' + (prefersDark ? 'dark' : 'light'));
-                        } else {
-                            localStorage.setItem('fluent_theme_mode', mode);
-                        }
-                        if (themeToggle) themeToggle.classList.toggle('is-dark', isDark);
-                        if (themeDropdown) {
-                            themeDropdown.querySelectorAll('.fui-theme-option').forEach(function (btn) {
-                                btn.classList.toggle('is-active', btn.dataset.theme === mode);
-                            });
-                        }
-                    }
-
-                    var savedMode = localStorage.getItem('fluent_theme_mode') || 'system';
-                    var baseMode = savedMode.startsWith('system') ? 'system' : savedMode;
-                    applyTheme(baseMode);
-
-                    if (themeToggle && themeDropdown) {
-                        themeToggle.addEventListener('click', function (e) {
-                            e.stopPropagation();
-                            var isOpen = !themeDropdown.hidden;
-                            themeDropdown.hidden = isOpen;
-                            themeToggle.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
-                        });
-
-                        themeDropdown.querySelectorAll('.fui-theme-option').forEach(function (btn) {
-                            btn.addEventListener('click', function () {
-                                applyTheme(btn.dataset.theme);
-                                themeDropdown.hidden = true;
-                                themeToggle.setAttribute('aria-expanded', 'false');
-                            });
-                        });
-
-                        document.addEventListener('click', function (e) {
-                            if (!themeToggle.contains(e.target) && !themeDropdown.contains(e.target)) {
-                                themeDropdown.hidden = true;
-                                themeToggle.setAttribute('aria-expanded', 'false');
+                            if (isDark) document.body.classList.add('fluent_theme_dark');
+                            if (mode === 'system') {
+                                localStorage.setItem('fluent_theme_mode', 'system:' + (prefersDark ? 'dark' : 'light'));
+                            } else {
+                                localStorage.setItem('fluent_theme_mode', mode);
                             }
-                        });
-                    }
+                            if (themeToggle) themeToggle.classList.toggle('is-dark', isDark);
+                            if (themeDropdown) {
+                                themeDropdown.querySelectorAll('.fui-theme-option').forEach(function (btn) {
+                                    btn.classList.toggle('is-active', btn.dataset.theme === mode);
+                                });
+                            }
+                        }
 
-                    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
                         var savedMode = localStorage.getItem('fluent_theme_mode') || 'system';
                         var baseMode = savedMode.startsWith('system') ? 'system' : savedMode;
-                        if (baseMode === 'system') applyTheme('system');
-                    });
+                        applyTheme(baseMode);
 
-                    // Workspace switcher dropdown.
-                    var wsWrap = sidebar.querySelector('.fui-workspace-wrap');
-                    if (wsWrap) {
-                        var wsBtn = wsWrap.querySelector('.fui-workspace');
-                        var wsMenu = wsWrap.querySelector('.fui-workspace-menu');
+                        if (themeToggle && themeDropdown) {
+                            themeToggle.addEventListener('click', function (e) {
+                                e.stopPropagation();
+                                var isOpen = !themeDropdown.hidden;
+                                themeDropdown.hidden = isOpen;
+                                themeToggle.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+                            });
 
-                        function closeWs() {
-                            wsWrap.classList.remove('is-open');
-                            wsBtn.setAttribute('aria-expanded', 'false');
-                            wsMenu.hidden = true;
+                            themeDropdown.querySelectorAll('.fui-theme-option').forEach(function (btn) {
+                                btn.addEventListener('click', function () {
+                                    applyTheme(btn.dataset.theme);
+                                    themeDropdown.hidden = true;
+                                    themeToggle.setAttribute('aria-expanded', 'false');
+                                });
+                            });
+
+                            document.addEventListener('click', function (e) {
+                                if (!themeToggle.contains(e.target) && !themeDropdown.contains(e.target)) {
+                                    themeDropdown.hidden = true;
+                                    themeToggle.setAttribute('aria-expanded', 'false');
+                                }
+                            });
                         }
 
-                        function openWs() {
-                            wsWrap.classList.add('is-open');
-                            wsBtn.setAttribute('aria-expanded', 'true');
-                            wsMenu.hidden = false;
-                        }
-
-                        wsBtn.addEventListener('click', function (e) {
-                            e.stopPropagation();
-                            if (wsWrap.classList.contains('is-open')) closeWs();
-                            else openWs();
+                        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
+                            var savedMode = localStorage.getItem('fluent_theme_mode') || 'system';
+                            var baseMode = savedMode.startsWith('system') ? 'system' : savedMode;
+                            if (baseMode === 'system') applyTheme('system');
                         });
 
-                        document.addEventListener('click', function (e) {
-                            if (!wsWrap.contains(e.target)) closeWs();
-                        });
+                        // Workspace switcher dropdown.
+                        var wsWrap = sidebar.querySelector('.fui-workspace-wrap');
+                        if (wsWrap) {
+                            var wsBtn = wsWrap.querySelector('.fui-workspace');
+                            var wsMenu = wsWrap.querySelector('.fui-workspace-menu');
 
-                        document.addEventListener('keydown', function (e) {
-                            if (e.key === 'Escape' && wsWrap.classList.contains('is-open')) {
-                                closeWs();
-                                wsBtn.focus();
+                            function closeWs() {
+                                wsWrap.classList.remove('is-open');
+                                wsBtn.setAttribute('aria-expanded', 'false');
+                                wsMenu.hidden = true;
                             }
-                        });
-                    }
-                })();
-            </script>
+
+                            function openWs() {
+                                wsWrap.classList.add('is-open');
+                                wsBtn.setAttribute('aria-expanded', 'true');
+                                wsMenu.hidden = false;
+                            }
+
+                            wsBtn.addEventListener('click', function (e) {
+                                e.stopPropagation();
+                                if (wsWrap.classList.contains('is-open')) closeWs();
+                                else openWs();
+                            });
+
+                            document.addEventListener('click', function (e) {
+                                if (!wsWrap.contains(e.target)) closeWs();
+                            });
+
+                            document.addEventListener('keydown', function (e) {
+                                if (e.key === 'Escape' && wsWrap.classList.contains('is-open')) {
+                                    closeWs();
+                                    wsBtn.focus();
+                                }
+                            });
+                        }
+                    })();
+                </script>
         <?php
     }
 
@@ -663,6 +746,16 @@ class UnifiedUiHandler
             }
         }
 
+        if (!defined('FLUENTCAMPAIGN_PLUGIN_VERSION')) {
+            $formattedItems['get_pro'] = [
+                'external' => true,
+                'title'    => __('Get Pro', 'fluent-toolkit'),
+                'url'      => 'https://fluentcrm.com/?utm_source=plugin&utm_medium=admin&utm_campaign=promo',
+                'icon_svg' => $this->getIcon('get_pro')
+            ];
+        }
+
+
         return $formattedItems;
     }
 
@@ -678,9 +771,14 @@ class UnifiedUiHandler
 
         $menuItems = \FluentCart\App\Helpers\AdminHelper::getMenuItems(true);
 
+
         $formattedItems = [];
 
         foreach ($menuItems as $itemKey => $item) {
+            if (!empty($item['permission']) && !PermissionManager::hasPermission($item['permission'])) {
+                continue;
+            }
+
             $formattedItems[$itemKey] = [
                 'title'    => $item['label'],
                 'url'      => $item['link'],
@@ -697,6 +795,19 @@ class UnifiedUiHandler
                 }
                 $formattedItems[$itemKey]['sub_menu'] = $subItems;
             }
+        }
+
+        if (!$formattedItems) {
+            return [];
+        }
+
+        if (!defined('FLUENTCART_PRO_PLUGIN_VERSION')) {
+            $formattedItems['get_pro'] = [
+                'external' => true,
+                'title'    => __('Get Pro', 'fluent-toolkit'),
+                'url'      => 'https://fluentcart.com/?utm_source=plugin&utm_medium=admin&utm_campaign=promo',
+                'icon_svg' => $this->getIcon('get_pro')
+            ];
         }
 
         return $formattedItems;
@@ -742,12 +853,25 @@ class UnifiedUiHandler
             }
         }
 
+        if (!defined('FLUENT_BOARDS_PRO')) {
+            $formattedItems['get_pro'] = [
+                'external' => true,
+                'title'    => __('Get Pro', 'fluent-toolkit'),
+                'url'      => 'https://fluentboards.com//?utm_source=plugin&utm_medium=admin&utm_campaign=promo',
+                'icon_svg' => $this->getIcon('get_pro')
+            ];
+        }
+
         return $formattedItems;
     }
 
     protected function getBookingMenu()
     {
         if (!defined('FLUENT_BOOKING_VERSION')) {
+            return [];
+        }
+
+        if (!\FluentBooking\App\Services\PermissionManager::getMenuPermission()) {
             return [];
         }
 
@@ -785,12 +909,26 @@ class UnifiedUiHandler
             ];
         }
 
+        if (!defined('FLUENT_BOOKING_PRO_VERSION')) {
+            $menuItems['get_pro'] = [
+                'external' => true,
+                'title'    => __('Get Pro', 'fluent-toolkit'),
+                'url'      => 'https://fluentbooking.com//?utm_source=plugin&utm_medium=admin&utm_campaign=promo',
+                'icon_svg' => $this->getIcon('get_pro')
+            ];
+        }
+
         return $menuItems;
     }
 
     protected function getFormsMenu()
     {
         if (!defined('FLUENTFORM_VERSION')) {
+            return [];
+        }
+
+        $currentUserCapability = \FluentForm\App\Modules\Acl\Acl::getCurrentUserCapability();
+        if (!$currentUserCapability) {
             return [];
         }
 
@@ -807,32 +945,58 @@ class UnifiedUiHandler
                 'url'      => $baseUrl . 'fluent_forms_all_entries',
                 'icon_svg' => $this->getIcon('entries')
             ],
-            'fluent_forms_reports'     => [
-                'title'    => __('Reports', 'fluent-toolkit'),
-                'url'      => $baseUrl . 'fluent_forms_reports',
-                'icon_svg' => $this->getIcon('reports')
-            ],
-            'fluent_forms_transfer'    => [
-                'title'    => __('Tools', 'fluent-toolkit'),
-                'url'      => $baseUrl . 'fluent_forms_transfer',
-                'icon_svg' => $this->getIcon('tools')
-            ],
-            'fluent_forms_add_ons'     => [
-                'title'    => __('Integrations', 'fluent-toolkit'),
-                'url'      => $baseUrl . 'fluent_forms_add_ons',
-                'icon_svg' => $this->getIcon('integrations')
-            ],
             'payments'                 => [
                 'title'    => __('Payments', 'fluent-toolkit'),
-                'url'      => $baseUrl . 'fluent_forms_settings#payments/general_settings',
+                'url'      => $baseUrl . 'fluent_forms_payment_entries',
                 'icon_svg' => $this->getIcon('money')
             ],
             'fluent_forms_settings'    => [
                 'title'    => __('Global Settings', 'fluent-toolkit'),
                 'url'      => $baseUrl . 'fluent_forms_settings#settings',
                 'icon_svg' => $this->getIcon('settings')
+            ],
+            'tools'                    => [
+                'title'    => __('Tools', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'fluent_forms_transfer',
+                'icon_svg' => $this->getIcon('tools')
+            ],
+            'integrations'             => [
+                'title'    => __('Integrations', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'fluent_forms_add_ons',
+                'icon_svg' => $this->getIcon('integrations')
+            ],
+            'support'                  => [
+                'title'    => __('Support', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'fluent_forms_docs',
+                'icon_svg' => $this->getIcon('support')
             ]
         ];
+
+        if (!current_user_can('manage_options')) {
+            $hasSettingsCapability = current_user_can('fluentform_settings_manager');
+            if (!$hasSettingsCapability && !current_user_can('fluentform_entries_viewer')) {
+                unset($menuItems['fluent_forms_all_entries']);
+            }
+
+            if (!$hasSettingsCapability && !current_user_can('fluentform_view_payments')) {
+                unset($menuItems['payments']);
+            }
+
+            if (!$hasSettingsCapability && !current_user_can('fluentform_settings_manager')) {
+                unset($menuItems['fluent_forms_settings']);
+                unset($menuItems['integrations']);
+                unset($menuItems['tools']);
+            }
+        }
+
+        if (!defined('FLUENTFORMPRO_VERSION')) {
+            $menuItems['get_pro'] = [
+                'external' => true,
+                'title'    => __('Get Pro', 'fluent-toolkit'),
+                'url'      => 'https://fluentforms.com/pricing/?utm_source=plugin&utm_medium=wp_install&utm_campaign=ff_upgrade',
+                'icon_svg' => $this->getIcon('get_pro')
+            ];
+        }
 
         return $menuItems;
     }
@@ -842,57 +1006,99 @@ class UnifiedUiHandler
         if (!defined('FLUENT_SUPPORT_VERSION')) {
             return [];
         }
-
         $baseUrl = admin_url('admin.php?page=fluent-support#/');
+        $permissons = \FluentSupport\App\Modules\PermissionManager::currentUserPermissions();
+        if (!$permissons) {
+            return [];
+        }
 
         $menuItems = [
-            'dashboard'        => [
+            'dashboard' => [
                 'title'    => __('Dashboard', 'fluent-toolkit'),
                 'url'      => $baseUrl,
                 'icon_svg' => $this->getIcon('dashboard')
             ],
-            'tickets'        => [
+            'tickets'   => [
                 'title'    => __('Tickets', 'fluent-toolkit'),
                 'url'      => $baseUrl . 'tickets',
                 'icon_svg' => $this->getIcon('tickets')
             ],
-            'reports'        => [
-                    'title'    => __('Reports', 'fluent-toolkit'),
-                    'url'      => $baseUrl . 'reports',
-                    'icon_svg' => $this->getIcon('reports')
+            'reports'   => [
+                'title'    => __('Reports', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'reports',
+                'icon_svg' => $this->getIcon('reports')
             ],
-            'mailboxes'        => [
-                    'title'    => __('Business Inboxes', 'fluent-toolkit'),
-                    'url'      => $baseUrl . 'mailboxes',
-                    'icon_svg' => $this->getIcon('mailboxes')
+            'mailboxes' => [
+                'title'    => __('Business Inboxes', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'mailboxes',
+                'icon_svg' => $this->getIcon('mailboxes')
             ],
-            'activity'        => [
-                    'title'    => __('Activities', 'fluent-toolkit'),
-                    'url'      => $baseUrl . 'activity',
-                    'icon_svg' => $this->getIcon('activities')
+            'activity'  => [
+                'title'    => __('Activities', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'activity',
+                'icon_svg' => $this->getIcon('activities')
             ],
-            'customers'        => [
-                    'title'    => __('Customers', 'fluent-toolkit'),
-                    'url'      => $baseUrl . 'customers',
-                    'icon_svg' => $this->getIcon('customers')
+            'customers' => [
+                'title'    => __('Customers', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'customers',
+                'icon_svg' => $this->getIcon('customers')
             ],
-            'more'        => [
+            'more'      => [
                 'title'    => __('More', 'fluent-toolkit'),
-                'url'  => '#',
+                'url'      => '#',
                 'icon_svg' => $this->getIcon('more'),
                 'sub_menu' => [
                     'saved_replies' => [
                         'title' => __('Saved Replies', 'fluent-toolkit'),
-                        'url' => $baseUrl . 'saved-replies',
+                        'url'   => $baseUrl . 'saved-replies',
                     ],
-                    'workflows' => [
+                    'workflows'     => [
                         'title' => __('Workflows', 'fluent-toolkit'),
-                        'url' => $baseUrl . 'workflows',
+                        'url'   => $baseUrl . 'workflows',
                     ]
                 ]
             ]
         ];
 
+        if (!current_user_can('manage_options')) {
+            if (!in_array('fst_view_all_reports', $permissons)) {
+                unset($menuItems['reports']);
+            }
+
+            if (!in_array('fst_manage_settings', $permissons)) {
+                unset($menuItems['mailboxes']);
+            }
+
+            if (!in_array('fst_view_activity_logs', $permissons)) {
+                unset($menuItems['activity']);
+            }
+
+            if (!in_array('fst_sensitive_data', $permissons)) {
+                unset($menuItems['customers']);
+            }
+
+
+            if (!in_array('fst_manage_workflows', $permissons)) {
+                unset($menuItems['more']['sub_menu']['workflows']);
+            }
+
+            if (!in_array('fst_manage_saved_replies', $permissons)) {
+                unset($menuItems['more']['sub_menu']['saved_replies']);
+            }
+
+            if (empty($menuItems['more']['sub_menu'])) {
+                unset($menuItems['more']);
+            }
+        }
+
+        if (!defined('FLUENT_SUPPORT_PRO_DIR_FILE')) {
+            $menuItems['get_pro'] = [
+                'external' => true,
+                'title'    => __('Get Pro', 'fluent-toolkit'),
+                'url'      => 'https://fluentsupport.com//?utm_source=plugin&utm_medium=admin&utm_campaign=promo',
+                'icon_svg' => $this->getIcon('get_pro')
+            ];
+        }
 
         return $menuItems;
 

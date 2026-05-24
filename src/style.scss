@@ -501,7 +501,7 @@
 
   .ft-list-head {
     display: grid;
-    grid-template-columns: 1fr 130px 160px 160px;
+    grid-template-columns: 1fr 150px 170px;
     gap: 16px;
     padding: 12px 24px;
     border-bottom: 1px solid var(--border);
@@ -515,7 +515,7 @@
 
   .ft-row {
     display: grid;
-    grid-template-columns: 1fr 130px 160px 160px;
+    grid-template-columns: 1fr 150px 170px;
     gap: 16px;
     align-items: center;
     padding: 18px 24px;
@@ -579,7 +579,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    max-width: 460px;
   }
 
   // ── Tags ─────────────────────────────
@@ -617,6 +616,13 @@
     border-radius: 50%;
     background: var(--text-soft);
     opacity: 0.6;
+  }
+
+  .ft-meta-link {
+    color: var(--text-soft);
+    text-decoration: none;
+    border-bottom: 1px dotted currentColor;
+    &:hover { color: var(--accent); }
   }
 
   .ft-version-installed {

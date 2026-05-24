@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: FluentKit
+ * Plugin Name: FluentHub
  * Description: Connects all your Fluent plugins under one roof — unified dashboard, AI/MCP support, early-access updates, and seamless cross-plugin data.
  * Version: 2.0.4
  * Author: WPManageNinja
@@ -29,6 +29,7 @@ class FluentToolkitBootstrap
         add_action('admin_menu', array(\FluentToolkit\Classes\AdminMenu::class, 'register'));
         add_action('wp_ajax_fluent-beta-install', array($this, 'installBetaPlugin'));
         add_action('wp_ajax_fluent_beta_get_beta_versions', array($this, 'getBetaVersions'));
+        add_action('wp_ajax_fluent_toolkit_activate_plugin', array($this, 'activatePlugin'));
         add_action('wp_ajax_fluent_toolkit_unified_ui_toggle', array($this, 'toggleUnifiedUi'));
         add_action('wp_ajax_fluent_toolkit_mcp_overview', array($this, 'fetchMcpOverview'));
         add_action('wp_ajax_fluent_toolkit_mcp_toggle', array($this, 'toggleMcpAccess'));
@@ -80,15 +81,27 @@ class FluentToolkitBootstrap
 
     public function getBetaVersions()
     {
-        $this->verifyAjaxRequest();
+        $this->verifySettingsAjaxRequest();
+        if (!empty($_REQUEST['refresh'])) {
+            \FluentToolkit\Classes\ToolkitHelper::clearFreePluginsCache();
+        }
         $betaVersions = \FluentToolkit\Classes\ToolkitHelper::getVersions(false);
+        $freePlugins  = \FluentToolkit\Classes\ToolkitHelper::getFreePlugins();
+        if ($freePlugins) {
+            $betaVersions = array_merge($betaVersions, $freePlugins);
+        }
         $allPlugins = get_plugins();
+
+        if (!function_exists('is_plugin_active')) {
+            require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
 
         foreach ($betaVersions as $index => $betaVersion) {
             $fullSlug = $betaVersion['slug'] . '/' . $betaVersion['slug'] . '.php';
             if (isset($allPlugins[$fullSlug])) {
                 $betaVersions[$index]['installed_version'] = $allPlugins[$fullSlug]['Version'];
                 $betaVersions[$index]['status'] = 'installed';
+                $betaVersions[$index]['is_active'] = is_plugin_active($fullSlug);
                 if (version_compare($betaVersions[$index]['installed_version'], $betaVersion['stable_version'], '<')) {
                     $betaVersions[$index]['has_update'] = 'yes';
                 }
@@ -115,7 +128,11 @@ class FluentToolkitBootstrap
 
     public function installBetaPlugin()
     {
-        $this->verifyAjaxRequest();
+        $nonce = isset($_REQUEST['__nonce']) ? sanitize_text_field($_REQUEST['__nonce']) : '';
+        if (!wp_verify_nonce($nonce, 'fluent_toolkit_nonce')) {
+            wp_send_json(array('message' => __('Invalid nonce.', 'fluent-toolkit')), 403);
+        }
+
         $pluginSlug = sanitize_text_field($_POST['slug']);
         $licenseKey = isset($_POST['license_key']) ? sanitize_text_field($_POST['license_key']) : '';
         $isBeta = isset($_POST['beta']) ? $_POST['beta'] == 'yes' : false;
@@ -123,6 +140,16 @@ class FluentToolkitBootstrap
         // get current plugin info
         $allPlugins = get_plugins();
         $fullSlug = $pluginSlug . '/' . $pluginSlug . '.php';
+
+        // Updates need update_plugins; fresh installs need install_plugins.
+        $isInstalled = isset($allPlugins[$fullSlug]);
+        $requiredCap = $isInstalled ? 'update_plugins' : 'install_plugins';
+        if (!current_user_can($requiredCap)) {
+            $message = $isInstalled
+                ? __('You do not have permission to update plugins.', 'fluent-toolkit')
+                : __('You do not have permission to install plugins.', 'fluent-toolkit');
+            wp_send_json(array('message' => $message), 403);
+        }
 
         if ($fullSlug == 'fluent-toolkit/fluent-toolkit.php') {
             $cachedSettings = get_option('__fluent_toolkit_versions', []);
@@ -135,24 +162,20 @@ class FluentToolkitBootstrap
                 ], 422);
             }
         } else {
-            $betaVersions = \FluentToolkit\Classes\ToolkitHelper::getVersions(true);
+            $candidates = array_merge(
+                \FluentToolkit\Classes\ToolkitHelper::getVersions(true),
+                \FluentToolkit\Classes\ToolkitHelper::getFreePlugins()
+            );
 
-            if (empty($betaVersions)) {
-                wp_send_json([
-                    'message' => __('No beta version found.', 'fluent-toolkit'),
-                    'status'  => false,
-                ], 500);
-            }
-
-            $targetBeta = array_filter($betaVersions, function ($beta) use ($pluginSlug) {
+            $targetBeta = array_filter($candidates, function ($beta) use ($pluginSlug) {
                 return $beta['slug'] === $pluginSlug;
             });
 
             if (empty($targetBeta)) {
                 wp_send_json([
-                    'message' => __('No beta version found.', 'fluent-toolkit'),
+                    'message' => __('Plugin not found.', 'fluent-toolkit'),
                     'status'  => false,
-                ], 500);
+                ], 404);
             }
 
             $targetBeta = array_values($targetBeta);
@@ -165,7 +188,6 @@ class FluentToolkitBootstrap
             $targetVersion = $targetBeta['beta_version'];
         }
 
-        $isInstalled = isset($allPlugins[$fullSlug]);
         if ($isInstalled) {
             // check the version
             $currentVersion = $allPlugins[$fullSlug]['Version'];
@@ -206,6 +228,42 @@ class FluentToolkitBootstrap
             'message' => __('Plugin installed successfully.', 'fluent-toolkit'),
             'status'  => true,
         ], 200);
+    }
+
+    public function activatePlugin()
+    {
+        if (!current_user_can('activate_plugins')) {
+            wp_send_json(array('message' => __('You do not have permission to activate plugins.', 'fluent-toolkit')), 403);
+        }
+
+        $nonce = isset($_REQUEST['__nonce']) ? sanitize_text_field($_REQUEST['__nonce']) : '';
+        if (!wp_verify_nonce($nonce, 'fluent_toolkit_nonce')) {
+            wp_send_json(array('message' => __('Invalid nonce.', 'fluent-toolkit')), 403);
+        }
+
+        $pluginSlug = isset($_POST['slug']) ? sanitize_key($_POST['slug']) : '';
+        if (!$pluginSlug) {
+            wp_send_json(array('message' => __('Missing plugin slug.', 'fluent-toolkit')), 422);
+        }
+
+        $fullSlug = $pluginSlug . '/' . $pluginSlug . '.php';
+
+        if (!function_exists('activate_plugin')) {
+            require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+
+        if (!file_exists(WP_PLUGIN_DIR . '/' . $fullSlug)) {
+            wp_send_json(array('message' => __('Plugin is not installed.', 'fluent-toolkit')), 404);
+        }
+
+        $result = activate_plugin($fullSlug);
+        if (is_wp_error($result)) {
+            wp_send_json(array('message' => $result->get_error_message()), 500);
+        }
+
+        wp_send_json(array(
+            'message' => __('Plugin activated.', 'fluent-toolkit'),
+        ), 200);
     }
 
     public function fetchMcpOverview()
@@ -287,19 +345,6 @@ class FluentToolkitBootstrap
         }
 
         return '';
-    }
-
-    private function verifyAjaxRequest()
-    {
-        if (!current_user_can('install_plugins')) {
-            wp_send_json(array('message' => __('You do not have permission to install a plugin.', 'fluent-toolkit')), 403);
-        }
-
-        $nonce = isset($_REQUEST['__nonce']) ? sanitize_text_field($_REQUEST['__nonce']) : '';
-
-        if (!wp_verify_nonce($nonce, 'fluent_toolkit_nonce')) {
-            wp_send_json(array('message' => __('Invalid nonce.', 'fluent-toolkit')), 403);
-        }
     }
 
     private function verifySettingsAjaxRequest()

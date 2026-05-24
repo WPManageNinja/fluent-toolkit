@@ -4,6 +4,88 @@ namespace FluentToolkit\Classes;
 
 class ToolkitHelper
 {
+    /**
+     * Curated free Fluent plugins surfaced in the FluentHub dashboard.
+     * `logo` is a filename in dist/images/; leave empty to fall back to initials.
+     * Versions and download URLs are fetched separately and cached short-term.
+     */
+    const FREE_PLUGINS = [
+        [
+            'slug'      => 'fluent-crm',
+            'name'      => 'FluentCRM',
+            'sub_title' => 'Self-hosted email marketing — no per-subscriber fees, full data ownership.',
+            'logo'      => 'fluentcrm_icon.svg',
+        ],
+        [
+            'slug'      => 'fluent-cart',
+            'name'      => 'FluentCart',
+            'sub_title' => 'A modern e-commerce engine for selling digital and physical products.',
+            'logo'      => 'fluentcart_icon.svg',
+        ],
+        [
+            'slug'      => 'fluentform',
+            'name'      => 'Fluent Forms',
+            'sub_title' => 'Drag-and-drop form builder with conditional logic, payments, and integrations.',
+            'logo'      => 'fluentforms_icon.svg',
+        ],
+        [
+            'slug'      => 'fluent-smtp',
+            'name'      => 'FluentSMTP',
+            'sub_title' => 'Reliable WP email delivery via SES, SendGrid, Mailgun, Postmark, and more.',
+            'logo'      => 'fluentsmtp_icon.svg',
+        ],
+        [
+            'slug'      => 'fluent-community',
+            'name'      => 'Fluent Community',
+            'sub_title' => 'Build a private community with spaces, courses, and member discussions.',
+            'logo'      => 'fluentcommunity_icon.svg',
+        ],
+        [
+            'slug'      => 'fluent-support',
+            'name'      => 'Fluent Support',
+            'sub_title' => 'A complete helpdesk and ticketing system built into your WordPress admin.',
+            'logo'      => 'fluentsupport_icon.svg',
+        ],
+        [
+            'slug'      => 'fluent-booking',
+            'name'      => 'Fluent Booking',
+            'sub_title' => 'Online appointment scheduling with calendar sync, reminders, and payments.',
+            'logo'      => 'fluentbooking_icon.svg',
+        ],
+        [
+            'slug'      => 'fluent-boards',
+            'name'      => 'Fluent Boards',
+            'sub_title' => 'Kanban boards for managing tasks and projects inside WordPress.',
+            'logo'      => 'fluentboards_icon.svg',
+        ],
+        [
+            'slug'      => 'fluent-security',
+            'name'      => 'FluentAuth',
+            'sub_title' => 'Two-factor auth, magic login, social logins, and brute-force protection.',
+            'logo'      => 'fluentauth_icon.svg',
+        ],
+        [
+            'slug'      => 'wp-payment-form',
+            'name'      => 'Paymattic',
+            'sub_title' => 'Accept one-time and recurring payments with Stripe, PayPal, and more.',
+            'logo'      => 'wppaymentform_icon.png',
+        ],
+        [
+            'slug'      => 'ninja-tables',
+            'name'      => 'Ninja Tables',
+            'sub_title' => 'Create responsive data tables from CSV, Google Sheets, or your database.',
+            'logo'      => 'ninjatables_icon.png',
+        ],
+    ];
+
+    const FREE_VERSIONS_CACHE_KEY = '__fluent_toolkit_free_versions_v4';
+    const FREE_VERSIONS_CACHE_TTL = 10 * MINUTE_IN_SECONDS;
+
+    public static function clearFreePluginsCache()
+    {
+        delete_site_transient(self::FREE_VERSIONS_CACHE_KEY);
+    }
+
     public static function getVersions($cached = true)
     {
         if ($cached) {
@@ -41,5 +123,96 @@ class ToolkitHelper
         }
 
         return [];
+    }
+
+    /**
+     * Free Fluent plugins shown in the dashboard. Static metadata (name,
+     * description, logo) is bundled; version + download URL is fetched from
+     * wordpress.org and cached for 10 minutes.
+     */
+    public static function getFreePlugins()
+    {
+        $versions = self::getFreePluginVersions();
+
+        $plugins = [];
+        foreach (self::FREE_PLUGINS as $meta) {
+            $slug = $meta['slug'];
+            if (empty($versions[$slug]['version']) || empty($versions[$slug]['download_link'])) {
+                continue;
+            }
+
+            $plugins[] = [
+                'slug'           => $slug,
+                'name'           => $meta['name'],
+                'sub_title'      => $meta['sub_title'],
+                'logo'           => $meta['logo']
+                    ? FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/' . $meta['logo']
+                    : '',
+                'stable_version' => $versions[$slug]['version'],
+                'download_url'   => $versions[$slug]['download_link'],
+                'changelog_url'  => 'https://wordpress.org/plugins/' . $slug . '/#developers',
+                'source'         => 'wp_org',
+                'is_pro'         => false,
+            ];
+        }
+
+        return $plugins;
+    }
+
+    /**
+     * Map of slug → ['version' => …, 'download_link' => …], from wordpress.org.
+     * Cached for FREE_VERSIONS_CACHE_TTL. One bulk POST to update-check/1.1/
+     * instead of N plugins_api() calls — same endpoint WP core uses to check
+     * every installed plugin in a single round trip.
+     */
+    private static function getFreePluginVersions()
+    {
+        $cached = get_site_transient(self::FREE_VERSIONS_CACHE_KEY);
+        if (is_array($cached)) {
+            return $cached;
+        }
+
+        $to_send = [];
+        foreach (self::FREE_PLUGINS as $meta) {
+            $file = $meta['slug'] . '/' . $meta['slug'] . '.php';
+            $to_send[$file] = [
+                'Name'    => $meta['name'],
+                'Version' => '0.0.1', // Force the server to treat each as out of date so we get latest info.
+            ];
+        }
+
+        $response = wp_remote_post('https://api.wordpress.org/plugins/update-check/1.1/', [
+            'timeout' => 10,
+            'body'    => [
+                'plugins' => wp_json_encode(['plugins' => $to_send, 'active' => []]),
+                'locale'  => wp_json_encode([get_locale()]),
+                'all'     => 'true',
+            ],
+        ]);
+
+        if (is_wp_error($response) || 200 !== wp_remote_retrieve_response_code($response)) {
+            return [];
+        }
+
+        $body = json_decode(wp_remote_retrieve_body($response), true);
+        if (!is_array($body) || empty($body['plugins'])) {
+            return [];
+        }
+
+        $versions = [];
+        foreach ($body['plugins'] as $file => $info) {
+            $slug = strstr($file, '/', true);
+            if (!$slug || empty($info['new_version']) || empty($info['package'])) {
+                continue;
+            }
+            $versions[$slug] = [
+                'version'       => $info['new_version'],
+                'download_link' => $info['package'],
+            ];
+        }
+
+        set_site_transient(self::FREE_VERSIONS_CACHE_KEY, $versions, self::FREE_VERSIONS_CACHE_TTL);
+
+        return $versions;
     }
 }

@@ -10,15 +10,50 @@ class AdminMenu
 
     public static function register()
     {
+        $adminApps = apply_filters('fluent_toolkit/admin_apps', []);
+        $priority = apply_filters('fluent_toolkit/admin_menu_priority', 200);
+
+        $basePermission = 'manage_options';
+        if ($adminApps && !current_user_can('manage_options')) {
+            $user = wp_get_current_user();
+            if (empty($user->roles) || !is_array($user->roles)) {
+                return;
+            }
+            $basePermission = array_values($user->roles)[0];
+            if (!$basePermission) {
+                return;
+            }
+        }
+
         add_menu_page(
-            __('FluentKit', 'fluent-toolkit'),
-            __('FluentKit', 'fluent-toolkit'),
-            'manage_options',
+            __('FluentHub', 'fluent-toolkit'),
+            __('FluentHub', 'fluent-toolkit'),
+            $basePermission,
             self::DASHBOARD_SLUG,
             [__CLASS__, 'render'],
             self::pluginIcon(),
-            200
+            $priority
         );
+
+        if ($adminApps) {
+            global $submenu;
+            foreach ($adminApps as $adminApp) {
+                if (empty($adminApp['dashboard_url'])) {
+                    continue;
+                }
+                $submenu['fluent-toolkit'][] = [
+                    $adminApp['title'],                      // 0: label
+                    'manage_options',                      // 1: capability
+                    $adminApp['dashboard_url'],            // 2: link
+                ];
+            }
+
+            $submenu['fluent-toolkit'][] = [
+                __('Hub Settings', 'fluent-toolkit'),
+                'manage_options',
+                admin_url('admin.php?page=fluent-toolkit#/')
+            ];
+        }
     }
 
     public static function render()
@@ -79,6 +114,11 @@ class AdminMenu
             'dashboard_url'      => self::url(),
             'current_user_login' => $currentUserLogin,
             'settings'           => $toolkitSettings,
+            'caps'               => [
+                'install_plugins'  => current_user_can('install_plugins'),
+                'update_plugins'   => current_user_can('update_plugins'),
+                'activate_plugins' => current_user_can('activate_plugins'),
+            ],
         ]);
     }
 

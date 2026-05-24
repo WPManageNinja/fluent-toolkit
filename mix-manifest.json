@@ -1,19 +1,24 @@
 {
     "/dist/app.js": "/dist/app.js",
     "/dist/unified-ui.css": "/dist/unified-ui.css",
+    "/dist/images/fluentauth_icon.svg": "/dist/images/fluentauth_icon.svg",
     "/dist/images/fluentboards_icon.svg": "/dist/images/fluentboards_icon.svg",
     "/dist/images/fluentbooking_icon.svg": "/dist/images/fluentbooking_icon.svg",
     "/dist/images/fluentbooking_logo.svg": "/dist/images/fluentbooking_logo.svg",
     "/dist/images/fluentcart_icon.svg": "/dist/images/fluentcart_icon.svg",
     "/dist/images/fluentcart_logo.svg": "/dist/images/fluentcart_logo.svg",
+    "/dist/images/fluentcommunity_icon.svg": "/dist/images/fluentcommunity_icon.svg",
     "/dist/images/fluentcrm-logo.svg": "/dist/images/fluentcrm-logo.svg",
     "/dist/images/fluentcrm_icon.svg": "/dist/images/fluentcrm_icon.svg",
     "/dist/images/fluentforms_icon.svg": "/dist/images/fluentforms_icon.svg",
     "/dist/images/fluentforms_logo.svg": "/dist/images/fluentforms_logo.svg",
+    "/dist/images/fluentsmtp_icon.svg": "/dist/images/fluentsmtp_icon.svg",
     "/dist/images/fluentsupport_icon.svg": "/dist/images/fluentsupport_icon.svg",
     "/dist/images/fluentsupport_logo.svg": "/dist/images/fluentsupport_logo.svg",
     "/dist/images/logo-dark.svg": "/dist/images/logo-dark.svg",
     "/dist/images/logo-light.svg": "/dist/images/logo-light.svg",
     "/dist/images/logo.svg": "/dist/images/logo.svg",
-    "/dist/images/logo_monoto_light.svg": "/dist/images/logo_monoto_light.svg"
+    "/dist/images/logo_monoto_light.svg": "/dist/images/logo_monoto_light.svg",
+    "/dist/images/ninjatables_icon.png": "/dist/images/ninjatables_icon.png",
+    "/dist/images/wppaymentform_icon.png": "/dist/images/wppaymentform_icon.png"
 }
