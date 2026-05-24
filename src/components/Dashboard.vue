@@ -115,11 +115,11 @@
                     <!-- Status -->
                     <div>
                         <span v-if="!plugin.installed_version" class="ft-status ft-status-notinstalled">Not installed</span>
-                        <span v-else-if="plugin.has_update || plugin.has_beta_update" class="ft-status ft-status-update">
-                            <span class="ft-dot ft-dot-warn"></span>Update available
-                        </span>
                         <span v-else-if="plugin.is_active === false" class="ft-status ft-status-notinstalled">
                             <span class="ft-dot"></span>Inactive
+                        </span>
+                        <span v-else-if="plugin.has_update || plugin.has_beta_update" class="ft-status ft-status-update">
+                            <span class="ft-dot ft-dot-warn"></span>Update available
                         </span>
                         <span v-else class="ft-status ft-status-ok">
                             <span class="ft-dot ft-dot-ok"></span>Up to date
@@ -129,9 +129,9 @@
                     <!-- Actions -->
                     <div class="ft-actions">
                         <button v-if="!plugin.installed_version && caps.install_plugins" @click="installPlugin(plugin)" class="ft-btn ft-btn-primary">Install</button>
+                        <button v-else-if="plugin.is_active === false && caps.activate_plugins" @click="activatePlugin(plugin)" class="ft-btn ft-btn-primary">Activate</button>
                         <button v-else-if="plugin.has_beta_update && caps.update_plugins" @click="installPlugin(plugin, 'yes')" class="ft-btn ft-btn-accent">Update to {{ plugin.beta_version }}</button>
                         <button v-else-if="plugin.has_update && caps.update_plugins" @click="installPlugin(plugin)" class="ft-btn ft-btn-accent">Update to {{ plugin.stable_version }}</button>
-                        <button v-else-if="plugin.is_active === false && caps.activate_plugins" @click="activatePlugin(plugin)" class="ft-btn ft-btn-primary">Activate</button>
                         <span v-else>
                             --
                         </span>

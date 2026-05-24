@@ -26,8 +26,15 @@ class UnifiedUiHandler
         $cartMenu = $this->getCartMenu();
         $crmMenu = $this->getCrmMenu();
         $bookingMenu = $this->getBookingMenu();
+        $smtpMenu = $this->getSmtpMenu();
+        $authMenu = $this->getAuthMenu();
+        $tablesMenu = $this->getNinjaTablesMenu();
+        $paymatticMenu = $this->getPaymatticMenu();
+        $playerMenu = $this->getPlayerMenu();
+        $socialMenu = $this->getSocialNinjaMenu();
+        $communityMenu = $this->getCommunityMenu();
 
-        $hasApps = $supportMenu || $formsMenu || $cartMenu || $crmMenu || $bookingMenu;
+        $hasApps = $supportMenu || $formsMenu || $cartMenu || $crmMenu || $bookingMenu || $smtpMenu || $authMenu || $tablesMenu || $paymatticMenu || $playerMenu || $socialMenu || $communityMenu;
 
         $apps = [
             'fluentcrm-admin' => [
@@ -84,6 +91,68 @@ class UnifiedUiHandler
                 'has_dark_mode' => false,
                 'dashboard_url' => admin_url('admin.php?page=fluent-boards#/')
             ],
+            'wppayform.php'   => [
+                'disabled'      => !$paymatticMenu,
+                'title'         => 'Payments & Donations',
+                'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/wppaymentform_icon.png',
+                'items'         => $paymatticMenu,
+                'has_dark_mode' => false,
+                'dashboard_url' => admin_url('admin.php?page=wppayform.php#/')
+            ],
+            'ninja_tables'    => [
+                'disabled'      => !$tablesMenu,
+                'title'         => 'Data & Tables',
+                'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/ninjatables_icon.svg',
+                'items'         => $tablesMenu,
+                'has_dark_mode' => false,
+                'dashboard_url' => admin_url('admin.php?page=ninja_tables#/')
+            ],
+            'fluent-auth'     => [
+                'disabled'      => !$authMenu,
+                'title'         => 'Auth & Security',
+                'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentauth_icon.svg',
+                'items'         => $authMenu,
+                'has_dark_mode' => false,
+                'group'         => 'others',
+                'dashboard_url' => admin_url('admin.php?page=fluent-auth#/')
+            ],
+            'fluent-mail'     => [
+                'disabled'      => !$smtpMenu,
+                'title'         => 'Email Delivery (SMTP)',
+                'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentsmtp_icon.svg',
+                'items'         => $smtpMenu,
+                'has_dark_mode' => false,
+                'group'         => 'others',
+                'parent_slug'   => 'options-general.php',
+                'dashboard_url' => admin_url('options-general.php?page=fluent-mail#/')
+            ],
+            'fluent-player'   => [
+                'disabled'      => !$playerMenu,
+                'title'         => 'Media & Player',
+                'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentplayer_icon.svg',
+                'items'         => $playerMenu,
+                'has_dark_mode' => false,
+                'group'         => 'others',
+                'dashboard_url' => admin_url('admin.php?page=fluent-player#/')
+            ],
+            'wpsocialninja.php' => [
+                'disabled'      => !$socialMenu,
+                'title'         => 'Social Reviews',
+                'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/wpsocialninja_icon.svg',
+                'items'         => $socialMenu,
+                'has_dark_mode' => false,
+                'group'         => 'others',
+                'dashboard_url' => admin_url('admin.php?page=wpsocialninja.php#/')
+            ],
+            'fluent-community' => [
+                'disabled'      => !$communityMenu,
+                'title'         => 'Community',
+                'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentcommunity_icon.svg',
+                'items'         => $communityMenu,
+                'has_dark_mode' => false,
+                'group'         => 'others',
+                'dashboard_url' => admin_url('admin.php?page=fluent-community')
+            ],
             'fluent-toolkit'  => [
                 'disabled'      => true,
                 'title'         => 'FluentHub',
@@ -122,39 +191,54 @@ class UnifiedUiHandler
                 'fluent_forms_reports'
             ]);
 
-            if (!isset($this->apps[$plugin_page]) && !$isFfSubPage) {
-                add_action('admin_head', function () {
-                    $cssSelector = '';
-                    foreach ($this->apps as $key => $app) {
-                        if (!empty($app['disabled'])) {
-                            continue;
-                        }
-                        $cssSelector .= ' #toplevel_page_' . $key . ',';
+            $isPaymatticSubPage = ($plugin_page === 'wppayform_settings');
+            
+            add_action('admin_head', function () {
+                $selectors = [];
+                foreach ($this->apps as $key => $app) {
+                    if($key === 'fluent-toolkit') {
+                        continue;
                     }
-
-                    if (!$cssSelector) {
-                        return;
+                    
+                    if (!empty($app['parent_slug'])) {
+                        // Sub-menu app (e.g. fluent-mail under options-general.php) —
+                        // hide its <li> in the parent's sub-menu via :has().
+                        $selectors[] = '#adminmenumain .wp-submenu li:has(a[href*="page=' . esc_attr($key) . '"])';
+                        continue;
                     }
+                    // WP strips trailing `.php` when building the menu element id
+                    // (e.g. `wppayform.php` → `#toplevel_page_wppayform`).
+                    $slug = preg_replace('!\.php$!', '', $key);
+                    $selectors[] = '#toplevel_page_' . esc_attr($slug);
+                }
 
-                    $cssSelector = rtrim($cssSelector, ',');
-                    ?>
-                    <style>
-                        <?php echo $cssSelector; ?>
-                        {
-                            display: none !important
-                        ;
-                        }
-                    </style>
-                    <?php
-                });
+                if (!$selectors) {
+                    return;
+                }
+                ?>
+                <style>
+                    <?php echo implode(', ', $selectors); ?> {
+                        display: none !important;
+                    }
+                </style>
+                <?php
+            });
 
+            if (!isset($this->apps[$plugin_page]) && !$isFfSubPage && !$isPaymatticSubPage) {
                 return;
             }
 
+
             remove_all_actions('admin_notices');
-            $hookName = 'toplevel_page_' . $plugin_page;
+            // WP strips trailing `.php` from plugin slugs when building hook names
+            // (e.g., `wppayform.php` → `toplevel_page_wppayform`).
+            $hookName = 'toplevel_page_' . preg_replace('!\.php$!', '', $plugin_page);
             if ($isFfSubPage) {
                 $hookName = get_plugin_page_hookname($plugin_page, 'fluent_forms');
+            } elseif ($isPaymatticSubPage) {
+                $hookName = get_plugin_page_hookname($plugin_page, 'wppayform.php');
+            } elseif (isset($this->apps[$plugin_page]) && !empty($this->apps[$plugin_page]['parent_slug'])) {
+                $hookName = get_plugin_page_hookname($plugin_page, $this->apps[$plugin_page]['parent_slug']);
             }
 
             add_action($hookName, [$this, 'pushUnifiedUiToTop'], 1);
@@ -192,6 +276,7 @@ class UnifiedUiHandler
             'fluent_forms_payment_entries' => 'fluent_forms',
             'fluent_forms_smtp'            => 'fluent_forms',
             'fluent_forms_docs'            => 'fluent_forms',
+            'wppayform_settings'           => 'wppayform.php',
         ];
         if (isset($subPageToApp[$plugin_page])) {
             $currentAppSlug = $subPageToApp[$plugin_page];
@@ -217,6 +302,7 @@ class UnifiedUiHandler
         </script>
 
         <div class="fluent_uui">
+            <div class="fui-wp-menu-backdrop" aria-hidden="true"></div>
             <?php
             $mobileNavItems = !empty($currentApp['items']) ? array_slice(array_values($currentApp['items']), 0, 4) : [];
             ?>
@@ -317,33 +403,59 @@ class UnifiedUiHandler
                 $visibleApps = array_filter($this->apps, function ($a) {
                     return empty($a['disabled']);
                 });
+                $primaryApps = array_filter($visibleApps, function ($a) {
+                    return empty($a['group']);
+                });
+                $otherApps = array_filter($visibleApps, function ($a) {
+                    return !empty($a['group']) && $a['group'] === 'others';
+                });
+                $renderApps = $primaryApps + $otherApps;
+                $otherSubheadShown = false;
                 ?>
-                <?php if (!empty($visibleApps)): ?>
+                <?php if (!empty($renderApps)): ?>
                     <div class="fui-products">
-                        <?php foreach ($visibleApps as $slug => $app):
+                        <?php foreach ($renderApps as $slug => $app):
                             $isCurrent = ($slug === $currentAppSlug);
                             $appItems = isset($app['items']) ? $app['items'] : [];
-                            ?>
+                            $isOther = !empty($app['group']) && $app['group'] === 'others';
+                            if ($isOther && !$otherSubheadShown):
+                                $otherSubheadShown = true;
+                                ?>
+                                <div class="fui-products-subhead" role="presentation">
+                                    <?php esc_html_e('Others', 'fluent-toolkit'); ?>
+                                </div>
+                            <?php endif; ?>
                             <section
-                                class="fui-product-section<?php echo $isCurrent ? ' fui-product-section--current is-open' : ''; ?>">
-                                <button type="button" class="fui-product-header"
-                                        aria-expanded="<?php echo $isCurrent ? 'true' : 'false'; ?>">
-                                    <?php if (!empty($app['icon'])): ?>
-                                        <img class="fui-product-mark" src="<?php echo esc_url($app['icon']); ?>"
-                                             alt=""/>
-                                    <?php endif; ?>
-                                    <span class="fui-product-name"><?php echo esc_html($app['title']); ?></span>
-                                    <span class="fui-item-chevron" aria-hidden="true">
-                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
-                                         xmlns="http://www.w3.org/2000/svg">
-                                        <path
-                                            d="M10.0001 10.879L13.7126 7.1665L14.7731 8.227L10.0001 13L5.22705 8.227L6.28755 7.1665L10.0001 10.879Z"
-                                            fill="currentColor"/>
-                                    </svg>
-                                </span>
-                                </button>
+                                class="fui-product-section<?php echo $isCurrent ? ' fui-product-section--current is-open' : ''; ?><?php echo $isOther ? ' fui-product-section--flat' : ''; ?>">
+                                <?php if ($isOther): ?>
+                                    <a class="fui-product-header fui-product-header--flat<?php echo $isCurrent ? ' is-active' : ''; ?>"
+                                       href="<?php echo esc_url(!empty($app['dashboard_url']) ? $app['dashboard_url'] : '#'); ?>">
+                                        <?php if (!empty($app['icon'])): ?>
+                                            <img class="fui-product-mark" src="<?php echo esc_url($app['icon']); ?>"
+                                                 alt=""/>
+                                        <?php endif; ?>
+                                        <span class="fui-product-name"><?php echo esc_html($app['title']); ?></span>
+                                    </a>
+                                <?php else: ?>
+                                    <button type="button" class="fui-product-header"
+                                            aria-expanded="<?php echo $isCurrent ? 'true' : 'false'; ?>">
+                                        <?php if (!empty($app['icon'])): ?>
+                                            <img class="fui-product-mark" src="<?php echo esc_url($app['icon']); ?>"
+                                                 alt=""/>
+                                        <?php endif; ?>
+                                        <span class="fui-product-name"><?php echo esc_html($app['title']); ?></span>
+                                        <span class="fui-item-chevron" aria-hidden="true">
+                                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"
+                                             xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M10.0001 10.879L13.7126 7.1665L14.7731 8.227L10.0001 13L5.22705 8.227L6.28755 7.1665L10.0001 10.879Z"
+                                                fill="currentColor"/>
+                                        </svg>
+                                    </span>
+                                    </button>
+                                <?php endif; ?>
 
-                                <?php if (!empty($appItems)): ?>
+                                <?php if (!$isOther && !empty($appItems)): ?>
                                     <ul class="fui-product-nav">
                                         <?php foreach ($appItems as $itemKey => $item):
                                             $itemHash = parse_url($item['url'], PHP_URL_FRAGMENT);
@@ -401,7 +513,9 @@ class UnifiedUiHandler
                 <div class="fui-sidebar-footer">
                     <div class="fui-sidebar-footer--left">
                         <a href="<?php echo esc_url(admin_url()); ?>" class="fui-wordpress-menu-link"
-                           aria-label="Back to WP Admin">
+                           aria-label="<?php esc_attr_e('WordPress menu', 'fluent-toolkit'); ?>"
+                           aria-haspopup="true" aria-expanded="false"
+                           title="<?php esc_attr_e('WordPress menu', 'fluent-toolkit'); ?>">
                             <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                 <path
                                     d="M3.32308 12C3.32308 15.4385 5.32308 18.4 8.21538 19.8077L4.07692 8.46923C3.57998 9.57999 3.3231 10.7831 3.32308 12ZM12 20.6769C13.0077 20.6769 13.9769 20.5 14.8846 20.1846L14.8231 20.0692L12.1538 12.7615L9.55385 20.3231C10.3231 20.5538 11.1462 20.6769 12 20.6769ZM13.1923 7.93077L16.3308 17.2615L17.2 14.3692C17.5692 13.1692 17.8538 12.3077 17.8538 11.5615C17.8538 10.4846 17.4692 9.74615 17.1462 9.17692C16.7 8.45385 16.2923 7.84615 16.2923 7.13846C16.2923 6.33846 16.8923 5.6 17.7538 5.6H17.8615C16.2627 4.13224 14.1704 3.31946 12 3.32308C10.5629 3.32281 9.14834 3.67979 7.88347 4.3619C6.61861 5.04402 5.54315 6.02987 4.75385 7.23077L5.30769 7.24615C6.21538 7.24615 7.61539 7.13077 7.61539 7.13077C8.09231 7.10769 8.14615 7.79231 7.67692 7.84615C7.67692 7.84615 7.20769 7.90769 6.67692 7.93077L9.84615 17.3308L11.7462 11.6385L10.3923 7.93077C10.0891 7.91404 9.78636 7.88838 9.48462 7.85385C9.01538 7.82308 9.06923 7.10769 9.53846 7.13077C9.53846 7.13077 10.9692 7.24615 11.8231 7.24615C12.7308 7.24615 14.1308 7.13077 14.1308 7.13077C14.6 7.10769 14.6615 7.79231 14.1923 7.84615C14.1923 7.84615 13.7231 7.9 13.1923 7.93077ZM16.3615 19.5C17.6742 18.7368 18.7636 17.6424 19.5208 16.3263C20.2781 15.0102 20.6767 13.5184 20.6769 12C20.6769 10.4923 20.2923 9.07692 19.6154 7.83846C19.7529 9.20099 19.5466 10.5762 19.0154 11.8385L16.3615 19.5ZM12 22C9.34784 22 6.8043 20.9464 4.92893 19.0711C3.05357 17.1957 2 14.6522 2 12C2 9.34784 3.05357 6.8043 4.92893 4.92893C6.8043 3.05357 9.34784 2 12 2C14.6522 2 17.1957 3.05357 19.0711 4.92893C20.9464 6.8043 22 9.34784 22 12C22 14.6522 20.9464 17.1957 19.0711 19.0711C17.1957 20.9464 14.6522 22 12 22Z"></path>
@@ -557,6 +671,35 @@ class UnifiedUiHandler
                         applyActive();
                         window.addEventListener('hashchange', applyActive);
 
+                        // WP admin menu drawer — keeps the native #adminmenumain hidden
+                        // by default and slides it in as a second column next to the unified
+                        // sidebar when the user clicks the WordPress icon.
+                        var wpMenuTrigger = sidebar.querySelector('.fui-wordpress-menu-link');
+                        var adminMenuEl = document.getElementById('adminmenumain');
+                        function setWpMenuOpen(open) {
+                            document.body.classList.toggle('fui-wp-menu-open', open);
+                            if (wpMenuTrigger) wpMenuTrigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+                        }
+                        if (wpMenuTrigger && adminMenuEl) {
+                            wpMenuTrigger.addEventListener('click', function (e) {
+                                e.preventDefault();
+                                setWpMenuOpen(!document.body.classList.contains('fui-wp-menu-open'));
+                            });
+                            // Close on outside click.
+                            document.addEventListener('click', function (e) {
+                                if (!document.body.classList.contains('fui-wp-menu-open')) return;
+                                if (adminMenuEl.contains(e.target)) return;
+                                if (wpMenuTrigger.contains(e.target)) return;
+                                setWpMenuOpen(false);
+                            });
+                            // Escape closes the drawer.
+                            document.addEventListener('keydown', function (e) {
+                                if (e.key === 'Escape' && document.body.classList.contains('fui-wp-menu-open')) {
+                                    setWpMenuOpen(false);
+                                }
+                            });
+                        }
+
                         // Sidebar click delegation:
                         //  • Product header — toggle that product's section open/closed.
                         //  • Item chevron — toggle that item's sub-menu open/closed (no navigation).
@@ -565,6 +708,9 @@ class UnifiedUiHandler
                         sidebar.addEventListener('click', function (e) {
                             var productHeader = e.target.closest('.fui-product-header');
                             if (productHeader) {
+                                if (productHeader.classList.contains('fui-product-header--flat')) {
+                                    return;
+                                }
                                 e.preventDefault();
                                 var section = productHeader.closest('.fui-product-section');
                                 if (section) {
@@ -929,6 +1075,319 @@ class UnifiedUiHandler
         }
 
         return $menuItems;
+    }
+
+    protected function getCommunityMenu()
+    {
+        if (!defined('FLUENT_COMMUNITY_PLUGIN_VERSION')) {
+            return [];
+        }
+
+        if (!current_user_can('edit_posts')) {
+            return [];
+        }
+
+        // Items list isn't rendered for Others-group flat links, but a
+        // non-empty return drives the `disabled` flag.
+        return [
+            'dashboard' => [
+                'title'    => __('Dashboard', 'fluent-toolkit'),
+                'url'      => admin_url('admin.php?page=fluent-community'),
+                'icon_svg' => $this->getIcon('dashboard')
+            ]
+        ];
+    }
+
+    protected function getSocialNinjaMenu()
+    {
+        if (!defined('WPSOCIALREVIEWS_VERSION') || !class_exists('\WPSocialReviews\App\Services\PermissionManager')) {
+            return [];
+        }
+
+        $permission = \WPSocialReviews\App\Services\PermissionManager::currentUserPermissions();
+        if (empty($permission)) {
+            return [];
+        }
+
+        // Items list isn't rendered (this is an Others-group flat link), but
+        // a non-empty return signals "show this app" via the disabled flag.
+        return [
+            'dashboard' => [
+                'title'    => __('Dashboard', 'fluent-toolkit'),
+                'url'      => admin_url('admin.php?page=wpsocialninja.php#/'),
+                'icon_svg' => $this->getIcon('dashboard')
+            ]
+        ];
+    }
+
+    protected function getPlayerMenu()
+    {
+        if (!defined('FLUENT_PLAYER_VERSION')) {
+            return [];
+        }
+
+        if (!current_user_can('manage_options')) {
+            return [];
+        }
+
+        $baseUrl = admin_url('admin.php?page=fluent-player#/');
+
+        return [
+            'media'     => [
+                'title'    => __('Media', 'fluent-toolkit'),
+                'url'      => $baseUrl,
+                'icon_svg' => $this->getIcon('dashboard')
+            ],
+            'playlists' => [
+                'title'    => __('Playlists', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'playlists',
+                'icon_svg' => $this->getIcon('mailboxes')
+            ],
+            'analytics' => [
+                'title'    => __('Analytics', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'analytics',
+                'icon_svg' => $this->getIcon('reports')
+            ],
+            'settings'  => [
+                'title'    => __('Settings', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'settings',
+                'icon_svg' => $this->getIcon('settings')
+            ]
+        ];
+    }
+
+    protected function getPaymatticMenu()
+    {
+        if (!defined('WPPAYFORM_VERSION') || !class_exists('\WPPayForm\App\Services\AccessControl')) {
+            return [];
+        }
+
+        $menuPermission = \WPPayForm\App\Services\AccessControl::hasTopLevelMenuPermission();
+        if (!current_user_can($menuPermission)) {
+            $accessStatus = \WPPayForm\App\Services\AccessControl::giveCustomAccess();
+            if (empty($accessStatus['has_access'])) {
+                return [];
+            }
+        }
+
+        if (\WPPayForm\App\Services\AccessControl::isPaymatticUser()) {
+            return [];
+        }
+
+        $baseUrl = admin_url('admin.php?page=wppayform.php#/');
+
+        $menuItems = [
+            'forms'        => [
+                'title'    => __('All Forms', 'fluent-toolkit'),
+                'url'      => $baseUrl,
+                'icon_svg' => $this->getIcon('forms')
+            ],
+            'entries'      => [
+                'title'    => __('Entries', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'entries',
+                'icon_svg' => $this->getIcon('entries')
+            ],
+            'reports'      => [
+                'title'    => __('Reports', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'reports',
+                'icon_svg' => $this->getIcon('reports')
+            ],
+            'customers'    => [
+                'title'    => __('Customers', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'customers',
+                'icon_svg' => $this->getIcon('customers')
+            ],
+            'integrations' => [
+                'title'    => __('Integrations', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'integrations',
+                'icon_svg' => $this->getIcon('integrations')
+            ],
+            'gateways'     => [
+                'title'    => __('Payment Gateways', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'gateways/stripe',
+                'icon_svg' => $this->getIcon('money')
+            ],
+            'settings'     => [
+                'title'    => __('Settings', 'fluent-toolkit'),
+                'url'      => admin_url('admin.php?page=wppayform_settings'),
+                'icon_svg' => $this->getIcon('settings')
+            ],
+            'support'      => [
+                'title'    => __('Support & Debug', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'support',
+                'icon_svg' => $this->getIcon('tickets')
+            ]
+        ];
+
+        if (!defined('WPPAYFORMHASPRO')) {
+            $menuItems['get_pro'] = [
+                'external' => true,
+                'title'    => __('Get Pro', 'fluent-toolkit'),
+                'url'      => 'https://paymattic.com/pricing/?utm_source=plugin&utm_medium=menu&utm_campaign=upgrade',
+                'icon_svg' => $this->getIcon('get_pro')
+            ];
+        }
+
+        return $menuItems;
+    }
+
+    protected function getNinjaTablesMenu()
+    {
+        if (!defined('NINJA_TABLES_VERSION') || !function_exists('ninja_table_admin_role')) {
+            return [];
+        }
+
+        if (!ninja_table_admin_role()) {
+            return [];
+        }
+
+        $baseUrl = admin_url('admin.php?page=ninja_tables#/');
+
+        $menuItems = [
+            'tables' => [
+                'title'    => __('Tables', 'fluent-toolkit'),
+                'url'      => $baseUrl,
+                'icon_svg' => $this->getIcon('dashboard')
+            ],
+            'tools'  => [
+                'title'    => __('Tools', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'tools',
+                'icon_svg' => $this->getIcon('tools')
+            ]
+        ];
+
+        if (defined('NINJA_CHARTS_VERSION')) {
+            $menuItems['charts'] = [
+                'title'    => __('Charts', 'fluent-toolkit'),
+                'url'      => admin_url('admin.php?page=ninja-charts#/chart-list'),
+                'icon_svg' => $this->getIcon('reports')
+            ];
+        } else {
+            $menuItems['charts'] = [
+                'title'    => __('Charts', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'charts',
+                'icon_svg' => $this->getIcon('reports')
+            ];
+        }
+
+        $menuItems['help'] = [
+            'title'    => __('Help', 'fluent-toolkit'),
+            'url'      => $baseUrl . 'help',
+            'icon_svg' => $this->getIcon('tickets')
+        ];
+
+        if (!defined('NINJATABLESPRO')) {
+            $menuItems['get_pro'] = [
+                'external' => true,
+                'title'    => __('Get Pro', 'fluent-toolkit'),
+                'url'      => 'https://wpmanageninja.com/downloads/ninja-tables-pro-add-on/?utm_source=ninja-tables&utm_medium=wp&utm_campaign=wp_plugin&utm_term=upgrade_menu',
+                'icon_svg' => $this->getIcon('get_pro')
+            ];
+        }
+
+        return $menuItems;
+    }
+
+    protected function getSmtpMenu()
+    {
+        if (!defined('FLUENTMAIL_PLUGIN_VERSION')) {
+            return [];
+        }
+
+        if (!current_user_can('manage_options')) {
+            return [];
+        }
+
+        $baseUrl = admin_url('options-general.php?page=fluent-mail#/');
+
+        return [
+            'dashboard'             => [
+                'title'    => __('Dashboard', 'fluent-toolkit'),
+                'url'      => $baseUrl,
+                'icon_svg' => $this->getIcon('dashboard')
+            ],
+            'connections'           => [
+                'title'    => __('Connections', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'connections',
+                'icon_svg' => $this->getIcon('integrations')
+            ],
+            'logs'                  => [
+                'title'    => __('Email Logs', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'logs',
+                'icon_svg' => $this->getIcon('email')
+            ],
+            'notification-settings' => [
+                'title'    => __('Notifications', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'notification-settings',
+                'icon_svg' => $this->getIcon('settings')
+            ],
+            'test'                  => [
+                'title'    => __('Test Email', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'test',
+                'icon_svg' => $this->getIcon('tools')
+            ],
+            'documentation'         => [
+                'title'    => __('Documentation', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'documentation',
+                'icon_svg' => $this->getIcon('tickets')
+            ],
+            'support'               => [
+                'title'    => __('About', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'support',
+                'icon_svg' => $this->getIcon('more')
+            ]
+        ];
+    }
+
+    protected function getAuthMenu()
+    {
+        if (!defined('FLUENT_AUTH_VERSION') || !class_exists('\FluentAuth\App\Helpers\Helper')) {
+            return [];
+        }
+
+        if (!\FluentAuth\App\Helpers\Helper::getAppPermission()) {
+            return [];
+        }
+
+        $baseUrl = admin_url('admin.php?page=fluent-auth#/');
+
+        return [
+            'dashboard'        => [
+                'title'    => __('Dashboard', 'fluent-toolkit'),
+                'url'      => $baseUrl,
+                'icon_svg' => $this->getIcon('dashboard')
+            ],
+            'logs'             => [
+                'title'    => __('Auth Logs', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'logs',
+                'icon_svg' => $this->getIcon('reports')
+            ],
+            'settings'         => [
+                'title'    => __('Security Settings', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'settings',
+                'icon_svg' => $this->getIcon('settings')
+            ],
+            'auth-shortcodes'  => [
+                'title'    => __('Login/Signup Forms', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'auth-shortcodes',
+                'icon_svg' => $this->getIcon('forms')
+            ],
+            'login-redirects'  => [
+                'title'    => __('Login Redirects', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'login-redirects',
+                'icon_svg' => $this->getIcon('automation')
+            ],
+            'custom-wp-emails' => [
+                'title'    => __('Customize WP Emails', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'custom-wp-emails',
+                'icon_svg' => $this->getIcon('email')
+            ],
+            'security-scans'   => [
+                'title'    => __('Security Scans', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'security-scans',
+                'icon_svg' => $this->getIcon('check')
+            ]
+        ];
     }
 
     protected function getFormsMenu()

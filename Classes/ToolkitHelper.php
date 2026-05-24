@@ -76,6 +76,12 @@ class ToolkitHelper
             'sub_title' => 'Create responsive data tables from CSV, Google Sheets, or your database.',
             'logo'      => 'ninjatables_icon.png',
         ],
+        [
+            'slug'      => 'wp-social-reviews',
+            'name'      => 'WP Social Ninja',
+            'sub_title' => 'Embed reviews, social feeds, testimonials, and chat widgets from Google, Facebook, Yelp, and more.',
+            'logo'      => 'wpsocialninja_icon.svg',
+        ],
     ];
 
     const FREE_VERSIONS_CACHE_KEY = '__fluent_toolkit_free_versions_v4';
