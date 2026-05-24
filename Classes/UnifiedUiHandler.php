@@ -951,10 +951,13 @@ class UnifiedUiHandler
                 'url'      => $baseUrl . 'fluent_forms_all_entries',
                 'icon_svg' => $this->getIcon('entries')
             ];
-            $menuItems['fluent_forms_reports'] = [
-                'title'    => __('Reports', 'fluent-toolkit'),
-                'url'      => $baseUrl . 'fluent_forms_reports',
-                'icon_svg' => $this->getIcon('reports')
+        }
+
+        if ($Acl::hasPermission('fluentform_view_payments')) {
+            $menuItems['payments'] = [
+                'title'    => __('Payments', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'fluent_forms_payment_entries',
+                'icon_svg' => $this->getIcon('money')
             ];
         }
 
@@ -968,14 +971,6 @@ class UnifiedUiHandler
                 'title'    => __('Integrations', 'fluent-toolkit'),
                 'url'      => $baseUrl . 'fluent_forms_add_ons',
                 'icon_svg' => $this->getIcon('integrations')
-            ];
-        }
-
-        if ($Acl::hasPermission('fluentform_view_payments')) {
-            $menuItems['payments'] = [
-                'title'    => __('Payments', 'fluent-toolkit'),
-                'url'      => $baseUrl . 'fluent_forms_payment_entries',
-                'icon_svg' => $this->getIcon('money')
             ];
         }
 
@@ -995,21 +990,8 @@ class UnifiedUiHandler
             ];
         }
 
-        if (!current_user_can('manage_options')) {
-            $hasSettingsCapability = current_user_can('fluentform_settings_manager');
-            if (!$hasSettingsCapability && !current_user_can('fluentform_entries_viewer')) {
-                unset($menuItems['fluent_forms_all_entries']);
-            }
-
-            if (!$hasSettingsCapability && !current_user_can('fluentform_view_payments')) {
-                unset($menuItems['payments']);
-            }
-
-            if (!$hasSettingsCapability && !current_user_can('fluentform_settings_manager')) {
-                unset($menuItems['fluent_forms_settings']);
-                unset($menuItems['integrations']);
-                unset($menuItems['tools']);
-            }
+        if(!$menuItems) {
+            return [];
         }
 
         if (!defined('FLUENTFORMPRO_VERSION')) {
