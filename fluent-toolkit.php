@@ -27,6 +27,7 @@ class FluentToolkitBootstrap
         $this->loadClasses();
 
         add_action('admin_menu', array(\FluentToolkit\Classes\AdminMenu::class, 'register'));
+
         add_action('wp_ajax_fluent-beta-install', array($this, 'installBetaPlugin'));
         add_action('wp_ajax_fluent_beta_get_beta_versions', array($this, 'getBetaVersions'));
         add_action('wp_ajax_fluent_toolkit_activate_plugin', array($this, 'activatePlugin'));
@@ -72,6 +73,7 @@ class FluentToolkitBootstrap
 
             \FluentToolkit\Mcp\AdapterBootstrap::boot();
         }, 999);
+
 
         (new \FluentToolkit\Classes\UnifiedUiHandler())->register();
 
@@ -380,10 +382,12 @@ class FluentToolkitBootstrap
 
     private function loadClasses()
     {
-        require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'includes/Mcp/AdapterBootstrap.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/AdminMenu.php';
+        require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'includes/Mcp/AdapterBootstrap.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/ToolkitHelper.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/McpManager.php';
+        require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/UnifiedUi/Icons.php';
+        require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/UnifiedUi/MenuProviders.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/UnifiedUiHandler.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/Updater.php';
     }
