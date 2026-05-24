@@ -2,7 +2,7 @@
 /**
  * Plugin Name: FluentHub
  * Description: Connects all your Fluent plugins under one roof — unified dashboard, AI/MCP support, early-access updates, and seamless cross-plugin data.
- * Version: 2.0.4
+ * Version: 2.0.5
  * Author: WPManageNinja
  * Text Domain: fluent-toolkit
  * Requires PHP: 7.4
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('FLUENT_TOOLKIT_VERSION', '2.0.3');
+define('FLUENT_TOOLKIT_VERSION', '2.0.5');
 define('FLUENT_TOOLKIT_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('FLUENT_TOOLKIT_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('FLUENT_TOOLKIT_PLUGIN_FILE', __FILE__);
@@ -70,9 +70,7 @@ class FluentToolkitBootstrap
 
             }, 10, 2);
 
-            if (!defined('WP_MCP_VERSION')) {
-                require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'libs/mcp-adapter/mcp-adapter.php';
-            }
+            \FluentToolkit\Mcp\AdapterBootstrap::boot();
         }, 999);
 
         (new \FluentToolkit\Classes\UnifiedUiHandler())->register();
@@ -363,6 +361,7 @@ class FluentToolkitBootstrap
 
     private function loadClasses()
     {
+        require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'includes/Mcp/AdapterBootstrap.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/AdminMenu.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/ToolkitHelper.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/McpManager.php';

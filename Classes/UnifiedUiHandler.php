@@ -154,7 +154,7 @@ class UnifiedUiHandler
             remove_all_actions('admin_notices');
             $hookName = 'toplevel_page_' . $plugin_page;
             if ($isFfSubPage) {
-                $hookName = 'fluent-forms_page_' . $plugin_page;
+                $hookName = get_plugin_page_hookname($plugin_page, 'fluent_forms');
             }
 
             add_action($hookName, [$this, 'pushUnifiedUiToTop'], 1);
@@ -923,7 +923,7 @@ class UnifiedUiHandler
 
     protected function getFormsMenu()
     {
-        if (!defined('FLUENTFORM_VERSION')) {
+        if (!defined('FLUENTFORM_VERSION') || !class_exists('\FluentForm\App\Modules\Acl\Acl')) {
             return [];
         }
 
@@ -932,45 +932,68 @@ class UnifiedUiHandler
             return [];
         }
 
+        $Acl     = '\FluentForm\App\Modules\Acl\Acl';
         $baseUrl = admin_url('admin.php?page=');
 
-        $menuItems = [
-            'fluent_forms'             => [
+        $menuItems = [];
+
+        if ($Acl::hasPermission('fluentform_dashboard_access') || $Acl::hasPermission('fluentform_settings_manager')) {
+            $menuItems['fluent_forms'] = [
                 'title'    => __('Forms', 'fluent-toolkit'),
                 'url'      => $baseUrl . 'fluent_forms',
                 'icon_svg' => $this->getIcon('forms')
-            ],
-            'fluent_forms_all_entries' => [
+            ];
+        }
+
+        if ($Acl::hasPermission('fluentform_entries_viewer')) {
+            $menuItems['fluent_forms_all_entries'] = [
                 'title'    => __('Entries', 'fluent-toolkit'),
                 'url'      => $baseUrl . 'fluent_forms_all_entries',
                 'icon_svg' => $this->getIcon('entries')
-            ],
-            'payments'                 => [
-                'title'    => __('Payments', 'fluent-toolkit'),
-                'url'      => $baseUrl . 'fluent_forms_payment_entries',
-                'icon_svg' => $this->getIcon('money')
-            ],
-            'fluent_forms_settings'    => [
-                'title'    => __('Global Settings', 'fluent-toolkit'),
-                'url'      => $baseUrl . 'fluent_forms_settings#settings',
-                'icon_svg' => $this->getIcon('settings')
-            ],
-            'tools'                    => [
+            ];
+            $menuItems['fluent_forms_reports'] = [
+                'title'    => __('Reports', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'fluent_forms_reports',
+                'icon_svg' => $this->getIcon('reports')
+            ];
+        }
+
+        if ($Acl::hasPermission('fluentform_settings_manager')) {
+            $menuItems['fluent_forms_transfer'] = [
                 'title'    => __('Tools', 'fluent-toolkit'),
                 'url'      => $baseUrl . 'fluent_forms_transfer',
                 'icon_svg' => $this->getIcon('tools')
-            ],
-            'integrations'             => [
+            ];
+            $menuItems['fluent_forms_add_ons'] = [
                 'title'    => __('Integrations', 'fluent-toolkit'),
                 'url'      => $baseUrl . 'fluent_forms_add_ons',
                 'icon_svg' => $this->getIcon('integrations')
-            ],
-            'support'                  => [
+            ];
+        }
+
+        if ($Acl::hasPermission('fluentform_view_payments')) {
+            $menuItems['payments'] = [
+                'title'    => __('Payments', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'fluent_forms_payment_entries',
+                'icon_svg' => $this->getIcon('money')
+            ];
+        }
+
+        if ($Acl::hasPermission('fluentform_settings_manager')) {
+            $menuItems['fluent_forms_settings'] = [
+                'title'    => __('Global Settings', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'fluent_forms_settings#settings',
+                'icon_svg' => $this->getIcon('settings')
+            ];
+        }
+
+        if ($Acl::hasPermission('fluentform_dashboard_access') || $Acl::hasPermission('fluentform_settings_manager')) {
+            $menuItems['fluent_forms_docs'] = [
                 'title'    => __('Support', 'fluent-toolkit'),
                 'url'      => $baseUrl . 'fluent_forms_docs',
-                'icon_svg' => $this->getIcon('support')
-            ]
-        ];
+                'icon_svg' => $this->getIcon('docs')
+            ];
+        }
 
         if (!current_user_can('manage_options')) {
             $hasSettingsCapability = current_user_can('fluentform_settings_manager');
