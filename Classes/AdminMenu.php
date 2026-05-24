@@ -13,17 +13,17 @@ class AdminMenu
         $adminApps = apply_filters('fluent_toolkit/admin_apps', []);
         $priority = apply_filters('fluent_toolkit/admin_menu_priority', 200);
 
-        $basePermission = 'manage_options';
-        if ($adminApps && !current_user_can('manage_options')) {
-            $user = wp_get_current_user();
-            if (empty($user->roles) || !is_array($user->roles)) {
-                return;
-            }
-            $basePermission = array_values($user->roles)[0];
-            if (!$basePermission) {
-                return;
-            }
+        $isAdmin = current_user_can('manage_options');
+
+        // Only admins always get the menu. Non-admins see it only when at
+        // least one Fluent app is registered (a Fluent plugin may grant them
+        // access via its own permission system). For those non-admins we use
+        // 'read' — every logged-in user has it — so the menu appears; each
+        // submenu still carries its own capability gate.
+        if (!$isAdmin && empty($adminApps)) {
+            return;
         }
+        $basePermission = $isAdmin ? 'manage_options' : 'read';
 
         add_menu_page(
             __('FluentHub', 'fluent-toolkit'),
@@ -42,24 +42,40 @@ class AdminMenu
                     continue;
                 }
                 $submenu['fluent-toolkit'][] = [
-                    $adminApp['title'],                      // 0: label
-                    'manage_options',                      // 1: capability
-                    $adminApp['dashboard_url'],            // 2: link
+                    $adminApp['title'],
+                    $basePermission,
+                    $adminApp['dashboard_url'],
                 ];
             }
 
-            $submenu['fluent-toolkit'][] = [
-                __('Hub Settings', 'fluent-toolkit'),
-                'manage_options',
-                admin_url('admin.php?page=fluent-toolkit#/')
-            ];
+            if ($isAdmin) {
+                $submenu['fluent-toolkit'][] = [
+                    __('Hub Settings', 'fluent-toolkit'),
+                    'manage_options',
+                    admin_url('admin.php?page=fluent-toolkit#/')
+                ];
+            }
         }
     }
 
     public static function render()
     {
         if (!current_user_can('manage_options')) {
-            wp_die(esc_html__('You do not have permission to access Fluent Toolkit.', 'fluent-toolkit'));
+            // Non-admin landed on the top-level FluentHub page (their menu
+            // capability is 'read' so the click is allowed). Bounce them to
+            // the first Fluent app they can actually use rather than dying.
+            $apps = apply_filters('fluent_toolkit/admin_apps', []);
+            foreach ($apps as $app) {
+                if (empty($app['dashboard_url'])) {
+                    continue;
+                }
+                $cap = !empty($app['capability']) ? $app['capability'] : 'manage_options';
+                if (current_user_can($cap)) {
+                    wp_safe_redirect($app['dashboard_url']);
+                    exit;
+                }
+            }
+            wp_die(esc_html__('You do not have permission to access FluentHub.', 'fluent-toolkit'));
         }
 
         self::enqueueAssets();

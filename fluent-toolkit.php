@@ -133,7 +133,13 @@ class FluentToolkitBootstrap
             wp_send_json(array('message' => __('Invalid nonce.', 'fluent-toolkit')), 403);
         }
 
-        $pluginSlug = sanitize_text_field($_POST['slug']);
+        // sanitize_key locks the slug to [a-z0-9_-]; anything else (including
+        // path separators or dots) is stripped, so $pluginSlug can't escape
+        // the WP_PLUGIN_DIR/<slug>/<slug>.php pattern built below.
+        $pluginSlug = isset($_POST['slug']) ? sanitize_key($_POST['slug']) : '';
+        if (!$pluginSlug) {
+            wp_send_json(array('message' => __('Missing or invalid plugin slug.', 'fluent-toolkit')), 422);
+        }
         $licenseKey = isset($_POST['license_key']) ? sanitize_text_field($_POST['license_key']) : '';
         $isBeta = isset($_POST['beta']) ? $_POST['beta'] == 'yes' : false;
 
