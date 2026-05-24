@@ -184,7 +184,6 @@ class Updater
 
         $response = wp_remote_post($this->api_url, [
             'timeout'   => 15,
-            'sslverify' => false,
             'body'      => [
                 'edd_action' => 'get_version',
                 'license'    => isset($this->api_data['license']) ? $this->api_data['license'] : '',
@@ -202,10 +201,6 @@ class Updater
         $data = json_decode(wp_remote_retrieve_body($response));
         if (!is_object($data) || empty($data->new_version)) {
             return false;
-        }
-
-        if (isset($data->sections)) {
-            $data->sections = maybe_unserialize($data->sections);
         }
 
         // WP 6.9+ list_plugin_updates() reads $update->icons['svg'] with bracket

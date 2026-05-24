@@ -62,18 +62,18 @@ class AdminMenu
     {
         if (!current_user_can('manage_options')) {
             // Non-admin landed on the top-level FluentHub page (their menu
-            // capability is 'read' so the click is allowed). Bounce them to
-            // the first Fluent app they can actually use rather than dying.
+            // capability is 'read' so the click is allowed). The Fluent apps
+            // filter doesn't pre-filter by user, and our descriptors don't
+            // carry per-app capabilities, so we can't pick the "right" target
+            // ourselves. Bounce to the first registered Fluent app and let
+            // its own page-level capability check decide what to do.
             $apps = apply_filters('fluent_toolkit/admin_apps', []);
             foreach ($apps as $app) {
                 if (empty($app['dashboard_url'])) {
                     continue;
                 }
-                $cap = !empty($app['capability']) ? $app['capability'] : 'manage_options';
-                if (current_user_can($cap)) {
-                    wp_safe_redirect($app['dashboard_url']);
-                    exit;
-                }
+                wp_safe_redirect($app['dashboard_url']);
+                exit;
             }
             wp_die(esc_html__('You do not have permission to access FluentHub.', 'fluent-toolkit'));
         }

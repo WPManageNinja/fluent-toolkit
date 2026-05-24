@@ -22,6 +22,13 @@ class UnifiedUiHandler
             return;
         }
 
+        // The unified UI only renders on admin pages. Skipping the rest of
+        // init on the frontend avoids instantiating a dozen Fluent plugin
+        // admin classes on every public pageview.
+        if (!is_admin() && !wp_doing_ajax()) {
+            return;
+        }
+
         $mergeAdminMenus = !empty($toolkitSettings['merge_admin_menus']) && $toolkitSettings['merge_admin_menus'] === 'yes';
 
         $supportMenu = MenuProviders::getSupportTicketsMenu();
@@ -36,8 +43,9 @@ class UnifiedUiHandler
         $playerMenu = MenuProviders::getPlayerMenu();
         $socialMenu = MenuProviders::getSocialNinjaMenu();
         $communityMenu = MenuProviders::getCommunityMenu();
+        $boardsMenu = MenuProviders::getBoardsMenu();
 
-        $hasApps = $supportMenu || $formsMenu || $cartMenu || $crmMenu || $bookingMenu || $smtpMenu || $authMenu || $tablesMenu || $paymatticMenu || $playerMenu || $socialMenu || $communityMenu;
+        $hasApps = $supportMenu || $formsMenu || $cartMenu || $crmMenu || $bookingMenu || $smtpMenu || $authMenu || $tablesMenu || $paymatticMenu || $playerMenu || $socialMenu || $communityMenu || $boardsMenu;
 
         $apps = [
             'fluentcrm-admin' => [
@@ -86,11 +94,11 @@ class UnifiedUiHandler
                 'dashboard_url' => admin_url('admin.php?page=fluent-booking#/')
             ],
             'fluent-boards'   => [
-                'disabled'      => !defined('FLUENT_BOARDS'),
+                'disabled'      => !$boardsMenu,
                 'title'         => 'Projects',
                 'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentboards_icon.svg',
                 'logo'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentboards_logo.svg',
-                'items'         => MenuProviders::getBoardsMenu(),
+                'items'         => $boardsMenu,
                 'has_dark_mode' => false,
                 'dashboard_url' => admin_url('admin.php?page=fluent-boards#/')
             ],
