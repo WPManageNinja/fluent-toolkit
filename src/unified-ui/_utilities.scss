@@ -1,7 +1,119 @@
 
 /* ── WP chrome reset ─────────────────────────────────────── */
+/* Native WP admin menu drawer ─────────────────────────────────
+   Layout-push behavior: the menu lives at left:0 and slides in,
+   while the entire .fluent_uui shifts right to make room. Both
+   movements use the same easing so they feel like one motion.
+   ─────────────────────────────────────────────────────────── */
+:root {
+  --fui-wp-menu-width: 160px;
+}
+
 #adminmenumain {
+  display: block !important;
+  position: fixed !important;
+  left: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  height: 100vh !important;
+  width: var(--fui-wp-menu-width) !important;
+  z-index: 200;
+  overflow: visible !important;
+  transform: translateX(-100%);
+  visibility: hidden;
+  box-shadow: 4px 0 16px -8px rgba(0, 0, 0, 0.25);
+  transition:
+    transform 0.32s cubic-bezier(0.32, 0.72, 0, 1),
+    visibility 0s linear 0.32s;
+}
+
+/* Keep wrap overflow visible so absolute-positioned fly-outs can
+   extend past the 160px drawer width. Trade-off: very tall admin
+   menus may get cut at the bottom of the viewport. */
+#adminmenumain #adminmenuwrap {
+  height: auto;
+  overflow: visible !important;
+}
+
+#adminmenu,
+#adminmenuwrap,
+#adminmenuback {
+  display: block !important;
+}
+
+body.fui-wp-menu-open #adminmenumain {
+  transform: translateX(0);
+  visibility: visible;
+  transition:
+    transform 0.32s cubic-bezier(0.32, 0.72, 0, 1),
+    visibility 0s linear 0s;
+}
+
+/* Push the unified UI right to make room for the drawer. The
+   transition is paired with the drawer slide so they move
+   together as one motion. */
+.fluent_uui {
+  transition: margin-left 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+body.fui-wp-menu-open .fluent_uui {
+  margin-left: var(--fui-wp-menu-width);
+}
+
+/* On mobile the unified sidebar is a fixed overlay at z-index 1001, so the
+   WP drawer (z-index 200 by default) would slide in behind it. Bump it
+   above the sidebar and let it claim full mobile-drawer width so the
+   native menu is actually visible and tappable. */
+@media (max-width: 782px) {
+  #adminmenumain {
+    width: 280px !important;
+    max-width: 86vw;
+    z-index: 1002;
+  }
+
+  body.fui-wp-menu-open .fluent_uui {
+    /* Drawer overlays content on mobile — no push needed. */
+    margin-left: 0;
+  }
+
+  #fct_admin_app_wrapper #fct_admin_menu_holder, .fui-app-content .ff_header {
+    margin-left: 0;
+  }
+
+}
+
+/* Drop the Collapse Menu button — meaningless in a drawer. */
+#adminmenu #collapse-menu {
   display: none !important;
+}
+
+/* Subtle dim over the unified UI while the WP menu drawer is open.
+   Positioned inside .fluent_uui (which gets position: relative) so
+   it dims sidebar + content together — the WP drawer itself stays
+   bright. pointer-events:none lets outside-click still hit through
+   to the JS close handler. */
+.fluent_uui {
+  position: relative;
+}
+
+.fui-wp-menu-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.08);
+  z-index: 150;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+body.fui-wp-menu-open .fui-wp-menu-backdrop {
+  opacity: 1;
+}
+
+/* Active state for the WP icon trigger when drawer is open. */
+body.fui-wp-menu-open .fui-wordpress-menu-link {
+  background: var(--fui-active-bg, rgba(0, 0, 0, 0.06));
+  color: var(--fui-text);
 }
 
 #wpadminbar,
@@ -27,6 +139,11 @@ div#fct_admin_menu_holder {
   position: sticky;
   top: 0;
   z-index: 999;
+  margin-left: -20px;
+}
+
+.ff_header {
+  margin-left: -20px;
 }
 
 #fluent_cart_plugin_app {
@@ -65,6 +182,40 @@ select {
 .toplevel_page_fluent-boards #wpbody #fbs_tasks_wrapper {
   height: calc(100vh - 140px);
 }
+
+.fs_main_navbar {
+  top: 0 !important;
+  width: calc(100% - 240px);
+}
+
+.fui-has-app-headers {
+  &.fui_app_fluent-support {
+    .fframe_app {
+      padding-bottom: 50px;
+      @media screen and (max-width: 782px) {
+        padding-bottom: 60px;
+      }
+    }
+    .fs_view_ticket, .fs_tk_inner_sidebar.has-view-route, .fs_tickets_tiny_nav {
+      margin-top: 20px;
+      padding-top: 0;
+    }
+  }
+
+  &.fui_app_fluent-booking {
+    #fluent-booking-app {
+      padding-top: 0px;
+    }
+  }
+
+  button.el-button.el-button--default.fbs_full_screen_btn {
+    display: none;
+  }
+
+
+}
+
+
 .fluent_uui {
   .fluentcrm-app.is-settings-page {
     margin-top: 0;
@@ -95,13 +246,16 @@ select {
     left: -20px;
   }
 
-  #alpha_app .fframe_app,
-  #fluent-booking-app .fframe_main-menu-items,
-  .ff_header,
-  .fcrm_topbar,
-  #fct_admin_menu_holder {
-    display: none;
+  &.fui-hide-app-headers {
+    #alpha_app .fframe_app,
+    #fluent-booking-app .fframe_main-menu-items,
+    .ff_header,
+    .fcrm_topbar,
+    #fct_admin_menu_holder {
+      display: none;
+    }
   }
+
   .fl_app.fluent-cart-admin-pages {
     padding: 24px 24px 24px 0;
   }

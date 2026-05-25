@@ -32,6 +32,7 @@ mix.webpackConfig({
 
 mix
     .js('src/app.js', 'dist/app.js').vue({ version: 3 })
+    .js('src/unified-ui.js', 'dist/unified-ui.js')
     .sass('src/unified-ui.scss', 'dist/unified-ui.css')
     .override((config) => {
         config.plugins = config.plugins.filter(

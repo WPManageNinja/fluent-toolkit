@@ -205,96 +205,121 @@
   }
 
   // -- Dashboard overview ----------------
-  .ft-unified-panel {
-    align-items: center;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    display: flex;
-    gap: 18px;
-    justify-content: space-between;
-    margin-bottom: 18px;
-    overflow: hidden;
-    padding: 22px 24px;
-    position: relative;
-  }
-
-  .ft-unified-icon {
-    align-items: center;
-    background: var(--text);
-    border-radius: 12px;
-    color: #fff;
-    display: flex;
-    flex-shrink: 0;
-    height: 48px;
-    justify-content: center;
-    position: relative;
-    width: 48px;
-    z-index: 1;
-  }
-
-  .ft-unified-copy,
-  .ft-unified-control {
-    position: relative;
-    z-index: 1;
-  }
-
-  .ft-unified-copy {
-    flex: 1;
-
-    h1 {
-      color: var(--text);
-      font-size: 26px;
-      font-weight: 650;
-      letter-spacing: 0;
-      line-height: 1.15;
-      margin: 0 0 8px;
-    }
-
-    p {
-      color: var(--text-muted);
-      font-size: 14px;
-      margin: 0;
-      max-width: 560px;
-    }
-  }
-
-  .ft-unified-eyebrow,
+  .ft-card-eyebrow,
   .ft-section-kicker {
     color: var(--accent);
     display: inline-flex;
     font-size: 11px;
     font-weight: 650;
     letter-spacing: 0.08em;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     text-transform: uppercase;
   }
 
-  .ft-unified-control {
+  .ft-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    margin-bottom: 18px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .ft-workspace-card {
+    padding: 26px 28px 8px;
+  }
+
+  .ft-card-head {
+    margin-bottom: 18px;
+  }
+
+  .ft-card-title {
+    color: var(--text);
+    font-size: 22px;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    margin: 0 0 6px;
+  }
+
+  .ft-card-sub {
+    color: var(--text-muted);
+    font-size: 13.5px;
+    line-height: 1.55;
+    margin: 0;
+    max-width: 720px;
+  }
+
+  .ft-setting-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .ft-setting-item {
     align-items: center;
-    background: rgba(255, 255, 255, .78);
-    border: 1px solid var(--border-strong);
-    border-radius: 8px;
     display: flex;
+    gap: 16px;
+    padding: 18px 0;
+    transition: opacity .15s ease;
+
+    + .ft-setting-item {
+      border-top: 1px solid var(--border);
+    }
+
+    &.is-disabled {
+      opacity: .55;
+    }
+  }
+
+  .ft-setting-icon {
+    align-items: center;
+    border-radius: 10px;
+    display: inline-flex;
     flex-shrink: 0;
-    gap: 18px;
-    min-width: 270px;
-    padding: 16px 18px;
-    justify-content: space-between;
+    height: 40px;
+    justify-content: center;
+    width: 40px;
+
+    svg {
+      height: 20px;
+      width: 20px;
+    }
+  }
+
+  .ft-setting-icon--indigo {
+    background: rgba(91, 80, 240, .12);
+    color: #5b50f0;
+  }
+
+  .ft-setting-icon--violet {
+    background: rgba(155, 81, 224, .12);
+    color: #9b51e0;
+  }
+
+  .ft-setting-icon--amber {
+    background: rgba(245, 158, 11, .14);
+    color: #d97706;
+  }
+
+  .ft-setting-text {
+    flex: 1;
+    min-width: 0;
 
     strong {
       color: var(--text);
       display: block;
       font-size: 14px;
       font-weight: 650;
-      margin-bottom: 2px;
+      margin-bottom: 3px;
     }
 
     span {
       color: var(--text-muted);
       display: block;
-      font-size: 12px;
+      font-size: 12.5px;
+      line-height: 1.55;
     }
   }
 
@@ -501,7 +526,7 @@
 
   .ft-list-head {
     display: grid;
-    grid-template-columns: 1fr 130px 160px 160px;
+    grid-template-columns: 1fr 150px 170px;
     gap: 16px;
     padding: 12px 24px;
     border-bottom: 1px solid var(--border);
@@ -515,7 +540,7 @@
 
   .ft-row {
     display: grid;
-    grid-template-columns: 1fr 130px 160px 160px;
+    grid-template-columns: 1fr 150px 170px;
     gap: 16px;
     align-items: center;
     padding: 18px 24px;
@@ -579,7 +604,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    max-width: 460px;
   }
 
   // ── Tags ─────────────────────────────
@@ -617,6 +641,13 @@
     border-radius: 50%;
     background: var(--text-soft);
     opacity: 0.6;
+  }
+
+  .ft-meta-link {
+    color: var(--text-soft);
+    text-decoration: none;
+    border-bottom: 1px dotted currentColor;
+    &:hover { color: var(--accent); }
   }
 
   .ft-version-installed {
@@ -735,19 +766,29 @@
   }
 
   .ft-app {
-    .ft-unified-panel,
-    .ft-unified-control,
     .ft-section-head {
       align-items: stretch;
       flex-direction: column;
     }
 
-    .ft-unified-panel {
-      padding: 22px 20px;
+    .ft-workspace-card {
+      padding: 22px 20px 4px;
     }
 
-    .ft-unified-control {
-      min-width: 0;
+    .ft-setting-item {
+      align-items: flex-start;
+      gap: 14px;
+      padding: 16px 0;
+    }
+
+    .ft-setting-icon {
+      height: 36px;
+      width: 36px;
+
+      svg {
+        height: 18px;
+        width: 18px;
+      }
     }
 
     .ft-mcp-banner-actions {

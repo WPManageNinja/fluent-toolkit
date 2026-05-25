@@ -4,7 +4,7 @@
         <!-- Topbar -->
         <header class="ft-topbar">
             <div class="ft-brand">
-                <img class="ft-brand-logo" :src="brandLogoUrl" alt="FluentKit logo" />
+                <img class="ft-brand-logo" :src="brandLogoUrl" alt="FluentHub logo" />
                 <span class="ft-brand-version">v{{ appVars.version }}</span>
             </div>
             <div class="ft-topbar-actions">
@@ -15,34 +15,94 @@
                     @click="updateToolkit()"
                     type="danger"
                     size="small"
-                >Update Toolkit</el-button>
-                <button class="ft-iconbtn" @click="getBetaPlugins()" title="Refresh registry" aria-label="Refresh">
+                >Update FluentHub</el-button>
+                <button class="ft-iconbtn" @click="getBetaPlugins(true)" title="Refresh registry" aria-label="Refresh">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
                 </button>
             </div>
         </header>
 
-        <section class="ft-unified-panel" v-loading="unifiedUiSaving" element-loading-text="Saving Unified UI status...">
-            <div class="ft-unified-copy">
-                <span class="ft-unified-eyebrow">Unified Fluent workspace</span>
-                <h1>Fluent Unified UI</h1>
-                <p>Turn on a unified Fluent workspace that brings your Fluent tools into one cleaner, focused and easier-to-manage experience.</p>
-            </div>
-            <div class="ft-unified-control">
-                <div>
-                    <strong>Unified UI</strong>
-                    <span>{{ unifiedUiStatusLabel }}</span>
-                </div>
-                <label class="ft-switch ft-switch-large" title="Enable Fluent Unified UI">
-                    <input
-                        type="checkbox"
-                        :checked="unifiedUiEnabled"
-                        :disabled="unifiedUiSaving"
-                        @change="toggleUnifiedUi($event.target.checked)"
-                    />
-                    <span></span>
-                </label>
-            </div>
+        <section class="ft-card ft-workspace-card" v-loading="unifiedUiSaving" element-loading-text="Saving setting...">
+            <header class="ft-card-head">
+                <span class="ft-card-eyebrow">Unified Fluent Workspace</span>
+                <h2 class="ft-card-title">Fluent Unified UI</h2>
+                <p class="ft-card-sub">Turn on a unified Fluent workspace that brings your Fluent tools into one cleaner, focused and easier-to-manage experience.</p>
+            </header>
+
+            <ul class="ft-setting-list">
+                <li class="ft-setting-item">
+                    <span class="ft-setting-icon ft-setting-icon--indigo" aria-hidden="true">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+                            <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+                            <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+                            <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+                        </svg>
+                    </span>
+                    <div class="ft-setting-text">
+                        <strong>Enable Unified UI</strong>
+                        <span>{{ unifiedUiStatusLabel }} · Replace the default Fluent admin screens with the unified workspace.</span>
+                    </div>
+                    <label class="ft-switch" title="Enable Fluent Unified UI">
+                        <input
+                            type="checkbox"
+                            :checked="unifiedUiEnabled"
+                            :disabled="unifiedUiSaving"
+                            @change="toggleUnifiedUi($event.target.checked)"
+                        />
+                        <span></span>
+                    </label>
+                </li>
+
+                <li class="ft-setting-item" :class="{ 'is-disabled': !unifiedUiEnabled }">
+                    <span class="ft-setting-icon ft-setting-icon--violet" aria-hidden="true">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="16" rx="2"/>
+                            <line x1="9" y1="4" x2="9" y2="20"/>
+                            <line x1="5.5" y1="8.5" x2="6.5" y2="8.5"/>
+                            <line x1="5.5" y1="12" x2="6.5" y2="12"/>
+                            <line x1="5.5" y1="15.5" x2="6.5" y2="15.5"/>
+                        </svg>
+                    </span>
+                    <div class="ft-setting-text">
+                        <strong>Merge admin menus</strong>
+                        <span>Hide each Fluent plugin's top-level WordPress menu so everything opens from the unified workspace.</span>
+                    </div>
+                    <label class="ft-switch" :title="unifiedUiEnabled ? 'Merge top-level Fluent menus' : 'Enable Unified UI first'">
+                        <input
+                            type="checkbox"
+                            :checked="mergeAdminMenus"
+                            :disabled="unifiedUiSaving || !unifiedUiEnabled"
+                            @change="toggleMergeAdminMenus($event.target.checked)"
+                        />
+                        <span></span>
+                    </label>
+                </li>
+
+                <li class="ft-setting-item" :class="{ 'is-disabled': !unifiedUiEnabled }">
+                    <span class="ft-setting-icon ft-setting-icon--amber" aria-hidden="true">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="16" rx="2"/>
+                            <line x1="3" y1="9" x2="21" y2="9"/>
+                            <line x1="6.5" y1="6.5" x2="7.5" y2="6.5"/>
+                            <line x1="9.5" y1="6.5" x2="10.5" y2="6.5"/>
+                        </svg>
+                    </span>
+                    <div class="ft-setting-text">
+                        <strong>Hide app headers</strong>
+                        <span>Hide the in-app headers of FluentCRM, Cart, Support, Forms, Booking and similar apps for a cleaner workspace.</span>
+                    </div>
+                    <label class="ft-switch" :title="unifiedUiEnabled ? 'Hide native app headers' : 'Enable Unified UI first'">
+                        <input
+                            type="checkbox"
+                            :checked="hideAppHeaders"
+                            :disabled="unifiedUiSaving || !unifiedUiEnabled"
+                            @change="toggleHideAppHeaders($event.target.checked)"
+                        />
+                        <span></span>
+                    </label>
+                </li>
+            </ul>
         </section>
 
         <section class="ft-hero ft-mcp-hero ft-mcp-dashboard-banner">
@@ -60,8 +120,8 @@
 
         <div class="ft-section-head ft-beta-head">
             <div>
-                <span class="ft-section-kicker">Beta program</span>
-                <h2>Beta / Early Access Plugins</h2>
+                <span class="ft-section-kicker">Fluent ecosystem</span>
+                <h2>Plugins &amp; Add-ons</h2>
             </div>
             <div class="ft-beta-stats">
                 <span>{{ betaPlugins.length }} available</span>
@@ -76,14 +136,13 @@
             <div v-else v-loading="installing" element-loading-text="Installing… Please wait.">
                 <div class="ft-list-head">
                     <div>Plugin</div>
-                    <div>Latest</div>
                     <div>Status</div>
                     <div style="text-align: right;">Action</div>
                 </div>
                 <div class="ft-row" v-for="(plugin, index) in filteredPlugins" :key="plugin.slug">
                     <!-- Plugin info -->
                     <div class="ft-plugin">
-                        <div class="ft-plugin-icon" :class="`ft-ic-${index % 6}`">
+                        <div class="ft-plugin-icon" :class="plugin.logo ? '' : `ft-ic-${index % 6}`">
                             <img style="max-width: 44px;" :src="plugin.logo" v-if="plugin.logo" />
                             <span v-else>{{ pluginInitials(plugin.name) }}</span>
                         </div>
@@ -105,18 +164,20 @@
                                     </template>
                                 </template>
                                 <span v-else>Not installed</span>
+                                <template v-if="plugin.changelog_url">
+                                    <span class="ft-dot-sep"></span>
+                                    <a :href="plugin.changelog_url" target="_blank" rel="noopener" class="ft-meta-link">Changelog</a>
+                                </template>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Latest version -->
-                    <div class="ft-version ft-mono">
-                        {{ plugin.has_beta_update ? plugin.beta_version : plugin.stable_version }}
                     </div>
 
                     <!-- Status -->
                     <div>
                         <span v-if="!plugin.installed_version" class="ft-status ft-status-notinstalled">Not installed</span>
+                        <span v-else-if="plugin.is_active === false" class="ft-status ft-status-notinstalled">
+                            <span class="ft-dot"></span>Inactive
+                        </span>
                         <span v-else-if="plugin.has_update || plugin.has_beta_update" class="ft-status ft-status-update">
                             <span class="ft-dot ft-dot-warn"></span>Update available
                         </span>
@@ -127,10 +188,10 @@
 
                     <!-- Actions -->
                     <div class="ft-actions">
-                        <a v-if="plugin.changelog_url" :href="plugin.changelog_url" target="_blank" rel="noopener" class="ft-btn ft-btn-ghost">Changelog</a>
-                        <button v-if="!plugin.installed_version" @click="installPlugin(plugin)" class="ft-btn ft-btn-primary">Install</button>
-                        <button v-else-if="plugin.has_beta_update" @click="installPlugin(plugin, 'yes')" class="ft-btn ft-btn-accent">Update</button>
-                        <button v-else-if="plugin.has_update" @click="installPlugin(plugin)" class="ft-btn ft-btn-accent">Update</button>
+                        <button v-if="!plugin.installed_version && caps.install_plugins" @click="installPlugin(plugin)" class="ft-btn ft-btn-primary">Install</button>
+                        <button v-else-if="plugin.is_active === false && caps.activate_plugins" @click="activatePlugin(plugin)" class="ft-btn ft-btn-primary">Activate</button>
+                        <button v-else-if="plugin.has_beta_update && caps.update_plugins" @click="installPlugin(plugin, 'yes')" class="ft-btn ft-btn-accent">Update to {{ plugin.beta_version }}</button>
+                        <button v-else-if="plugin.has_update && caps.update_plugins" @click="installPlugin(plugin)" class="ft-btn ft-btn-accent">Update to {{ plugin.stable_version }}</button>
                         <span v-else>
                             --
                         </span>
@@ -138,14 +199,14 @@
                 </div>
 
                 <div v-if="filteredPlugins.length === 0" class="ft-empty">
-                    Currently, there has no beta testing available.
+                    No plugins available right now.
                 </div>
             </div>
         </div>
 
         <!-- Footer -->
         <div class="ft-footer">
-            <div>Registry synced · <span @click="getBetaPlugins()" style="cursor: pointer; color: var(--accent);">Refresh now</span></div>
+            <div>Registry synced · <span @click="getBetaPlugins(true)" style="cursor: pointer; color: var(--accent);">Refresh now</span></div>
             <!-- <div>Toggle <a href="#">beta channel</a> in settings to opt in to release candidates</div> -->
         </div>
 
@@ -163,8 +224,14 @@ export default {
             loading: false,
             unifiedUiSaving: false,
             unifiedUiEnabled: (window.fluentToolkitVars.settings || {}).uinified_ui === 'yes',
+            mergeAdminMenus: (window.fluentToolkitVars.settings || {}).merge_admin_menus === 'yes',
+            hideAppHeaders: (window.fluentToolkitVars.settings || {}).hide_app_headers === 'yes',
             activeChannel: 'all',
             searchQuery: '',
+            caps: Object.assign(
+                { install_plugins: false, update_plugins: false, activate_plugins: false },
+                window.fluentToolkitVars.caps || {}
+            ),
         };
     },
     computed: {
@@ -215,9 +282,9 @@ export default {
                 .slice(0, 2)
                 .toUpperCase();
         },
-        getBetaPlugins() {
+        getBetaPlugins(refresh = false) {
             this.loading = true;
-            this.$get('fluent_beta_get_beta_versions')
+            this.$get('fluent_beta_get_beta_versions', refresh ? { refresh: 1 } : {})
                 .then(response => {
                     this.betaPlugins = response.beta_versions;
                 })
@@ -229,12 +296,30 @@ export default {
                 });
         },
         toggleUnifiedUi(enabled) {
+            this.saveDashboardSettings({ uinified_ui: enabled ? 'yes' : 'no' }, true);
+        },
+        toggleMergeAdminMenus(enabled) {
+            this.saveDashboardSettings({ merge_admin_menus: enabled ? 'yes' : 'no' }, false);
+        },
+        toggleHideAppHeaders(enabled) {
+            this.saveDashboardSettings({ hide_app_headers: enabled ? 'yes' : 'no' }, false);
+        },
+        saveDashboardSettings(settings, reload) {
             this.unifiedUiSaving = true;
-            this.$post('fluent_toolkit_unified_ui_toggle', {
-                enabled: enabled ? 'yes' : 'no',
-            })
-                .then(() => {
-                    window.location.reload();
+            this.$post('fluent_toolkit_save_dashboard_settings', { settings })
+                .then(response => {
+                    if (response && response.settings) {
+                        this.unifiedUiEnabled = response.settings.uinified_ui === 'yes';
+                        this.mergeAdminMenus = response.settings.merge_admin_menus === 'yes';
+                        this.hideAppHeaders = response.settings.hide_app_headers === 'yes';
+                    }
+                    if (reload) {
+                        window.location.reload();
+                        return;
+                    }
+                    if (response && response.message) {
+                        this.$notify.success(response.message);
+                    }
                 })
                 .catch(error => {
                     this.$handleError(error);
@@ -276,6 +361,20 @@ export default {
         updateToolkit() {
             this.installing = true;
             this.installPlugin({slug: 'fluent-toolkit'});
+        },
+        activatePlugin(plugin) {
+            this.installing = true;
+            this.$post('fluent_toolkit_activate_plugin', { slug: plugin.slug })
+                .then(response => {
+                    this.$notify.success(response.message);
+                    this.getBetaPlugins();
+                })
+                .catch(error => {
+                    this.$handleError(error);
+                })
+                .finally(() => {
+                    this.installing = false;
+                });
         },
         hideLicenseKey(licenseKey) {
             if (!licenseKey) return '';

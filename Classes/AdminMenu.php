@@ -10,21 +10,72 @@ class AdminMenu
 
     public static function register()
     {
+        $adminApps = apply_filters('fluent_toolkit/admin_apps', []);
+        $priority = apply_filters('fluent_toolkit/admin_menu_priority', 200);
+
+        $isAdmin = current_user_can('manage_options');
+
+        // Only admins always get the menu. Non-admins see it only when at
+        // least one Fluent app is registered (a Fluent plugin may grant them
+        // access via its own permission system). For those non-admins we use
+        // 'read' — every logged-in user has it — so the menu appears; each
+        // submenu still carries its own capability gate.
+        if (!$isAdmin && empty($adminApps)) {
+            return;
+        }
+        $basePermission = $isAdmin ? 'manage_options' : 'read';
+
         add_menu_page(
-            __('FluentKit', 'fluent-toolkit'),
-            __('FluentKit', 'fluent-toolkit'),
-            'manage_options',
+            __('FluentHub', 'fluent-toolkit'),
+            __('FluentHub', 'fluent-toolkit'),
+            $basePermission,
             self::DASHBOARD_SLUG,
             [__CLASS__, 'render'],
             self::pluginIcon(),
-            200
+            $priority
         );
+
+        if ($adminApps) {
+            global $submenu;
+            foreach ($adminApps as $adminApp) {
+                if (empty($adminApp['dashboard_url'])) {
+                    continue;
+                }
+                $submenu['fluent-toolkit'][] = [
+                    $adminApp['title'],
+                    $basePermission,
+                    $adminApp['dashboard_url'],
+                ];
+            }
+
+            if ($isAdmin) {
+                $submenu['fluent-toolkit'][] = [
+                    __('Hub Settings', 'fluent-toolkit'),
+                    'manage_options',
+                    admin_url('admin.php?page=fluent-toolkit#/')
+                ];
+            }
+        }
     }
 
     public static function render()
     {
         if (!current_user_can('manage_options')) {
-            wp_die(esc_html__('You do not have permission to access Fluent Toolkit.', 'fluent-toolkit'));
+            // Non-admin landed on the top-level FluentHub page (their menu
+            // capability is 'read' so the click is allowed). The Fluent apps
+            // filter doesn't pre-filter by user, and our descriptors don't
+            // carry per-app capabilities, so we can't pick the "right" target
+            // ourselves. Bounce to the first registered Fluent app and let
+            // its own page-level capability check decide what to do.
+            $apps = apply_filters('fluent_toolkit/admin_apps', []);
+            foreach ($apps as $app) {
+                if (empty($app['dashboard_url'])) {
+                    continue;
+                }
+                wp_safe_redirect($app['dashboard_url']);
+                exit;
+            }
+            wp_die(esc_html__('You do not have permission to access FluentHub.', 'fluent-toolkit'));
         }
 
         self::enqueueAssets();
@@ -79,12 +130,21 @@ class AdminMenu
             'dashboard_url'      => self::url(),
             'current_user_login' => $currentUserLogin,
             'settings'           => $toolkitSettings,
+            'caps'               => [
+                'install_plugins'  => current_user_can('install_plugins'),
+                'update_plugins'   => current_user_can('update_plugins'),
+                'activate_plugins' => current_user_can('activate_plugins'),
+            ],
         ]);
     }
 
     private static function pluginIcon()
     {
-        $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><path d="M32.6667 15L46.2681 15C47.2953 15 47.8212 16.2314 47.1109 16.9734L30.3333 34.5H16.7319C15.7047 34.5 15.1788 33.2686 15.8891 32.5266L32.6667 15Z" fill="black"/><path d="M34.4108 50L46.7576 50C47.7018 50 48.2549 48.9369 47.713 48.1637L40.5892 38H26L34.4108 50Z" fill="black"/></svg>';
+        // Monochrome silhouette — the rounded square is filled and the two "F" marks
+        // are cut out as holes via fill-rule="evenodd". WP's admin menu masks SVG
+        // icons to a single color, so a multi-color logo flattens into one shape;
+        // this version preserves the F cut-outs against any menu color scheme.
+        $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><path fill-rule="evenodd" clip-rule="evenodd" d="M6.4 0H57.6A6.4 6.4 0 0 1 64 6.4V57.6A6.4 6.4 0 0 1 57.6 64H6.4A6.4 6.4 0 0 1 0 57.6V6.4A6.4 6.4 0 0 1 6.4 0ZM15 25.7273C15 18.6982 20.6982 13 27.7273 13H30.9091V38.4545C30.9091 45.4836 25.2109 51.1818 18.1818 51.1818H15V25.7273ZM34.0909 35.2727C34.0909 28.2436 39.7891 22.5454 46.8182 22.5454H50V38.4545C50 45.4836 44.3018 51.1818 37.2727 51.1818H34.0909V35.2727Z" fill="black"/></svg>';
 
         return 'data:image/svg+xml;base64,' . base64_encode($svg);
     }
