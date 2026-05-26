@@ -216,6 +216,29 @@ select {
 }
 
 
+.fui_app_fluent-support {
+  .fframe_body {
+    position: relative;
+  }
+  .fframe_body .fs_settings_view {
+    position: absolute;
+    left: 0;
+  }
+  .fframe_body .fs_settings_view .fs_settings_wrapper {
+    padding-left: 0;
+  }
+  .fframe_body .fs_settings_view .fs_settings_menu_toggle {
+    bottom: 72px;
+  }
+  .fframe_body .fs_settings_view .fs_inner_sidebar {
+    height: calc(100vh - 56px);
+  }
+  .fframe_body .fs_settings_view .fs_inner_body {
+    max-height: calc(100vh - 56px);
+    min-height: calc(100vh - 56px);
+  }
+}
+
 .fluent_uui {
   .fluentcrm-app.is-settings-page {
     margin-top: 0;

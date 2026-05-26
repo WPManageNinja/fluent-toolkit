@@ -670,6 +670,11 @@ class MenuProviders
                 'url'      => $baseUrl . 'customers',
                 'icon_svg' => Icons::get('customers')
             ],
+            'settings' => [
+                'title'    => __('Settings', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'settings',
+                'icon_svg' => Icons::get('settings')
+            ],
             'more'      => [
                 'title'    => __('More', 'fluent-toolkit'),
                 'url'      => '#',
@@ -711,6 +716,10 @@ class MenuProviders
 
             if (!in_array('fst_manage_saved_replies', $permissons)) {
                 unset($menuItems['more']['sub_menu']['saved_replies']);
+            }
+
+            if(!in_array('fst_manage_settings', $permissons)){
+                unset($menuItems['settings']);
             }
 
             if (empty($menuItems['more']['sub_menu'])) {
