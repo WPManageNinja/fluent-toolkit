@@ -14,7 +14,7 @@ class ToolkitHelper
             'slug'      => 'fluent-crm',
             'name'      => 'FluentCRM',
             'sub_title' => 'Self-hosted email marketing — no per-subscriber fees, full data ownership.',
-            'logo'      => 'fluentcrm_icon.svg',
+            'logo'      => 'fluentcrm_icon.svg'
         ],
         [
             'slug'      => 'fluent-cart',
@@ -136,9 +136,9 @@ class ToolkitHelper
      * description, logo) is bundled; version + download URL is fetched from
      * wordpress.org and cached for 10 minutes.
      */
-    public static function getFreePlugins()
+    public static function getFreePlugins($willCache = true)
     {
-        $versions = self::getFreePluginVersions();
+        $versions = self::getFreePluginVersions($willCache);
 
         $plugins = [];
         foreach (self::FREE_PLUGINS as $meta) {
@@ -171,12 +171,15 @@ class ToolkitHelper
      * instead of N plugins_api() calls — same endpoint WP core uses to check
      * every installed plugin in a single round trip.
      */
-    private static function getFreePluginVersions()
+    private static function getFreePluginVersions($willCache = true)
     {
-        $cached = get_site_transient(self::FREE_VERSIONS_CACHE_KEY);
-        if (is_array($cached)) {
-            return $cached;
+        if($willCache) {
+            $cached = get_site_transient(self::FREE_VERSIONS_CACHE_KEY);
+            if (is_array($cached)) {
+                return $cached;
+            }
         }
+
 
         $to_send = [];
         foreach (self::FREE_PLUGINS as $meta) {
@@ -205,12 +208,28 @@ class ToolkitHelper
             return [];
         }
 
+        $overWrites = [];
+
+        $versionInfo = get_option('__fluent_toolkit_versions');
+        if($versionInfo && !empty($versionInfo['overwrites']) && is_array($versionInfo['overwrites'])) {
+            $overWrites = $versionInfo['overwrites'];
+        }
+
         $versions = [];
         foreach ($body['plugins'] as $file => $info) {
             $slug = strstr($file, '/', true);
             if (!$slug || empty($info['new_version']) || empty($info['package'])) {
                 continue;
             }
+
+            if (isset($overWrites[$slug])) {
+                $overwriteVersion = $overWrites[$slug]['version'];
+                if (version_compare($overwriteVersion, $info['new_version'], '>')) {
+                    $info['new_version'] = $overWrites[$slug]['version'];
+                    $info['package'] = $overWrites[$slug]['url'];
+                }
+            }
+
             $versions[$slug] = [
                 'version'       => $info['new_version'],
                 'download_link' => $info['package'],
