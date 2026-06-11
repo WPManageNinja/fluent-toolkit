@@ -25,6 +25,8 @@ cp index.php          "${BUILD_DIR}/"
 # Whole Classes dir (index.php included)
 cp -r Classes "${BUILD_DIR}/Classes"
 
+cp -r includes "${BUILD_DIR}/includes"
+
 # PHP modules + Composer dependencies
 cp -r libs "${BUILD_DIR}/libs"
 
