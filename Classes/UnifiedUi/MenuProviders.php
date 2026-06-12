@@ -630,105 +630,49 @@ class MenuProviders
 
     public static function getSupportTicketsMenu()
     {
-        if (!defined('FLUENT_SUPPORT_VERSION')) {
-            return [];
-        }
-        $baseUrl = admin_url('admin.php?page=fluent-support#/');
-        $permissons = \FluentSupport\App\Modules\PermissionManager::currentUserPermissions();
-        if (!$permissons) {
+        if (!defined('FLUENT_SUPPORT_VERSION') || !class_exists('\FluentSupport\App\Hooks\Handlers\Menu')) {
             return [];
         }
 
-        $menuItems = [
-            'dashboard' => [
-                'title'    => __('Dashboard', 'fluent-toolkit'),
-                'url'      => $baseUrl,
-                'icon_svg' => Icons::get('dashboard')
-            ],
-            'tickets'   => [
-                'title'    => __('Tickets', 'fluent-toolkit'),
-                'url'      => $baseUrl . 'tickets',
-                'icon_svg' => Icons::get('tickets')
-            ],
-            'reports'   => [
-                'title'    => __('Reports', 'fluent-toolkit'),
-                'url'      => $baseUrl . 'reports',
-                'icon_svg' => Icons::get('reports')
-            ],
-            'mailboxes' => [
-                'title'    => __('Business Inboxes', 'fluent-toolkit'),
-                'url'      => $baseUrl . 'mailboxes',
-                'icon_svg' => Icons::get('mailboxes')
-            ],
-            'activity'  => [
-                'title'    => __('Activities', 'fluent-toolkit'),
-                'url'      => $baseUrl . 'activity',
-                'icon_svg' => Icons::get('activities')
-            ],
-            'customers' => [
-                'title'    => __('Customers', 'fluent-toolkit'),
-                'url'      => $baseUrl . 'customers',
-                'icon_svg' => Icons::get('customers')
-            ],
-            'settings' => [
-                'title'    => __('Settings', 'fluent-toolkit'),
-                'url'      => $baseUrl . 'settings',
-                'icon_svg' => Icons::get('settings')
-            ],
-            'more'      => [
-                'title'    => __('More', 'fluent-toolkit'),
-                'url'      => '#',
-                'icon_svg' => Icons::get('more'),
-                'sub_menu' => [
-                    'saved_replies' => [
-                        'title' => __('Saved Replies', 'fluent-toolkit'),
-                        'url'   => $baseUrl . 'saved-replies',
-                    ],
-                    'workflows'     => [
-                        'title' => __('Workflows', 'fluent-toolkit'),
-                        'url'   => $baseUrl . 'workflows',
-                    ]
-                ]
-            ]
-        ];
+        $menuItems = (new \FluentSupport\App\Hooks\Handlers\Menu())->getMenuItems();
 
-        if (!current_user_can('manage_options')) {
-            if (!in_array('fst_view_all_reports', $permissons)) {
-                unset($menuItems['reports']);
+        if (!$menuItems) {
+            return [];
+        }
+
+        // 'activity' key in FluentSupport maps to the 'activities' icon.
+        $iconKeyMap = ['activity' => 'activities'];
+
+        $formattedItems = [];
+
+        foreach ($menuItems as $item) {
+            $key     = $item['key'];
+            $iconKey = isset($iconKeyMap[$key]) ? $iconKeyMap[$key] : $key;
+
+            $formattedItems[$key] = [
+                'title'    => $item['label'],
+                'url'      => $item['permalink'],
+                'icon_svg' => Icons::get($iconKey)
+            ];
+
+            if (!empty($item['children'])) {
+                $subItems = [];
+                foreach ($item['children'] as $subKey => $subItem) {
+                    $subItems[$subKey] = [
+                        'title' => $subItem['label'],
+                        'url'   => $subItem['permalink']
+                    ];
+                }
+                $formattedItems[$key]['sub_menu'] = $subItems;
             }
+        }
 
-            if (!in_array('fst_manage_settings', $permissons)) {
-                unset($menuItems['mailboxes']);
-            }
-
-            if (!in_array('fst_view_activity_logs', $permissons)) {
-                unset($menuItems['activity']);
-            }
-
-            if (!in_array('fst_sensitive_data', $permissons)) {
-                unset($menuItems['customers']);
-            }
-
-
-            if (!in_array('fst_manage_workflows', $permissons)) {
-                unset($menuItems['more']['sub_menu']['workflows']);
-            }
-
-            if (!in_array('fst_manage_saved_replies', $permissons)) {
-                unset($menuItems['more']['sub_menu']['saved_replies']);
-            }
-
-            if(!in_array('fst_manage_settings', $permissons)){
-                unset($menuItems['settings']);
-            }
-
-            if (empty($menuItems['more']['sub_menu'])) {
-                unset($menuItems['more']);
-            }
+        if (!$formattedItems) {
+            return [];
         }
 
         if (!defined('FLUENT_SUPPORT_PRO_DIR_FILE')) {
-            $menuItems['get_pro'] = [
+            $formattedItems['get_pro'] = [
                 'external' => true,
                 'title'    => __('Get Pro', 'fluent-toolkit'),
                 'url'      => 'https://fluentsupport.com//?utm_source=plugin&utm_medium=admin&utm_campaign=promo',
@@ -736,8 +680,7 @@ class MenuProviders
             ];
         }
 
-        return $menuItems;
-
+        return $formattedItems;
     }
 
 }
