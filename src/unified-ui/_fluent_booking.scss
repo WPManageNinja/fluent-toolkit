@@ -1,0 +1,50 @@
+/* ── FluentBooking ───────────────────────────────────────── */
+
+.fui-has-app-headers.fui_app_fluent-booking {
+  #fluent-booking-app {
+    padding-top: 0;
+  }
+}
+
+.fluent_uui {
+  &.fui-hide-app-headers {
+    #fluent-booking-app .fframe_main-menu-items {
+      display: none;
+    }
+  }
+
+  .fcal_onboard_wrap {
+    padding-top: 24px;
+    padding-bottom: 24px;
+  }
+  #fluent-booking-app {
+    padding-top: 20px;
+  }
+  #fluent-booking-app .fcal_dashboard .fcal_dashboard_chat_wrap {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    .fcal_dashboard_report_sidebar {
+      max-width: 100%;
+    }
+  }
+}
+
+@media (max-width: 1024px) {
+  .fluent_uui {
+    #fluent-booking-app {
+      margin-left: 0;
+      padding-left: 0;
+    }
+  }
+}
+
+@media (max-width: 782px) {
+  .fluent_uui {
+    #fluent-booking-app {
+      padding-left: 15px;
+      .fl_app {
+        margin-right: 15px;
+      }
+    }
+  }
+}

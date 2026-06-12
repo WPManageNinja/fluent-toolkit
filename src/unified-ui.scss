@@ -970,95 +970,16 @@ body.fui-wp-menu-open .fui-wordpress-menu-link .fui-wp-chevron {
 }
 
 /* ── Responsive ──────────────────────────────────────────── */
+/* Plugin-specific responsive rules live in src/unified-ui/_fluent_*.scss */
 @media (max-width: 1100px) {
     :root {
         --fui-sidebar-width: 220px;
-    }
-
-    .fluent_uui {
-        .fs_reports_wrapper {
-            left: 220px;
-        }
     }
 }
 
 @media (max-width: 1024px) {
     .fluent_uui {
-        .fcrm_settings_sidebar {
-            position: absolute;
-            left: -160px;
-            height: calc(100vh - 57px);
-            padding-bottom: 64px;
-            &.is-open {
-                left: 0;
-            }
-        }
-        .fcrm_settings_menu_overlay {
-            height: calc(100vh - 57px);
-        }
-        .fluentcrm-app.is-settings-page {
-            .fcrm_settings_inner {
-                padding-left: 0;
-            }
-        }
-
-        #fluent-booking-app,
-        #alpha_app {
-            margin-left: 0;
-        }
-        .fs_reports_wrapper {
-            .fs_box_wrapper {
-                padding-top: 0;
-            }
-        }
-        .fframe_body {
-            .fs_tk_inner_sidebar {
-                margin-top: 0;
-            }
-        }
-        .fs_tickets_view {
-            margin: 0;
-        }
-        .fs_tickets_view_wrapper {
-            width: 100%;
-            margin: 0;
-        }
-        #fct_admin_app_wrapper #fluent_cart_plugin_app {
-            padding: 0;
-        }
-        .fct-settings-nav-container {
-            left: -100%;
-            &.is-nav-open {
-                left: -20px;
-            }
-        }
-        #fct-report-body {
-            margin-left: -20px;
-            padding-left: 20px !important;
-        }
-        .fct-reports-view {
-            margin: 0;
-        }
-        .fct-report-body-inner {
-            padding-left: 0;
-            padding-right: 20px;
-        }
-        .fct-report-body {
-            .fct-report-filter-wrap {
-                margin-left: -20px;
-            }
-        }
-        .fct-settings-nav-content {
-            margin-left: -20px;
-        }
-        #alpha_app {
-            .fframe_body {
-                padding-left: 0;
-            }
-        }
-        #fluent-booking-app {
-            padding-left: 0;
-        }
+        /* fframe is shared by Support / Booking / Boards — stays here. */
         .fframe_menu.fframe_menu_small_screen.fframe_menu_small_screen_open {
             left: 0;
         }
@@ -1088,130 +1009,6 @@ body.fui-wp-menu-open .fui-wordpress-menu-link .fui-wp-chevron {
     }
     #wpbody {
         padding: 0;
-    }
-    .fluent_uui {
-        .ff_global_setting_wrap,
-        .ff_tools_wrap,
-        #ff_reports {
-            margin-left: 0;
-        }
-        .fcrm_settings_sidebar {
-            height: 100vh;
-            position: fixed;
-            padding-top: 0;
-        }
-        .fcrm_settings_menu_overlay {
-            height: 100vh;
-        }
-        .fluentcrm-app.is-settings-page {
-            .fluentcrm-body {
-                height: auto;
-                z-index: 1;
-            }
-
-            .fcrm_settings_content {
-                .fcrm_settings {
-                    max-height: inherit;
-                    min-height: inherit;
-                    overscroll-behavior: inherit;
-                }
-            }
-        }
-
-        .fs_reports_wrapper {
-            position: relative;
-            left: 0;
-        }
-        #alpha_app {
-            .fframe_body {
-                padding-top: 0;
-            }
-        }
-        .fs_reports_layout {
-            .fs_reports_content {
-                padding-left: 0;
-                padding-right: 0;
-            }
-        }
-        .fs_tickets_view_wrapper {
-            margin: 0;
-            width: 100%;
-        }
-        .fs_customers {
-            padding-top: 20px;
-        }
-        .fs_narrow_promo {
-            margin: 0;
-        }
-        .fcrm_reports_home {
-            .fcrm_reports_sidebar_overlay,
-            .fcrm_reports_sidebar {
-                height: calc(100vh - 47px);
-            }
-        }
-        #fct_admin_app_wrapper #fluent_cart_plugin_app {
-            padding: 0 0 30px 0 !important;
-            margin: 0;
-        }
-        .fl_app.fluent-cart-admin-pages {
-            margin: 0;
-            padding: 15px;
-            .fluent-cart-admin-pages {
-                padding: 0;
-            }
-        }
-        #fct-report-body {
-            margin-left: 0;
-        }
-        .fct-report-body,
-        .fct-settings-nav-content-inner {
-            max-height: calc(100vh - 64px);
-            min-height: calc(100vh - 64px);
-        }
-        .fct-settings-nav-container.is-nav-open {
-            left: 0;
-        }
-        .fct-settings-nav-content {
-            margin-left: 0;
-        }
-        .fct-setting-container {
-            .setting-wrap-inner {
-                padding: 20px 15px;
-            }
-            .setting-wrap {
-                margin-bottom: 0;
-            }
-        }
-        .ff_layout_section_container {
-            padding-left: 0;
-            padding-right: 0;
-        }
-        .fluent_boards-box,
-        .fbs_welcome-settings,
-        .fbs-dashboard-home,
-        #alpha_app .fframe_body,
-        .ff_form_wrap {
-            padding-left: 15px;
-            padding-right: 15px;
-        }
-        #alpha_app .fs_mailboxes,
-        .fs_tickets_view_wrapper {
-            padding-top: 15px;
-        }
-        #fluent-booking-app {
-            padding-left: 15px;
-            .fl_app {
-                margin-right: 15px;
-            }
-        }
-        #fluent-boards-app .fframe_main-menu-items,
-        #fluent-boards-app .fframe_body {
-            margin-left: 0 !important;
-        }
-        .fbs_report {
-            margin: 0;
-            padding: 20px 15px;
-        }
     }
     .fui-mobile-nav {
         display: flex;
@@ -1264,21 +1061,5 @@ body.fui-wp-menu-open .fui-wordpress-menu-link .fui-wp-chevron {
     /* Workspace dropdown sits within the drawer — keep it anchored */
     .fui-workspace-menu {
         right: 0;
-    }
-}
-
-@media (max-width: 500px) {
-    .fluent_uui {
-        .fluentcrm-app {
-            padding-left: 15px;
-            padding-right: 15px;
-        }
-        .fcrm_page_header_top_nav_wrapper {
-            margin: -15px -15px 0 -15px;
-        }
-        .fluentcrm-app.is-settings-page {
-            padding-left: 0;
-            padding-right: 0;
-        }
     }
 }

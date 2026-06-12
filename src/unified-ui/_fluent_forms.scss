@@ -1,0 +1,59 @@
+/* ── FluentForms ─────────────────────────────────────────── */
+
+.ff_header {
+  margin-left: -20px;
+}
+
+.fluent_uui {
+  &.fui-hide-app-headers {
+    .ff_header {
+      display: none;
+    }
+  }
+
+  .ff_tools_wrap {
+    .ff_admin_menu_wrapper {
+      min-height: 100vh;
+    }
+  }
+  .ff_global_setting_wrap,
+  .ff_tools_wrap {
+    margin-left: -20px;
+  }
+  .ff_form_wrap {
+    padding-left: 0;
+    padding-right: 20px;
+  }
+  .ff_global_settings_option {
+    height: 100vh;
+    padding: 24px;
+  }
+  .ff_settings_wrapper {
+    .ff_layout_section_container {
+      overflow: auto;
+      padding: 0;
+    }
+  }
+}
+
+@media (max-width: 782px) {
+  .fui-app-content .ff_header {
+    margin-left: 0;
+  }
+
+  .fluent_uui {
+    .ff_global_setting_wrap,
+    .ff_tools_wrap,
+    #ff_reports {
+      margin-left: 0;
+    }
+    .ff_layout_section_container {
+      padding-left: 0;
+      padding-right: 0;
+    }
+    .ff_form_wrap {
+      padding-left: 15px;
+      padding-right: 15px;
+    }
+  }
+}

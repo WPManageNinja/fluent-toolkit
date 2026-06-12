@@ -1,0 +1,158 @@
+/* ── FluentCart ──────────────────────────────────────────── */
+
+body #wpbody-content #fct_admin_menu_holder .fct_admin_menu_wrap {
+  top: 0;
+  width: 100%;
+  position: sticky;
+}
+
+div#fct_admin_menu_holder {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  margin-left: -20px;
+}
+
+#fluent_cart_plugin_app {
+  padding-top: 0;
+}
+
+.fct_admin_menu_wrap.fct_global_menu_wrap {
+  top: 0;
+  position: sticky;
+  width: 100%;
+}
+
+.fui_app_fluent-cart {
+  #fct_admin_app_wrapper {
+    gap: 0;
+  }
+}
+
+.fluent_uui {
+  .fct-settings-nav-container {
+    left: -20px;
+    height: 100vh;
+  }
+
+  &.fui-hide-app-headers {
+    #fct_admin_menu_holder {
+      display: none;
+    }
+  }
+
+  .fl_app.fluent-cart-admin-pages {
+    padding: 24px 24px 24px 0;
+  }
+  .fct_report_page_plugin_app_wrap {
+    .fl_app.fluent-cart-admin-pages {
+      padding: 0;
+    }
+  }
+  .fct_settings_page_plugin_app_wrap .fl_app.fluent-cart-admin-pages,
+  #fluent_cart_plugin_app {
+    padding: 0;
+  }
+  .fct-reports-view,
+  .fct-setting-container {
+    position: relative;
+    height: 100vh;
+  }
+  #fct_admin_app_wrapper {
+    padding-top: 0;
+    margin-left: 0;
+    width: 100%;
+  }
+  #fluent_cart_plugin_app.fct_settings_page_plugin_app_wrap {
+    padding: 0;
+  }
+  .fct-report-body,
+  .fct-settings-nav-content-inner {
+    max-height: 100vh;
+    min-height: 100vh;
+  }
+  .fct-settings-nav-content {
+    padding-left: 240px;
+  }
+  .fct-report-body {
+    padding-left: 240px;
+  }
+  .fct-setting-container .setting-wrap {
+    padding-bottom: 100px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .fluent_uui {
+    #fct_admin_app_wrapper #fluent_cart_plugin_app {
+      padding: 0;
+    }
+    .fct-settings-nav-container {
+      left: -100%;
+      &.is-nav-open {
+        left: -20px;
+      }
+    }
+    #fct-report-body {
+      margin-left: -20px;
+      padding-left: 20px !important;
+    }
+    .fct-reports-view {
+      margin: 0;
+    }
+    .fct-report-body-inner {
+      padding-left: 0;
+      padding-right: 20px;
+    }
+    .fct-report-body {
+      .fct-report-filter-wrap {
+        margin-left: -20px;
+      }
+    }
+    .fct-settings-nav-content {
+      margin-left: -20px;
+    }
+  }
+}
+
+@media (max-width: 782px) {
+  #fct_admin_app_wrapper #fct_admin_menu_holder {
+    margin-left: 0;
+  }
+
+  .fluent_uui {
+    #fct_admin_app_wrapper #fluent_cart_plugin_app {
+      padding: 0 0 30px 0 !important;
+      margin: 0;
+    }
+    .fl_app.fluent-cart-admin-pages {
+      margin: 0;
+      padding: 15px;
+      .fluent-cart-admin-pages {
+        padding: 0;
+      }
+    }
+    #fct-report-body {
+      margin-left: 0;
+    }
+    .fct-report-body,
+    .fct-settings-nav-content-inner {
+      max-height: calc(100vh - 64px);
+      min-height: calc(100vh - 64px);
+    }
+    .fct-settings-nav-container.is-nav-open {
+      left: 0;
+    }
+    .fct-settings-nav-content {
+      margin-left: 0;
+    }
+    .fct-setting-container {
+      .setting-wrap-inner {
+        padding: 20px 15px;
+      }
+      .setting-wrap {
+        margin-bottom: 0;
+      }
+    }
+  }
+}

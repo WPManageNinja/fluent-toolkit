@@ -200,8 +200,12 @@
         // Theme toggle dropdown.
         var themeToggle = document.getElementById('fui-theme-toggle');
         var themeDropdown = document.getElementById('fui-theme-dropdown');
+        var themeChannel = (typeof BroadcastChannel !== 'undefined')
+            ? new BroadcastChannel('fluent_theme_changed:' + window.location.origin)
+            : null;
 
-        function applyTheme(mode) {
+        function applyTheme(mode, _broadcast) {
+            if (_broadcast === undefined) _broadcast = true;
             if (!hasDarkMode) {
                 document.body.classList.remove('fluent_theme_dark');
                 return;
@@ -221,11 +225,22 @@
                     btn.classList.toggle('is-active', btn.dataset.theme === mode);
                 });
             }
+            if (_broadcast && themeChannel) {
+                themeChannel.postMessage({ mode: mode });
+            }
+        }
+
+        if (themeChannel) {
+            themeChannel.onmessage = function (event) {
+                if (event.data && event.data.mode) {
+                    applyTheme(event.data.mode, false);
+                }
+            };
         }
 
         var savedMode = localStorage.getItem('fluent_theme_mode') || 'system';
         var baseMode = savedMode.indexOf('system') === 0 ? 'system' : savedMode;
-        applyTheme(baseMode);
+        applyTheme(baseMode, false);
 
         if (themeToggle && themeDropdown) {
             themeToggle.addEventListener('click', function (e) {

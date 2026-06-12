@@ -1,0 +1,45 @@
+/* ── FluentBoards ────────────────────────────────────────── */
+
+body #fluent-boards-app {
+  top: 0;
+}
+
+.fluentcrm_page_fluent-boards #wpbody #fbs_tasks_wrapper,
+.toplevel_page_fluent-boards #wpbody #fbs_tasks_wrapper {
+  height: calc(100vh - 140px);
+}
+
+.fui-has-app-headers {
+  button.el-button.el-button--default.fbs_full_screen_btn {
+    display: none;
+  }
+}
+
+.fluent_uui {
+  .fluentboards_databox {
+    height: calc(100vh - 60px);
+  }
+  .fbs-dashboard-home {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+@media (max-width: 782px) {
+  .fluent_uui {
+    .fluent_boards-box,
+    .fbs_welcome-settings,
+    .fbs-dashboard-home {
+      padding-left: 15px;
+      padding-right: 15px;
+    }
+    #fluent-boards-app .fframe_main-menu-items,
+    #fluent-boards-app .fframe_body {
+      margin-left: 0 !important;
+    }
+    .fbs_report {
+      margin: 0;
+      padding: 20px 15px;
+    }
+  }
+}
