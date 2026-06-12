@@ -1,0 +1,156 @@
+/* ── FluentSupport (#alpha_app) ──────────────────────────── */
+
+.fs_main_navbar {
+  top: 0 !important;
+  width: calc(100% - 240px);
+}
+
+.fui-has-app-headers.fui_app_fluent-support {
+  .fframe_app {
+    padding-bottom: 50px;
+    @media screen and (max-width: 782px) {
+      padding-bottom: 60px;
+    }
+  }
+  .fs_view_ticket, .fs_tk_inner_sidebar.has-view-route, .fs_tickets_tiny_nav {
+    margin-top: 20px;
+    padding-top: 0;
+  }
+}
+
+.fui_app_fluent-support {
+  .fframe_body {
+    position: relative;
+  }
+  .fframe_body .fs_settings_view {
+    position: absolute;
+    left: 0;
+  }
+  .fframe_body .fs_settings_view .fs_settings_wrapper {
+    padding-left: 0;
+  }
+  .fframe_body .fs_settings_view .fs_settings_menu_toggle {
+    bottom: 72px;
+  }
+  .fframe_body .fs_settings_view .fs_inner_sidebar {
+    height: calc(100vh - 56px);
+  }
+  .fframe_body .fs_settings_view .fs_inner_body {
+    max-height: calc(100vh - 56px);
+    min-height: calc(100vh - 56px);
+  }
+}
+
+.fluent_uui {
+  &.fui-hide-app-headers {
+    #alpha_app .fframe_app {
+      display: none;
+    }
+  }
+
+  .fs_setup .fs_sticky_footer {
+    left: 0;
+    z-index: 50;
+    .fs_footer_content {
+      padding-left: 240px;
+    }
+  }
+  .fs_reports_layout,
+  .fs_dashboard_wrapper {
+    padding-top: 0;
+  }
+  .fs_tickets_view {
+    margin-top: -24px;
+  }
+  .fs_inside_activity_menu_tab_header {
+    top: 0 !important;
+  }
+  .fs_reports_wrapper {
+    top: 0;
+    left: 239px;
+    background: none;
+  }
+  .fs_customers {
+    padding-top: 0;
+  }
+  .fs_combined_top_bar {
+    top: 0;
+  }
+  #alpha_app {
+    .fs_mailboxes {
+      padding-top: 0;
+    }
+  }
+}
+
+@media (max-width: 1100px) {
+  .fluent_uui {
+    .fs_reports_wrapper {
+      left: 220px;
+    }
+  }
+}
+
+@media (max-width: 1024px) {
+  .fluent_uui {
+    #alpha_app {
+      margin-left: 0;
+      .fframe_body {
+        padding-left: 0;
+      }
+    }
+    .fs_reports_wrapper {
+      .fs_box_wrapper {
+        padding-top: 0;
+      }
+    }
+    .fframe_body {
+      .fs_tk_inner_sidebar {
+        margin-top: 0;
+      }
+    }
+    .fs_tickets_view {
+      margin: 0;
+    }
+    .fs_tickets_view_wrapper {
+      width: 100%;
+      margin: 0;
+    }
+  }
+}
+
+@media (max-width: 782px) {
+  .fluent_uui {
+    .fs_reports_wrapper {
+      position: relative;
+      left: 0;
+    }
+    #alpha_app {
+      .fframe_body {
+        padding-top: 0;
+        padding-left: 15px;
+        padding-right: 15px;
+      }
+      .fs_mailboxes {
+        padding-top: 15px;
+      }
+    }
+    .fs_reports_layout {
+      .fs_reports_content {
+        padding-left: 0;
+        padding-right: 0;
+      }
+    }
+    .fs_tickets_view_wrapper {
+      margin: 0;
+      width: 100%;
+      padding-top: 15px;
+    }
+    .fs_customers {
+      padding-top: 20px;
+    }
+    .fs_narrow_promo {
+      margin: 0;
+    }
+  }
+}

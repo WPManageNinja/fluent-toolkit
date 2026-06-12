@@ -1,0 +1,113 @@
+/* ── FluentCRM ───────────────────────────────────────────── */
+
+body .fcrm_topbar {
+  top: 0;
+}
+
+.fluent_uui {
+  .fluentcrm-app.is-settings-page {
+    margin-top: 0;
+    .fluentcrm-body {
+      position: relative;
+      height: 100vh;
+      margin-top: 0;
+    }
+    .fcrm_settings_inner {
+      padding-left: 271px;
+      &.is-collapsed {
+        padding-left: 78px;
+      }
+    }
+    .fcrm_settings_content {
+      .fcrm_settings {
+        max-height: 100vh;
+        min-height: 100vh;
+      }
+    }
+  }
+  .fcrm_settings_sidebar {
+    left: 0;
+    height: 100vh;
+  }
+
+  &.fui-hide-app-headers {
+    .fcrm_topbar {
+      display: none;
+    }
+  }
+
+  .fcrm-route-loading-bar {
+    top: 0;
+  }
+}
+
+@media (max-width: 1024px) {
+  .fluent_uui {
+    .fcrm_settings_sidebar {
+      position: absolute;
+      left: -160px;
+      height: calc(100vh - 57px);
+      padding-bottom: 64px;
+      &.is-open {
+        left: 0;
+      }
+    }
+    .fcrm_settings_menu_overlay {
+      height: calc(100vh - 57px);
+    }
+    .fluentcrm-app.is-settings-page {
+      .fcrm_settings_inner {
+        padding-left: 0;
+      }
+    }
+  }
+}
+
+@media (max-width: 782px) {
+  .fluent_uui {
+    .fcrm_settings_sidebar {
+      height: 100vh;
+      position: fixed;
+      padding-top: 0;
+    }
+    .fcrm_settings_menu_overlay {
+      height: 100vh;
+    }
+    .fluentcrm-app.is-settings-page {
+      .fluentcrm-body {
+        height: auto;
+        z-index: 1;
+      }
+
+      .fcrm_settings_content {
+        .fcrm_settings {
+          max-height: inherit;
+          min-height: inherit;
+          overscroll-behavior: inherit;
+        }
+      }
+    }
+    .fcrm_reports_home {
+      .fcrm_reports_sidebar_overlay,
+      .fcrm_reports_sidebar {
+        height: calc(100vh - 47px);
+      }
+    }
+  }
+}
+
+@media (max-width: 500px) {
+  .fluent_uui {
+    .fluentcrm-app {
+      padding-left: 15px;
+      padding-right: 15px;
+    }
+    .fcrm_page_header_top_nav_wrapper {
+      margin: -15px -15px 0 -15px;
+    }
+    .fluentcrm-app.is-settings-page {
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
+}

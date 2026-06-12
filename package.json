@@ -24,6 +24,8 @@
     "sass-loader": "^16.0.5",
     "unplugin-auto-import": "^0.16.7",
     "unplugin-vue-components": "^0.25.2",
-    "vue-loader": "^17.4.2"
+    "vue-loader": "^17.4.2",
+    "webpack": "5.99.6",
+    "webpack-cli": "4.10.0"
   }
 }
