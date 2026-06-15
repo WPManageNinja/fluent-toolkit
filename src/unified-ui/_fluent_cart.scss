@@ -94,6 +94,18 @@ div#fct_admin_menu_holder {
 .fct-mcp-snippet-code{
   max-width: 600px;
 }
+.fct-save-bar {
+  width: calc(100% - 240px);
+  &.is-active {
+    transform: translateY(0);
+  } 
+}
+
+body.fui-wp-menu-open {
+  .fct-save-bar {
+    width: calc(100% - 160px);
+  }
+}
 
 @media (max-width: 1024px) {
   .fluent_uui {
