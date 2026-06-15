@@ -107,6 +107,22 @@ body.fui-wp-menu-open {
   }
 }
 
+.fui-app-content {
+  .fct-notices-wrap {
+    margin-top: 20px;
+    margin-bottom: 0;
+  }
+  .fct-report-body-inner {
+    .fct-notices-wrap {
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+  }
+  .fct-reports-view.is-collapsed .fct-report-body {
+    padding-left: 52px;
+  }
+}
+
 @media (max-width: 1024px) {
   .fluent_uui {
     #fct_admin_app_wrapper #fluent_cart_plugin_app {
