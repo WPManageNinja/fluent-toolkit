@@ -562,6 +562,7 @@
         text-decoration: none;
         box-shadow: none;
         outline: none;
+        border-radius: 6px;
     }
     &:focus-visible {
         box-shadow: 0 0 0 2px rgba(99, 91, 255, 0.35);
