@@ -111,11 +111,14 @@ body.fui-wp-menu-open {
   .fct-notices-wrap {
     margin-top: 20px;
     margin-bottom: 0;
+    padding-right: 20px;
   }
-  .fct-report-body-inner {
+  .fct-report-body-inner,
+  .setting-wrap {
     .fct-notices-wrap {
       margin-top: 0;
       margin-bottom: 20px;
+      padding-right: 0;
     }
   }
   .fct-reports-view.is-collapsed .fct-report-body {
@@ -124,6 +127,11 @@ body.fui-wp-menu-open {
   .fct-admin-product-header {
     margin-top: 20px;
     margin-bottom: 0;
+    padding-right: 0;
+  }
+  .fct-admin-product-header {
+    max-width: 100%;
+    padding-right: 20px;
   }
 }
 
