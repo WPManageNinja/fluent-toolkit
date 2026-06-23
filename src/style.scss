@@ -9,6 +9,17 @@
   padding: 24px 0;
 }
 
+body.fluent_theme_dark {
+  background-color: #11171D;
+
+  #wpwrap,
+  #wpcontent,
+  #wpbody,
+  #wpbody-content {
+    background-color: #11171D;
+  }
+}
+
 .ft-app {
   --bg: #f6f5f2;
   --surface: #ffffff;
@@ -113,6 +124,63 @@
     &:hover {
       background: var(--surface-2);
       color: var(--text);
+    }
+  }
+
+  // ── Theme switcher ────────────────────
+  .ft-theme-wrap {
+    position: relative;
+  }
+
+  .ft-theme-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
+    list-style: none;
+    margin: 0;
+    padding: 4px;
+    min-width: 130px;
+    z-index: 9999;
+  }
+
+  .ft-theme-dropdown-item {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-radius: 7px;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    gap: 8px;
+    padding: 7px 10px;
+    transition: all .12s;
+    width: 100%;
+
+    &:hover {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+
+    &.is-active {
+      color: var(--text);
+      background: var(--surface-2);
+
+      &::after {
+        content: '';
+        display: block;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--accent);
+        margin-left: auto;
+      }
     }
   }
 
@@ -393,7 +461,7 @@
   }
 
   .ft-beta-head {
-    margin: 0 0 12px;
+    margin: 40px 0 12px;
   }
 
   .ft-beta-stats {
@@ -741,6 +809,63 @@
     }
   }
 
+  // ── Skeleton ─────────────────────────
+  @keyframes ft-skel-shimmer {
+    0%   { background-position: -600px 0; }
+    100% { background-position: 600px 0; }
+  }
+
+  .ft-skel {
+    background: linear-gradient(
+      90deg,
+      var(--border) 25%,
+      var(--border-strong) 50%,
+      var(--border) 75%
+    );
+    background-size: 1200px 100%;
+    animation: ft-skel-shimmer 1.6s infinite linear;
+    border-radius: 4px;
+  }
+
+  .ft-skel-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    flex-shrink: 0;
+  }
+
+  .ft-skel-name {
+    height: 14px;
+    width: 42%;
+    max-width: 210px;
+    margin-bottom: 8px;
+  }
+
+  .ft-skel-desc {
+    height: 12px;
+    width: 66%;
+    max-width: 340px;
+    margin-bottom: 6px;
+  }
+
+  .ft-skel-meta {
+    height: 10px;
+    width: 28%;
+    max-width: 140px;
+  }
+
+  .ft-skel-badge {
+    height: 28px;
+    width: 100px;
+    border-radius: 6px;
+  }
+
+  .ft-skel-btn {
+    height: 32px;
+    width: 82px;
+    border-radius: 8px;
+  }
+
   // ── Footer ───────────────────────────
   .ft-footer {
     margin-top: 18px;
@@ -758,6 +883,63 @@
     }
   }
 
+}
+
+// ── Dark Mode ─────────────────────────
+.fluent_theme_dark .ft-app {
+  --bg: #11171D;
+  --surface: #1a2530;
+  --surface-2: #141c27;
+  --border: #243040;
+  --border-strong: #2c3a4a;
+  --text: #e2e8f0;
+  --text-muted: #8a9db8;
+  --text-soft: #546880;
+  --accent: oklch(68% 0.18 280);
+  --accent-soft: oklch(20% 0.07 280 / .8);
+  --accent-border: oklch(30% 0.10 280);
+  --ok-soft: oklch(17% 0.06 155);
+  --warn-soft: oklch(18% 0.05 70);
+  --danger: oklch(62% 0.18 25);
+
+  .ft-hero::after {
+    background: radial-gradient(circle at 70% 30%, oklch(28% 0.07 280 / .4), transparent 60%);
+  }
+
+  .ft-btn-primary {
+    background: #253241;
+    color: #e2e8f0;
+    border-color: #2c3a4a;
+    &:hover { background: #1c2732; }
+  }
+
+  .ft-channel[aria-selected="true"] {
+    background: #253241;
+    color: #e2e8f0;
+
+    .ft-channel-count {
+      background: rgba(255, 255, 255, .08);
+      border-color: transparent;
+      color: #8a9db8;
+    }
+  }
+
+  .ft-setting-icon--indigo { background: rgba(91, 80, 240, .2); }
+  .ft-setting-icon--violet { background: rgba(155, 81, 224, .2); }
+  .ft-setting-icon--amber  { background: rgba(245, 158, 11, .2); }
+
+  .ft-status-ok     { color: oklch(62% 0.14 155); }
+  .ft-status-update { color: oklch(65% 0.14 70); }
+
+  .ft-tag-beta { color: oklch(68% 0.14 70);  border-color: oklch(35% 0.07 70); }
+  .ft-tag-rc   { color: oklch(68% 0.18 280); border-color: oklch(30% 0.10 280); }
+  .ft-tag-new  { background: oklch(20% 0.07 155); color: oklch(65% 0.13 155); border-color: oklch(30% 0.09 155); }
+
+  .ft-warn-text { color: oklch(68% 0.14 70); }
+
+  .ft-theme-dropdown {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .4);
+  }
 }
 
 @media (max-width: 782px) {
