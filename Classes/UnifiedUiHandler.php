@@ -167,7 +167,7 @@ class UnifiedUiHandler
             'fluent-toolkit'  => [
                 'disabled'      => true,
                 'title'         => 'FluentHub',
-                'has_dark_mode' => false,
+                'has_dark_mode' => true,
                 'hide_on_menu'  => true
             ]
         ];

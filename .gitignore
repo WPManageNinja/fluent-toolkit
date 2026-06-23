@@ -8,3 +8,4 @@ components.d.ts
 .idea
 .DS_Store
 refs
+/.playwright-mcp
