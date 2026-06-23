@@ -940,6 +940,9 @@ body.fluent_theme_dark {
   .ft-theme-dropdown {
     box-shadow: 0 8px 24px rgba(0, 0, 0, .4);
   }
+
+  --el-mask-color: rgba(17, 23, 29, 0.85);
+  --el-color-primary: oklch(68% 0.18 280);
 }
 
 @media (max-width: 782px) {
