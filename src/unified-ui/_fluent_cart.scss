@@ -68,8 +68,8 @@ div#fct_admin_menu_holder {
   }
   .fct-report-body,
   .fct-settings-nav-content-inner {
-    max-height: 100vh;
-    min-height: 100vh;
+    max-height: calc(100vh - 50px);
+    min-height: calc(100vh - 50px);
   }
   .fct-settings-nav-content {
     padding-left: 240px;
@@ -80,7 +80,6 @@ div#fct_admin_menu_holder {
   .fct-setting-container .setting-wrap {
     padding-bottom: 100px;
   }
-
 
 }
 
@@ -132,6 +131,19 @@ body.fui-wp-menu-open {
   .fct-admin-product-header {
     max-width: 100%;
     padding-right: 20px;
+  }
+}
+
+@media (max-width: 1330px) {
+  .fluent_uui {
+    .fct-order-report-page {
+      .el-row {
+        .el-col {
+          flex: 0 0 100%;
+          max-width: 100%;
+        }
+      }
+    }
   }
 }
 
