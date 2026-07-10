@@ -16,17 +16,17 @@ class MenuProviders
 {
     public static function getAffiliateMenu()
     {
-        if (!defined('FLUENT_AFFILIATE_VERSION') || !class_exists('\FluentAffiliate\App\Services\PermissionManager')) {
+        if (!defined('FLUENT_AFFILIATE_VERSION')) {
             return [];
         }
 
         $Permission = '\FluentAffiliate\App\Services\PermissionManager';
 
-        if (!$Permission::isLoggedIn()) {
+        if (!$Permission::hasAnyPermission()) {
             return [];
         }
 
-        $baseUrl = admin_url('admin.php?page=fluent-affiliate#');
+        $baseUrl = apply_filters('fluent_affiliate_base_url', admin_url('admin.php?page=fluent-affiliate#'));
 
         $menuItems = [
             'dashboard' => [
@@ -354,6 +354,21 @@ class MenuProviders
             }
         }
 
+        if (isset($formattedItems['settings'])) {
+            // we have to push addons and help here
+            $formattedItems['add-ons'] = [
+                'title'    => __('Addons', 'fluent-toolkit'),
+                'url'      => fluentcrm_menu_url_base('add-ons'),
+                'icon_svg' => Icons::get('integrations')
+            ];
+        }
+
+        $formattedItems['documentation'] = [
+            'title'    => __('Help', 'fluent-toolkit'),
+            'url'      => fluentcrm_menu_url_base('documentation'),
+            'icon_svg' => Icons::get('documentation')
+        ];
+
         if (!defined('FLUENTCAMPAIGN_PLUGIN_VERSION')) {
             $formattedItems['get_pro'] = [
                 'external' => true,
@@ -378,7 +393,7 @@ class MenuProviders
             return [];
         }
 
-        $Acl     = '\FluentForm\App\Modules\Acl\Acl';
+        $Acl = '\FluentForm\App\Modules\Acl\Acl';
         $baseUrl = admin_url('admin.php?page=');
 
         $menuItems = [];
@@ -436,7 +451,7 @@ class MenuProviders
             ];
         }
 
-        if(!$menuItems) {
+        if (!$menuItems) {
             return [];
         }
 
@@ -711,7 +726,7 @@ class MenuProviders
         $formattedItems = [];
 
         foreach ($menuItems as $item) {
-            $key     = $item['key'];
+            $key = $item['key'];
             $iconKey = isset($iconKeyMap[$key]) ? $iconKeyMap[$key] : $key;
 
             $formattedItems[$key] = [

@@ -279,7 +279,7 @@
     }
 
     &.is-active {
-        background: var(--fui-active-bg, rgba(255, 255, 255, 0.08));
+        background: var(--fui-bg, rgba(255, 255, 255, 0.08));
         color: var(--fui-text);
     }
 }

@@ -127,6 +127,15 @@ class UnifiedUiHandler
                 'has_dark_mode' => false,
                 'dashboard_url' => admin_url('admin.php?page=fluent-affiliate#/')
             ],
+            'fluent-player'   => [
+                'disabled'      => !$playerMenu,
+                'title'         => 'Media & Player',
+                'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentplayer_icon.svg',
+                'items'         => $playerMenu,
+                'has_dark_mode' => false,
+                'group'         => 'others',
+                'dashboard_url' => admin_url('admin.php?page=fluent-player#/')
+            ],
             'fluent-auth'     => [
                 'disabled'      => !$authMenu,
                 'title'         => 'Auth & Security',
@@ -145,15 +154,6 @@ class UnifiedUiHandler
                 'group'         => 'others',
                 'parent_slug'   => 'options-general.php',
                 'dashboard_url' => admin_url('options-general.php?page=fluent-mail#/')
-            ],
-            'fluent-player'   => [
-                'disabled'      => !$playerMenu,
-                'title'         => 'Media & Player',
-                'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentplayer_icon.svg',
-                'items'         => $playerMenu,
-                'has_dark_mode' => false,
-                'group'         => 'others',
-                'dashboard_url' => admin_url('admin.php?page=fluent-player#/')
             ],
             'wpsocialninja.php' => [
                 'disabled'      => !$socialMenu,
@@ -218,7 +218,12 @@ class UnifiedUiHandler
             if ($mergeAdminMenus) {
                 add_action('admin_head', function () use ($isOurApp) {
                     $selectors = [];
-                    foreach ($this->apps as $key => $app) {
+
+                    $apps = $this->apps;
+
+                    unset($apps['fluent-mail']);
+
+                    foreach ($apps as $key => $app) {
                         if($key === 'fluent-toolkit' && !$isOurApp) {
                             continue;
                         }
