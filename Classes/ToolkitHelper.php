@@ -82,6 +82,12 @@ class ToolkitHelper
             'sub_title' => 'Embed reviews, social feeds, testimonials, and chat widgets from Google, Facebook, Yelp, and more.',
             'logo'      => 'wpsocialninja_icon.svg',
         ],
+        [
+            'slug'      => 'fluent-affiliate',
+            'name'      => 'FluentAffiliate',
+            'sub_title' => 'Self-hosted affiliate program management — track clicks, referrals, commissions, and payouts.',
+            'logo'      => 'fluentaffiliate_icon.svg',
+        ],
     ];
 
     const FREE_VERSIONS_CACHE_KEY = '__fluent_toolkit_free_versions_v4';
