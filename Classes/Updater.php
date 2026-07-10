@@ -12,45 +12,33 @@ if (!defined('ABSPATH')) {
  *   pre_set_site_transient_update_plugins → inject our entry
  *   plugins_api                           → serve "View details" payload
  *
- * Talks to an EDD Software Licensing endpoint (edd_action=get_version) and
- * caches the response in a site transient.
+ * Remote responses are cached in a site transient.
  */
 class Updater
 {
     const CACHE_TTL       = 12 * HOUR_IN_SECONDS;
     const ERROR_CACHE_TTL = HOUR_IN_SECONDS;
 
-    /** @var string */
     private $api_url;
-
-    /** @var array{version?:string,license?:string,item_id?:string|int,author?:string} */
     private $api_data;
-
-    /** @var string e.g. "fluent-toolkit/fluent-toolkit.php" */
-    private $plugin_file;
-
-    /** @var string e.g. "fluent-toolkit" */
-    private $slug;
-
-    /** @var string Installed plugin version. */
+    private $plugin_file; // e.g. "fluent-toolkit/fluent-toolkit.php"
+    private $slug;        // e.g. "fluent-toolkit"
     private $version;
-
-    /** @var string Site transient key for the cached API response. */
     private $cache_key;
 
-    /**
-     * @param string $api_url     EDD Software Licensing endpoint URL.
-     * @param string $plugin_file Absolute path to the main plugin file.
-     * @param array  $api_data    Must include 'version'; may include 'license', 'item_id', 'author'.
-     */
     public function __construct($api_url, $plugin_file, array $api_data)
     {
         $this->api_url     = untrailingslashit($api_url);
-        $this->api_data    = $api_data;
+        $this->api_data    = wp_parse_args($api_data, [
+            'version' => '',
+            'license' => '',
+            'item_id' => '',
+            'author'  => '',
+        ]);
         $this->plugin_file = plugin_basename($plugin_file);
         $this->slug        = basename($plugin_file, '.php');
-        $this->version     = isset($api_data['version']) ? $api_data['version'] : '';
-        $this->cache_key   = 'fluent_toolkit_updater_' . md5($this->plugin_file);
+        $this->version     = $this->api_data['version'];
+        $this->cache_key   = self::cache_key($plugin_file);
 
         add_filter('pre_set_site_transient_update_plugins', [$this, 'inject_update'], 51);
         add_filter('plugins_api', [$this, 'plugin_information'], 10, 3);
@@ -58,31 +46,15 @@ class Updater
         add_action('admin_init', [$this, 'handle_force_check']);
     }
 
-    /**
-     * Inject our update entry into WordPress's update_plugins transient.
-     *
-     * @param mixed $transient
-     * @return object
-     */
     public function inject_update($transient)
     {
         if (!is_object($transient)) {
             $transient = new \stdClass();
         }
 
-        if ('' === $this->version) {
+        $info = $this->version ? $this->get_remote_version() : false;
+        if (!$info) {
             return $transient;
-        }
-
-        $info = $this->get_remote_version();
-        if (!$info || empty($info->new_version)) {
-            return $transient;
-        }
-
-        foreach (['response', 'no_update', 'checked'] as $bucket) {
-            if (!isset($transient->$bucket) || !is_array($transient->$bucket)) {
-                $transient->$bucket = [];
-            }
         }
 
         if (version_compare($this->version, $info->new_version, '<')) {
@@ -97,29 +69,13 @@ class Updater
         return $transient;
     }
 
-    /**
-     * Serve the "View version details" modal.
-     *
-     * @param false|object|array $result
-     * @param string             $action
-     * @param object|null        $args
-     * @return false|object|array
-     */
-    public function plugin_information($result, $action = '', $args = null)
+    public function plugin_information($result, $action, $args)
     {
-        if ('plugin_information' !== $action) {
-            return $result;
-        }
-        if (!is_object($args) || empty($args->slug) || $args->slug !== $this->slug) {
+        if ('plugin_information' !== $action || empty($args->slug) || $args->slug !== $this->slug) {
             return $result;
         }
 
-        $info = $this->get_remote_version();
-        if (!$info) {
-            return $result;
-        }
-
-        return $info;
+        return $this->get_remote_version() ?: $result;
     }
 
     /**
@@ -127,10 +83,7 @@ class Updater
      */
     public function handle_force_check()
     {
-        if (!isset($_GET['fluent-toolkit-check-update'])) {
-            return;
-        }
-        if (!current_user_can('update_plugins')) {
+        if (!isset($_GET['fluent-toolkit-check-update']) || !current_user_can('update_plugins')) {
             return;
         }
         check_admin_referer('fluent-toolkit-check-update');
@@ -148,7 +101,17 @@ class Updater
     }
 
     /**
-     * Fetch (or return cached) version info from the remote.
+     * Transient key holding the cached remote version payload. Public so
+     * other parts of the plugin can read the cache without instantiating
+     * the updater (e.g. the unified-UI update nag).
+     */
+    public static function cache_key($plugin_file)
+    {
+        return 'fluent_toolkit_updater_' . md5(plugin_basename($plugin_file));
+    }
+
+    /**
+     * Version info from the remote API, cached in a site transient.
      *
      * @return object|false
      */
@@ -159,16 +122,14 @@ class Updater
             return empty($cached->error) ? $cached : false;
         }
 
-        $response = $this->remote_request();
-        if (!$response) {
-            $error = new \stdClass();
-            $error->error = true;
-            set_site_transient($this->cache_key, $error, self::ERROR_CACHE_TTL);
-            return false;
-        }
+        $info = $this->remote_request();
+        set_site_transient(
+            $this->cache_key,
+            $info ?: (object) ['error' => true],
+            $info ? self::CACHE_TTL : self::ERROR_CACHE_TTL
+        );
 
-        set_site_transient($this->cache_key, $response, self::CACHE_TTL);
-        return $response;
+        return $info;
     }
 
     /**
@@ -180,17 +141,15 @@ class Updater
             return false;
         }
 
-        $site_url = is_multisite() ? network_site_url() : home_url();
-
         $response = wp_remote_post($this->api_url, [
-            'timeout'   => 15,
-            'body'      => [
+            'timeout' => 15,
+            'body'    => [
                 'edd_action' => 'get_version',
-                'license'    => isset($this->api_data['license']) ? $this->api_data['license'] : '',
-                'item_id'    => isset($this->api_data['item_id']) ? $this->api_data['item_id'] : '',
+                'license'    => $this->api_data['license'],
+                'item_id'    => $this->api_data['item_id'],
                 'slug'       => $this->slug,
-                'author'     => isset($this->api_data['author']) ? $this->api_data['author'] : '',
-                'url'        => $site_url,
+                'author'     => $this->api_data['author'],
+                'url'        => is_multisite() ? network_site_url() : home_url(),
             ],
         ]);
 

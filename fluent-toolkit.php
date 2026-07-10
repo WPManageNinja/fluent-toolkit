@@ -121,8 +121,23 @@ class FluentToolkitBootstrap
             }
         }
 
+        // getVersions(false) above just refreshed __fluent_toolkit_versions,
+        // so this reflects the live toolkit version — unlike the boot-time
+        // require_update flag in fluentToolkitVars, which is one load behind.
+        $requireUpdate = false;
+        $sourceVersion = '';
+        $cachedSettings = get_option('__fluent_toolkit_versions', []);
+        if (!empty($cachedSettings['toolkit']['stable_version'])) {
+            $sourceVersion = $cachedSettings['toolkit']['stable_version'];
+            $requireUpdate = version_compare(FLUENT_TOOLKIT_VERSION, $sourceVersion, '<');
+        }
+
         wp_send_json([
             'beta_versions' => $betaVersions,
+            'toolkit'       => [
+                'require_update' => $requireUpdate,
+                'source_version' => $sourceVersion,
+            ],
         ], 200);
     }
 

@@ -806,6 +806,89 @@
     }
 }
 
+// Toolkit self-update nag — a tiny amber pill pinned in the sidebar footer.
+// Rendered only when a newer toolkit version is already known locally;
+// clicking opens the FluentHub dashboard. Full width so it wraps onto its
+// own row above the footer icons.
+.fui-update-nag {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 5px 9px;
+    border-radius: 6px;
+    font-size: 11.5px;
+    font-weight: 500;
+    line-height: 1.3;
+    text-decoration: none;
+    color: #966412;
+    background: rgba(245, 158, 11, 0.10);
+    border: 1px solid rgba(245, 158, 11, 0.28);
+    transition: background-color .12s ease, border-color .12s ease;
+
+    &:hover,
+    &:focus-visible {
+        color: #7d520c;
+        background: rgba(245, 158, 11, 0.16);
+        border-color: rgba(245, 158, 11, 0.4);
+        outline: none;
+
+        .fui-update-nag-arrow {
+            transform: translateX(2px);
+            opacity: 1;
+        }
+    }
+}
+
+.fui-update-nag-dot {
+    flex: 0 0 auto;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #f59e0b;
+    animation: fui-update-nag-pulse 2.4s ease-in-out infinite;
+
+    @media (prefers-reduced-motion: reduce) {
+        animation: none;
+    }
+}
+
+.fui-update-nag-text {
+    flex: 1 1 auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fui-update-nag-arrow {
+    flex: 0 0 auto;
+    width: 12px;
+    height: 12px;
+    opacity: .65;
+    transition: transform .15s ease, opacity .12s ease;
+}
+
+@keyframes fui-update-nag-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.45); }
+    50%      { box-shadow: 0 0 0 3px rgba(245, 158, 11, 0); }
+}
+
+.fluent_theme_dark,
+html.dark body {
+    .fui-update-nag {
+        color: #fbbf24;
+        background: rgba(245, 158, 11, 0.12);
+        border-color: rgba(245, 158, 11, 0.30);
+
+        &:hover,
+        &:focus-visible {
+            color: #fcd34d;
+            background: rgba(245, 158, 11, 0.18);
+        }
+    }
+}
+
 // WP menu trigger — pairs the WordPress mark with a chevron affordance so
 // the icon reads as "opens a drawer" rather than just a logo. Chevron
 // rotates 180° while the drawer is open.

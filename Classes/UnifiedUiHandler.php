@@ -356,6 +356,17 @@ class UnifiedUiHandler
 
         $rootClass .= ' fui_app_'.$currentAppSlug;
 
+        // Toolkit self-update nag. Only uses version data already on this
+        // site (updater transient / cached kit API option) — never triggers
+        // a remote request from foreign plugin pages.
+        $toolkitUpdateVersion = '';
+        if (current_user_can('manage_options') && current_user_can('update_plugins')) {
+            $latestKnown = ToolkitHelper::getKnownToolkitVersion();
+            if ($latestKnown && version_compare(FLUENT_TOOLKIT_VERSION, $latestKnown, '<')) {
+                $toolkitUpdateVersion = $latestKnown;
+            }
+        }
+
         ?>
         <script>
             (function () {
@@ -582,6 +593,17 @@ class UnifiedUiHandler
                 <?php endif; ?>
 
                 <div class="fui-sidebar-footer">
+                    <?php if ($toolkitUpdateVersion): ?>
+                        <a class="fui-update-nag"
+                           href="<?php echo esc_url(admin_url('admin.php?page=fluent-toolkit')); ?>"
+                           title="<?php echo esc_attr(sprintf(__('FluentHub %1$s is available (you have %2$s)', 'fluent-toolkit'), $toolkitUpdateVersion, FLUENT_TOOLKIT_VERSION)); ?>">
+                            <span class="fui-update-nag-dot" aria-hidden="true"></span>
+                            <span class="fui-update-nag-text"><?php esc_html_e('Update FluentHub', 'fluent-toolkit'); ?></span>
+                            <svg class="fui-update-nag-arrow" aria-hidden="true" viewBox="0 0 16 16" fill="none"
+                                 stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                 stroke-linejoin="round"><path d="M3 8h10"/><path d="m9 4 4 4-4 4"/></svg>
+                        </a>
+                    <?php endif; ?>
                     <div class="fui-sidebar-footer--left">
                         <a href="<?php echo esc_url(admin_url()); ?>" class="fui-wordpress-menu-link"
                            aria-label="<?php esc_attr_e('Open WordPress menu', 'fluent-toolkit'); ?>"

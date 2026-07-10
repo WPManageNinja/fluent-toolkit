@@ -2,7 +2,7 @@
     <TopBar :active-view="activeView" @navigate="$emit('navigate', $event)">
         <template #actions>
             <el-button
-                v-if="appVars.require_update"
+                v-if="requireUpdate"
                 :loading="installing"
                 :disabled="installing"
                 @click="updateToolkit()"
@@ -246,6 +246,7 @@ export default {
     data() {
         return {
             betaPlugins: [],
+            requireUpdate: !!window.fluentToolkitVars.require_update,
             installing: false,
             loading: false,
             unifiedUiSaving: false,
@@ -309,6 +310,9 @@ export default {
             this.$get('fluent_beta_get_beta_versions', refresh ? { refresh: 1 } : {})
                 .then(response => {
                     this.betaPlugins = response.beta_versions;
+                    if (response.toolkit) {
+                        this.requireUpdate = !!response.toolkit.require_update;
+                    }
                 })
                 .catch(error => {
                     this.$handleError(error);

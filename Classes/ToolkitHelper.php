@@ -98,6 +98,33 @@ class ToolkitHelper
         delete_site_transient(self::FREE_VERSIONS_CACHE_KEY);
     }
 
+    /**
+     * Newest toolkit version already known to this site — from the updater's
+     * cached transient and the cached kit API option, whichever is newer.
+     * Never makes a remote request. Returns '' when neither source has data.
+     */
+    public static function getKnownToolkitVersion()
+    {
+        $known = [];
+
+        $cached = get_site_transient(Updater::cache_key(FLUENT_TOOLKIT_PLUGIN_FILE));
+        if (is_object($cached) && empty($cached->error) && !empty($cached->new_version)) {
+            $known[] = $cached->new_version;
+        }
+
+        $option = get_option('__fluent_toolkit_versions', []);
+        if (!empty($option['toolkit']['stable_version'])) {
+            $known[] = $option['toolkit']['stable_version'];
+        }
+
+        if (!$known) {
+            return '';
+        }
+
+        usort($known, 'version_compare');
+        return end($known);
+    }
+
     public static function getVersions($cached = true)
     {
         if ($cached) {
