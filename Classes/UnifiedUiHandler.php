@@ -173,7 +173,15 @@ class UnifiedUiHandler
                 'group'         => 'others',
                 'dashboard_url' => admin_url('admin.php?page=fluent-community')
             ],
-            'fluent-toolkit'  => [
+            'fluent-toolkit' => [
+                'disabled'      => !current_user_can('manage_options'),
+                'title'         => 'Addons & AI Settings',
+                'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluenthub_icon.svg',
+                'has_dark_mode' => false,
+                'group'         => 'others',
+                'dashboard_url' => admin_url('admin.php?page=fluent-toolkit')
+            ],
+            'fluent-toolkit-settings'  => [
                 'disabled'      => true,
                 'title'         => 'FluentHub',
                 'has_dark_mode' => true,
@@ -190,6 +198,7 @@ class UnifiedUiHandler
 
             add_filter('fluent_toolkit/admin_apps', function ($apps) {
                 $ourApps = $this->apps;
+                unset($ourApps['fluent-toolkit']);
                 return array_filter($ourApps, function ($app) {
                     return empty($app['disabled']);
                 });
@@ -221,6 +230,7 @@ class UnifiedUiHandler
                     $apps = $this->apps;
 
                     unset($apps['fluent-mail']);
+                    unset($apps['fluent-toolkit']);
 
                     foreach ($apps as $key => $app) {
                         if($key === 'fluent-toolkit' && !$isOurApp) {

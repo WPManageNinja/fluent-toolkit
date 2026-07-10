@@ -1,35 +1,4 @@
 .ft-app {
-  .ft-view-tabs {
-    display: inline-flex;
-    gap: 3px;
-    padding: 3px;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    border-radius: 10px;
-  }
-
-  .ft-view-tab {
-    border: 0;
-    background: transparent;
-    border-radius: 7px;
-    color: var(--text-muted);
-    cursor: pointer;
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 500;
-    line-height: 1;
-    padding: 8px 12px;
-
-    &:hover {
-      color: var(--text);
-    }
-
-    &[aria-selected="true"] {
-      background: var(--text);
-      color: #fff;
-    }
-  }
-
   .ft-mcp-hero {
     margin-bottom: 22px;
   }
@@ -268,22 +237,11 @@
 
 @media (max-width: 782px) {
   .ft-app {
-    .ft-topbar,
     .ft-hero-inner,
     .ft-mcp-empty,
     .ft-panel-head {
       align-items: stretch;
       flex-direction: column;
-    }
-
-    .ft-topbar-actions,
-    .ft-view-tabs {
-      width: 100%;
-    }
-
-    .ft-view-tab {
-      justify-content: center;
-      flex: 1;
     }
 
     .ft-mcp-grid,
