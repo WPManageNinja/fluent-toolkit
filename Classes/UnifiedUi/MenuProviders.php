@@ -14,6 +14,71 @@ defined('ABSPATH') || exit;
  */
 class MenuProviders
 {
+    public static function getAffiliateMenu()
+    {
+        if (!defined('FLUENT_AFFILIATE_VERSION') || !class_exists('\FluentAffiliate\App\Services\PermissionManager')) {
+            return [];
+        }
+
+        $Permission = '\FluentAffiliate\App\Services\PermissionManager';
+
+        if (!$Permission::isLoggedIn()) {
+            return [];
+        }
+
+        $baseUrl = admin_url('admin.php?page=fluent-affiliate#');
+
+        $menuItems = [
+            'dashboard' => [
+                'title'    => __('Dashboard', 'fluent-toolkit'),
+                'url'      => $baseUrl . '/',
+                'icon_svg' => Icons::get('dashboard')
+            ]
+        ];
+
+        if ($Permission::hasAffiliateAccess(true)) {
+            $menuItems['affiliates'] = [
+                'title'    => __('Affiliates', 'fluent-toolkit'),
+                'url'      => $baseUrl . '/affiliates',
+                'icon_svg' => Icons::get('customers')
+            ];
+        }
+
+        if ($Permission::hasReferralAccess(true)) {
+            $menuItems['referrals'] = [
+                'title'    => __('Referrals', 'fluent-toolkit'),
+                'url'      => $baseUrl . '/referrals',
+                'icon_svg' => Icons::get('reports')
+            ];
+        }
+
+        if ($Permission::hasPayoutAccess(true)) {
+            $menuItems['payouts'] = [
+                'title'    => __('Payouts', 'fluent-toolkit'),
+                'url'      => $baseUrl . '/payouts',
+                'icon_svg' => Icons::get('money')
+            ];
+        }
+
+        if ($Permission::hasVisitAccess()) {
+            $menuItems['visits'] = [
+                'title'    => __('Visits', 'fluent-toolkit'),
+                'url'      => $baseUrl . '/visits',
+                'icon_svg' => Icons::get('activities')
+            ];
+        }
+
+        if ($Permission::userCan('manage_all_data')) {
+            $menuItems['settings'] = [
+                'title'    => __('Settings', 'fluent-toolkit'),
+                'url'      => $baseUrl . '/settings/referral-settings',
+                'icon_svg' => Icons::get('settings')
+            ];
+        }
+
+        return $menuItems;
+    }
+
     public static function getAuthMenu()
     {
         if (!defined('FLUENT_AUTH_VERSION') || !class_exists('\FluentAuth\App\Helpers\Helper')) {

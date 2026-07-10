@@ -44,8 +44,9 @@ class UnifiedUiHandler
         $socialMenu = MenuProviders::getSocialNinjaMenu();
         $communityMenu = MenuProviders::getCommunityMenu();
         $boardsMenu = MenuProviders::getBoardsMenu();
+        $affiliateMenu = MenuProviders::getAffiliateMenu();
 
-        $hasApps = $supportMenu || $formsMenu || $cartMenu || $crmMenu || $bookingMenu || $smtpMenu || $authMenu || $tablesMenu || $paymatticMenu || $playerMenu || $socialMenu || $communityMenu || $boardsMenu;
+        $hasApps = $supportMenu || $formsMenu || $cartMenu || $crmMenu || $bookingMenu || $smtpMenu || $authMenu || $tablesMenu || $paymatticMenu || $playerMenu || $socialMenu || $communityMenu || $boardsMenu || $affiliateMenu;
 
         $apps = [
             'fluentcrm-admin' => [
@@ -117,6 +118,14 @@ class UnifiedUiHandler
                 'items'         => $tablesMenu,
                 'has_dark_mode' => false,
                 'dashboard_url' => admin_url('admin.php?page=ninja_tables#/')
+            ],
+            'fluent-affiliate' => [
+                'disabled'      => !$affiliateMenu,
+                'title'         => 'Affiliates',
+                'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentaffiliate_icon.svg',
+                'items'         => $affiliateMenu,
+                'has_dark_mode' => false,
+                'dashboard_url' => admin_url('admin.php?page=fluent-affiliate#/')
             ],
             'fluent-auth'     => [
                 'disabled'      => !$authMenu,
