@@ -196,7 +196,6 @@ class UnifiedUiHandler
             });
         }
 
-
         add_action('admin_init', function () use ($hasApps, $mergeAdminMenus) {
             global $plugin_page;
 

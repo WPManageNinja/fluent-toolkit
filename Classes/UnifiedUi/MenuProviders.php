@@ -85,7 +85,7 @@ class MenuProviders
             return [];
         }
 
-        if (!\FluentAuth\App\Helpers\Helper::getAppPermission()) {
+        if (!current_user_can(\FluentAuth\App\Helpers\Helper::getAppPermission())) {
             return [];
         }
 
@@ -248,8 +248,14 @@ class MenuProviders
             return [];
         }
 
-        $menuItems = \FluentCart\App\Helpers\AdminHelper::getMenuItems(true);
+        if(!current_user_can('manage_options')) {
+            // this is normal user.
+            if(!defined('FLUENTCART_PRO_PLUGIN_VERSION') || !current_user_can('fluent_cart_admin')) {
+                return [];
+            }
+        }
 
+        $menuItems = \FluentCart\App\Helpers\AdminHelper::getMenuItems(true);
 
         $formattedItems = [];
 
