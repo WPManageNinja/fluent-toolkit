@@ -4,7 +4,7 @@ Tags: fluent plugins, toolkit
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.0.6
+Stable tag: 2.1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,7 +25,12 @@ Upload the zip from your WordPress dashboard, activate Fluent Toolkit, then open
 
 == Changelog ==
 
-
+= 2.1.0 =
+* New: Addon updates now appear on the Plugins screen right after release — no more waiting out wp.org's update-check delay
+* New: FluentPlayer added to the plugin catalog
+* Improved: Local and remote plugin catalogs are merged by slug — no duplicate entries, remote data takes priority
+* Improved: Fresh installs of wp.org plugins always fetch the latest stable release
+* Improved: Refresh button added to the dashboard top bar
 
 = 2.0.5 =
 * Standalone MCP Adapter collision fix

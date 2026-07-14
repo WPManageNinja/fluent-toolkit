@@ -88,6 +88,12 @@ class ToolkitHelper
             'sub_title' => 'Self-hosted affiliate program management — track clicks, referrals, commissions, and payouts.',
             'logo'      => 'fluentaffiliate_icon.svg',
         ],
+        [
+            'slug'      => 'fluent-player',
+            'name'      => 'FluentPlayer',
+            'sub_title' => 'Video player with lead capture forms, chapters, and playback interactions.',
+            'logo'      => 'fluentplayer_icon.svg',
+        ],
     ];
 
     const FREE_VERSIONS_CACHE_KEY = '__fluent_toolkit_free_versions_v4';
@@ -162,6 +168,66 @@ class ToolkitHelper
         }
 
         return [];
+    }
+
+    /**
+     * Full dashboard plugin catalog. The bundled FREE_PLUGINS list (with
+     * wp.org version data) is the base; remote kit-API entries override
+     * matching slugs and are listed first — so a plugin can move between
+     * the two catalogs without ever showing up twice.
+     *
+     * @param bool $cachedRemote false forces a fresh kit-API fetch.
+     */
+    public static function getCatalog($cachedRemote = true)
+    {
+        return self::mergeCatalogs(self::getFreePlugins(), self::getVersions($cachedRemote));
+    }
+
+    /**
+     * Merge two plugin lists by slug. Override entries win field-by-field
+     * (empty values don't clobber base data, so bundled logo/sub_title
+     * survive a sparse remote entry) and lead the list in their own order;
+     * base-only entries follow in base order.
+     */
+    public static function mergeCatalogs(array $base, array $overrides)
+    {
+        $local = [];
+        foreach ($base as $plugin) {
+            if (!empty($plugin['slug'])) {
+                $local[$plugin['slug']] = $plugin;
+            }
+        }
+
+        $catalog = [];
+        foreach ($overrides as $plugin) {
+            if (empty($plugin['slug'])) {
+                continue;
+            }
+
+            $slug = $plugin['slug'];
+
+            $existing = null;
+            if (isset($catalog[$slug])) {
+                $existing = $catalog[$slug];
+            } elseif (isset($local[$slug])) {
+                $existing = $local[$slug];
+                unset($local[$slug]);
+            }
+
+            if ($existing === null) {
+                $catalog[$slug] = $plugin;
+                continue;
+            }
+
+            foreach ($plugin as $field => $value) {
+                if ($value !== '' && $value !== null && $value !== []) {
+                    $existing[$field] = $value;
+                }
+            }
+            $catalog[$slug] = $existing;
+        }
+
+        return array_values(array_merge($catalog, $local));
     }
 
     /**
@@ -258,8 +324,14 @@ class ToolkitHelper
             if (isset($overWrites[$slug])) {
                 $overwriteVersion = $overWrites[$slug]['version'];
                 if (version_compare($overwriteVersion, $info['new_version'], '>')) {
-                    $info['new_version'] = $overWrites[$slug]['version'];
-                    $info['package'] = $overWrites[$slug]['url'];
+                    // An overwrite means wp.org's update-check metadata lags
+                    // the release, so without an explicit URL fall back to the
+                    // versionless zip — it serves the current stable, unlike
+                    // the versioned package built from the stale metadata.
+                    $info['new_version'] = $overwriteVersion;
+                    $info['package'] = !empty($overWrites[$slug]['url'])
+                        ? $overWrites[$slug]['url']
+                        : 'https://downloads.wordpress.org/plugin/' . $slug . '.zip';
                 }
             }
 

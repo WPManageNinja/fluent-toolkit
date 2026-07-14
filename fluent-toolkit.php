@@ -2,7 +2,7 @@
 /**
  * Plugin Name: FluentHub
  * Description: Connects all your Fluent plugins under one roof — unified dashboard, AI/MCP support, early-access updates, and seamless cross-plugin data.
- * Version: 2.0.7
+ * Version: 2.1.0
  * Author: WPManageNinja
  * Text Domain: fluent-toolkit
  * Requires PHP: 7.4
@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('FLUENT_TOOLKIT_VERSION', '2.0.7');
+define('FLUENT_TOOLKIT_VERSION', '2.1.0');
 define('FLUENT_TOOLKIT_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('FLUENT_TOOLKIT_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('FLUENT_TOOLKIT_PLUGIN_FILE', __FILE__);
@@ -53,6 +53,10 @@ class FluentToolkitBootstrap
                 'author'  => 'wpmanageninja'
             ));
 
+            // Push kit-API version overwrites for installed Fluent addons into
+            // the WP update list (bypasses wp.org's post-release cool-down).
+            (new \FluentToolkit\Classes\AddonUpdatePusher())->register();
+
             add_filter('plugin_row_meta', function ($links, $pluginFile) {
                 if (plugin_basename(FLUENT_TOOLKIT_PLUGIN_FILE) !== $pluginFile) {
                     return $links;
@@ -85,11 +89,9 @@ class FluentToolkitBootstrap
         if (!empty($_REQUEST['refresh'])) {
             \FluentToolkit\Classes\ToolkitHelper::clearFreePluginsCache();
         }
-        $betaVersions = \FluentToolkit\Classes\ToolkitHelper::getVersions(false);
-        $freePlugins  = \FluentToolkit\Classes\ToolkitHelper::getFreePlugins();
-        if ($freePlugins) {
-            $betaVersions = array_merge($betaVersions, $freePlugins);
-        }
+        // Local FREE_PLUGINS catalog is the base; remote kit-API entries
+        // override matching slugs (no duplicates) and lead the list.
+        $betaVersions = \FluentToolkit\Classes\ToolkitHelper::getCatalog(false);
         $allPlugins = get_plugins();
 
         if (!function_exists('is_plugin_active')) {
@@ -121,7 +123,7 @@ class FluentToolkitBootstrap
             }
         }
 
-        // getVersions(false) above just refreshed __fluent_toolkit_versions,
+        // getCatalog(false) above just refreshed __fluent_toolkit_versions,
         // so this reflects the live toolkit version — unlike the boot-time
         // require_update flag in fluentToolkitVars, which is one load behind.
         $requireUpdate = false;
@@ -183,10 +185,7 @@ class FluentToolkitBootstrap
                 ], 422);
             }
         } else {
-            $candidates = array_merge(
-                \FluentToolkit\Classes\ToolkitHelper::getVersions(true),
-                \FluentToolkit\Classes\ToolkitHelper::getFreePlugins()
-            );
+            $candidates = \FluentToolkit\Classes\ToolkitHelper::getCatalog(true);
 
             $targetBeta = array_filter($candidates, function ($beta) use ($pluginSlug) {
                 return $beta['slug'] === $pluginSlug;
@@ -224,6 +223,11 @@ class FluentToolkitBootstrap
 
         if ($isBeta) {
             $downloadUrl = $targetBeta['beta_url'];
+        } elseif (!$isInstalled && strpos($downloadUrl, 'https://downloads.wordpress.org/') === 0) {
+            // Fresh install of a repo plugin: the versionless zip always
+            // serves the current stable, even when the cached catalog version
+            // (or wp.org's update-check metadata) lags behind a release.
+            $downloadUrl = 'https://downloads.wordpress.org/plugin/' . $pluginSlug . '.zip';
         }
 
         if ($licenseKey) {
@@ -413,6 +417,7 @@ class FluentToolkitBootstrap
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/UnifiedUi/MenuProviders.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/UnifiedUiHandler.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/Updater.php';
+        require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/AddonUpdatePusher.php';
     }
 }
 

@@ -328,6 +328,37 @@ body.fluent_theme_dark {
     position: relative;
   }
 
+  // ── Self-update banner (above the workspace card) ─────
+  .ft-update-banner {
+    align-items: center;
+    background: var(--warn-soft);
+    border: 1px solid oklch(88% 0.08 70);
+    border-radius: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 18px;
+    padding: 14px 18px;
+  }
+
+  .ft-update-banner-text {
+    flex: 1;
+    min-width: 200px;
+
+    strong {
+      color: var(--text);
+      display: block;
+      font-size: 14px;
+      font-weight: 650;
+      margin-bottom: 2px;
+    }
+
+    span {
+      color: var(--text-muted);
+      font-size: 12.5px;
+    }
+  }
+
   .ft-workspace-card {
     padding: 26px 28px 8px;
   }
@@ -974,6 +1005,12 @@ body.fluent_theme_dark {
   .ft-setting-icon--indigo { background: rgba(91, 80, 240, .2); }
   .ft-setting-icon--violet { background: rgba(155, 81, 224, .2); }
   .ft-setting-icon--amber  { background: rgba(245, 158, 11, .2); }
+
+  .ft-update-banner {
+    border-color: oklch(32% 0.07 70);
+
+    .ft-setting-icon--amber { color: oklch(75% 0.14 70); }
+  }
 
   .ft-status-ok     { color: oklch(62% 0.14 155); }
   .ft-status-update { color: oklch(65% 0.14 70); }

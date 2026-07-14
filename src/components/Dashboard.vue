@@ -1,18 +1,29 @@
 <template>
     <TopBar :active-view="activeView" @navigate="$emit('navigate', $event)">
         <template #actions>
-            <el-button
-                v-if="requireUpdate"
-                :loading="installing"
-                :disabled="installing"
-                @click="updateToolkit()"
-                type="danger"
-                size="small"
-            >Update FluentHub</el-button>
+            <button class="ft-iconbtn" @click="getBetaPlugins(true)" title="Refresh plugin list" aria-label="Refresh plugin list">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
+            </button>
         </template>
     </TopBar>
 
     <div class="ft-app">
+
+        <section class="ft-update-banner" v-if="requireUpdate">
+            <span class="ft-setting-icon ft-setting-icon--amber" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12a9 9 0 1 1-2.64-6.36"/>
+                    <path d="M21 3v6h-6"/>
+                </svg>
+            </span>
+            <div class="ft-update-banner-text">
+                <strong>FluentHub {{ sourceVersion ? 'v' + sourceVersion + ' ' : 'update ' }}is available</strong>
+                <span>You're running v{{ appVars.version }}. Update to get the latest features and fixes.</span>
+            </div>
+            <button class="ft-btn ft-btn-accent" :disabled="installing" @click="updateToolkit()">
+                {{ installing ? 'Updating…' : 'Update Now' }}
+            </button>
+        </section>
 
         <section class="ft-card ft-workspace-card" v-loading="unifiedUiSaving" element-loading-text="Saving setting...">
             <header class="ft-card-head">
@@ -247,6 +258,7 @@ export default {
         return {
             betaPlugins: [],
             requireUpdate: !!window.fluentToolkitVars.require_update,
+            sourceVersion: window.fluentToolkitVars.source_version || '',
             installing: false,
             loading: false,
             unifiedUiSaving: false,
@@ -312,6 +324,7 @@ export default {
                     this.betaPlugins = response.beta_versions;
                     if (response.toolkit) {
                         this.requireUpdate = !!response.toolkit.require_update;
+                        this.sourceVersion = response.toolkit.source_version || this.sourceVersion;
                     }
                 })
                 .catch(error => {

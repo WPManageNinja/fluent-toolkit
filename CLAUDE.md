@@ -10,6 +10,7 @@ WordPress plugin that unifies Fluent plugin admin UIs into one workspace, manage
 ## Code map
 
 - `fluent-toolkit.php` — bootstrap, AJAX handlers (`fluent_toolkit_save_dashboard_settings`, `fluent-beta-install`, `fluent_toolkit_activate_plugin`, MCP toggles), license/install logic.
+- `Classes/AddonUpdatePusher.php` — injects the kit API's `overwrites` map (slug → version/url in `__fluent_toolkit_versions`) into the `update_plugins` transient at read time, so addon updates show on the Plugins screen before wp.org's ~24h update-check cool-down. Also refreshes that option piggybacked on WP's own update checks (throttled to 6h).
 - `Classes/AdminMenu.php` — registers the `FluentHub` top-level menu + submenu links, enqueues the Vue dashboard.
 - `Classes/UnifiedUiHandler.php` — wraps Fluent plugin admin pages with the unified sidebar template. Reads `_fluent_kit_settings` to decide whether to hide native admin menus / app headers.
 - `Classes/UnifiedUi/MenuProviders.php` — one static class with `getCrmMenu()`, `getCartMenu()`, etc. Each returns `[item_key => {title, url, icon_svg, sub_menu?}]` or `[]` when the plugin isn't active.
