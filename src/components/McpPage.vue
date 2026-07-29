@@ -87,7 +87,7 @@
                 <div class="ft-panel-head">
                     <div>
                         <h2>Connect client</h2>
-                        <p>Use a WordPress Application Password for the selected user. Toolkit fills the endpoint and header format.</p>
+                        <p>Each Fluent plugin runs its own MCP server, so your client needs one entry per endpoint. The same Application Password works for all of them.</p>
                     </div>
                     <a class="ft-btn ft-btn-ghost" :href="activeProduct.app_passwords_url" target="_blank" rel="noopener">Create Application Password</a>
                 </div>
@@ -115,12 +115,34 @@
                     </button>
                 </div>
 
+                <div class="ft-channels ft-client-tabs" role="tablist" v-if="canCombine">
+                    <button
+                        class="ft-channel"
+                        :aria-selected="snippetScope === 'single'"
+                        @click="snippetScope = 'single'"
+                    >
+                        {{ activeProduct.name }} only
+                    </button>
+                    <button
+                        class="ft-channel"
+                        :aria-selected="snippetScope === 'all'"
+                        @click="snippetScope = 'all'"
+                    >
+                        All enabled
+                        <span class="ft-channel-count">{{ enabledProducts.length }}</span>
+                    </button>
+                </div>
+
                 <div class="ft-snippet-box">
                     <div class="ft-snippet-head">
                         <div>{{ activeClientInfo.note }}</div>
                         <button class="ft-btn ft-btn-primary" @click="copySnippet()">Copy</button>
                     </div>
                     <pre class="ft-snippet"><code>{{ activeSnippet }}</code></pre>
+                </div>
+
+                <div class="ft-mcp-note" v-if="snippetScope === 'all' && canCombine">
+                    Adds every enabled endpoint in one paste: {{ enabledProducts.map(product => product.name).join(', ') }}. Products that are switched off are left out — enable them and copy again.
                 </div>
             </section>
         </div>
@@ -153,6 +175,7 @@ export default {
             },
             activeProductSlug: 'fluent-crm',
             activeClient: 'codex',
+            snippetScope: 'single',
             loading: false,
             saving: false,
             username: window.fluentToolkitVars.current_user_login || '',
@@ -194,8 +217,20 @@ export default {
         activeClientInfo() {
             return this.clients.find(client => client.key === this.activeClient) || this.clients[0];
         },
-        serverName() {
-            return this.activeProduct ? this.activeProduct.slug : 'fluent-mcp';
+        // Only enabled products get an entry in the combined snippet — a disabled
+        // server's route isn't registered, so pasting it would just 404.
+        enabledProducts() {
+            return this.products.filter(product => product.mcp_enabled && product.endpoint_url);
+        },
+        canCombine() {
+            return this.activeProduct && this.enabledProducts.length > 1;
+        },
+        snippetEntries() {
+            if (this.snippetScope === 'all' && this.canCombine) {
+                return this.enabledProducts;
+            }
+
+            return this.activeProduct ? [this.activeProduct] : [];
         },
         canToggle() {
             return this.activeProduct && this.activeProduct.toggleable;
@@ -211,90 +246,99 @@ export default {
             return `<base64(${user}:${password})>`;
         },
         activeSnippet() {
-            if (!this.activeProduct) {
+            const entries = this.snippetEntries;
+
+            if (!entries.length) {
                 return '';
             }
 
-            const endpoint = this.activeProduct.endpoint_url;
             const user = this.username || '<your-username>';
             const password = this.appPassword || '<your-application-password>';
 
             if (this.activeClient === 'codex') {
-                return [
-                    'Codex app custom MCP',
-                    `Name: ${this.serverName}`,
+                const blocks = entries.map(product => [
+                    `Name: ${product.slug}`,
                     'Transport: Streamable HTTP',
-                    `URL: ${endpoint}`,
+                    `URL: ${product.endpoint_url}`,
                     'Header key: Authorization',
                     `Header value: Basic ${this.authHeader}`,
-                ].join('\n');
+                ].join('\n'));
+
+                const heading = entries.length > 1
+                    ? `Codex app custom MCP — add ${entries.length} servers`
+                    : 'Codex app custom MCP';
+
+                return [heading, ''].concat(blocks.join('\n\n')).join('\n');
             }
 
             if (this.activeClient === 'copilot') {
                 return JSON.stringify({
-                    servers: {
-                        [this.serverName]: {
-                            type: 'http',
-                            url: endpoint,
-                            headers: {
-                                Authorization: `Basic ${this.authHeader}`,
-                            },
+                    servers: this.keyBySlug(entries, product => ({
+                        type: 'http',
+                        url: product.endpoint_url,
+                        headers: {
+                            Authorization: `Basic ${this.authHeader}`,
                         },
-                    },
+                    })),
                 }, null, 2);
             }
 
             if (this.activeClient === 'claude-desktop') {
                 return JSON.stringify({
-                    mcpServers: {
-                        [this.serverName]: {
-                            command: 'npx',
-                            args: ['-y', '@automattic/mcp-wordpress-remote@latest'],
-                            env: {
-                                WP_API_URL: endpoint,
-                                WP_API_USERNAME: user,
-                                WP_API_PASSWORD: password,
-                                OAUTH_ENABLED: 'false',
-                                NODE_TLS_REJECT_UNAUTHORIZED: '0',
-                            },
+                    mcpServers: this.keyBySlug(entries, product => ({
+                        command: 'npx',
+                        args: ['-y', '@automattic/mcp-wordpress-remote@latest'],
+                        env: {
+                            WP_API_URL: product.endpoint_url,
+                            WP_API_USERNAME: user,
+                            WP_API_PASSWORD: password,
+                            OAUTH_ENABLED: 'false',
+                            NODE_TLS_REJECT_UNAUTHORIZED: '0',
                         },
-                    },
+                    })),
                 }, null, 2);
             }
 
             if (this.activeClient === 'cursor') {
                 return JSON.stringify({
-                    mcpServers: {
-                        [this.serverName]: {
-                            url: endpoint,
-                            type: 'http',
-                            headers: {
-                                Authorization: `Basic ${this.authHeader}`,
-                            },
+                    mcpServers: this.keyBySlug(entries, product => ({
+                        url: product.endpoint_url,
+                        type: 'http',
+                        headers: {
+                            Authorization: `Basic ${this.authHeader}`,
                         },
-                    },
+                    })),
                 }, null, 2);
             }
 
             if (this.activeClient === 'generic') {
-                return [
-                    `URL: ${endpoint}`,
+                return entries.map(product => [
+                    `# ${product.name}`,
+                    `URL: ${product.endpoint_url}`,
                     `Authorization: Basic ${this.authHeader}`,
                     '',
                     `curl -s -u '${user}:${password}' \\`,
-                    `  -X POST ${endpoint} \\`,
+                    `  -X POST ${product.endpoint_url} \\`,
                     "  -H 'Content-Type: application/json' \\",
                     "  -d '{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/list\"}'",
-                ].join('\n');
+                ].join('\n')).join('\n\n');
             }
 
-            return [
-                `URL: ${endpoint}`,
+            return entries.map(product => [
+                `URL: ${product.endpoint_url}`,
                 `Authorization: Basic ${this.authHeader}`,
-            ].join('\n');
+            ].join('\n')).join('\n\n');
         },
     },
     methods: {
+        // Client configs key servers by name; the product slug is already unique
+        // per endpoint, so it doubles as the server key.
+        keyBySlug(products, build) {
+            return products.reduce((servers, product) => {
+                servers[product.slug] = build(product);
+                return servers;
+            }, {});
+        },
         getOverview() {
             this.loading = true;
 
