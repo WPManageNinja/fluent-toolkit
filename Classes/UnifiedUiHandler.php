@@ -45,8 +45,9 @@ class UnifiedUiHandler
         $communityMenu = MenuProviders::getCommunityMenu();
         $boardsMenu = MenuProviders::getBoardsMenu();
         $affiliateMenu = MenuProviders::getAffiliateMenu();
+        $snippetsMenu = MenuProviders::getSnippetsMenu();
 
-        $hasApps = $supportMenu || $formsMenu || $cartMenu || $crmMenu || $bookingMenu || $smtpMenu || $authMenu || $tablesMenu || $paymatticMenu || $playerMenu || $socialMenu || $communityMenu || $boardsMenu || $affiliateMenu;
+        $hasApps = $supportMenu || $formsMenu || $cartMenu || $crmMenu || $bookingMenu || $smtpMenu || $authMenu || $tablesMenu || $paymatticMenu || $playerMenu || $socialMenu || $communityMenu || $boardsMenu || $affiliateMenu || $snippetsMenu;
 
         $apps = [
             'fluentcrm-admin' => [
@@ -154,6 +155,15 @@ class UnifiedUiHandler
                 'group'         => 'others',
                 'parent_slug'   => 'options-general.php',
                 'dashboard_url' => admin_url('options-general.php?page=fluent-mail#/')
+            ],
+            'fluent-snippets' => [
+                'disabled'      => !$snippetsMenu,
+                'title'         => 'Code Snippets',
+                'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentsnippets_icon.svg',
+                'items'         => $snippetsMenu,
+                'has_dark_mode' => false,
+                'group'         => 'others',
+                'dashboard_url' => admin_url('admin.php?page=fluent-snippets#/')
             ],
             'wpsocialninja.php' => [
                 'disabled'      => !$socialMenu,

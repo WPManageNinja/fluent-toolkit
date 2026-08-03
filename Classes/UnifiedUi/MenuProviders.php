@@ -692,6 +692,45 @@ class MenuProviders
         ];
     }
 
+    public static function getSnippetsMenu()
+    {
+        if (!defined('FLUENT_SNIPPETS_PLUGIN_VERSION')) {
+            return [];
+        }
+
+        // FluentSnippets gates its own menu on install_plugins, not
+        // manage_options — mirror it so the sidebar can't link to a page the
+        // user would get denied on.
+        if (!current_user_can('install_plugins')) {
+            return [];
+        }
+
+        $baseUrl = admin_url('admin.php?page=fluent-snippets#/');
+
+        return [
+            'snippets'   => [
+                'title'    => __('All Snippets', 'fluent-toolkit'),
+                'url'      => $baseUrl,
+                'icon_svg' => Icons::get('entries')
+            ],
+            'create-new' => [
+                'title'    => __('New Snippet', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'create-new',
+                'icon_svg' => Icons::get('add-ons')
+            ],
+            'settings'   => [
+                'title'    => __('Settings', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'settings',
+                'icon_svg' => Icons::get('settings')
+            ],
+            'about'      => [
+                'title'    => __('About', 'fluent-toolkit'),
+                'url'      => $baseUrl . 'about',
+                'icon_svg' => Icons::get('more')
+            ]
+        ];
+    }
+
     public static function getSocialNinjaMenu()
     {
         if (!defined('WPSOCIALREVIEWS_VERSION') || !class_exists('\WPSocialReviews\App\Services\PermissionManager')) {
