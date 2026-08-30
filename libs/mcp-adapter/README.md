@@ -8,7 +8,7 @@ The official WordPress package for MCP integration that exposes WordPress abilit
 
 ## Overview
 
-This adapter bridges WordPress's Abilities API with the [MCP specification](https://modelcontextprotocol.io/specification/2025-06-18/), providing a standardized way for AI agents to interact with WordPress functionality. It includes HTTP and STDIO transport support, comprehensive error handling, and an extensible architecture for custom integrations.
+This adapter bridges WordPress's Abilities API with the [MCP specification](https://modelcontextprotocol.io/specification/2025-11-25/), providing a standardized way for AI agents to interact with WordPress functionality. It includes HTTP and STDIO transport support, comprehensive error handling, and an extensible architecture for custom integrations.
 
 ## Features
 
@@ -17,7 +17,7 @@ This adapter bridges WordPress's Abilities API with the [MCP specification](http
 - **Ability-to-MCP Conversion**: Automatically converts WordPress abilities into MCP tools, resources, and prompts
 - **Multi-Server Management**: Create and manage multiple MCP servers with unique configurations
 - **Extensible Transport Layer**:
-    - **HTTP Transport**: Unified transport implementing [MCP 2025-06-18 specification](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports.md) for HTTP-based communication
+    - **HTTP Transport**: Unified transport implementing [MCP 2025-11-25 specification](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports) for HTTP-based communication
     - **STDIO Transport**: Process-based communication via standard input/output for local development and CLI integration
     - **Custom Transport Support**: Implement `McpTransportInterface` to create specialized communication protocols
     - **Multi-Transport Configuration**: Configure servers with multiple transport methods simultaneously
@@ -42,181 +42,51 @@ This adapter bridges WordPress's Abilities API with the [MCP specification](http
 - **Built-in Abilities**: Core WordPress abilities for system introspection and ability management
 - **CLI Integration**: WP-CLI commands supporting STDIO transport as defined in MCP specification
 
-## Understanding Abilities as MCP Components
-
-The MCP Adapter transforms WordPress abilities into MCP components:
-
-- **Tools**: WordPress abilities become executable MCP tools for AI agent interactions
-- **Resources**: WordPress abilities expose data as MCP resources for contextual information
-- **Prompts**: WordPress abilities provide structured MCP prompts for AI guidance
-
-For detailed information about MCP components, see the [Model Context Protocol specification](https://modelcontextprotocol.io/specification/2025-06-18/).
-
-
 ## Architecture
 
-### Component Overview
-
-```
-./includes/
-│   # Core system components
-├── Core/
-│   ├── McpAdapter.php         # Main registry and server management
-│   ├── McpServer.php          # Individual server configuration
-│   ├── McpComponentRegistry.php # Component registration and management
-│   └── McpTransportFactory.php # Transport instantiation factory
-│
-│   # Built-in abilities for MCP functionality
-├── Abilities/
-│   ├── DiscoverAbilitiesAbility.php # Ability discovery
-│   ├── ExecuteAbilityAbility.php    # Ability execution
-│   └── GetAbilityInfoAbility.php    # Ability introspection
-│
-│   # CLI and STDIO transport support
-├── Cli/
-│   ├── McpCommand.php         # WP-CLI commands
-│   └── StdioServerBridge.php  # STDIO transport bridge
-│
-│   # Business logic and MCP components
-├── Domain/
-│   │   # Shared contracts
-│   ├── Contracts/
-│   │   └── McpComponentInterface.php       # Contract for MCP components
-│   │   # Shared utilities
-│   ├── Utils/
-│   │   ├── McpNameSanitizer.php            # MCP name sanitization
-│   │   ├── McpValidator.php                # MCP name/URI/schema validation
-│   │   ├── McpAnnotationMapper.php         # Annotation mapping from abilities
-│   │   ├── SchemaTransformer.php           # Schema format transformation
-│   │   ├── ContentBlockHelper.php          # Content block DTO factory
-│   │   └── AbilityArgumentNormalizer.php   # Argument normalization
-│   │   # MCP Tools implementation
-│   ├── Tools/
-│   │   ├── McpTool.php                   # Base tool class
-│   │   ├── RegisterAbilityAsMcpTool.php  # Ability-to-tool conversion
-│   │   └── McpToolValidator.php          # Tool validation
-│   │   # MCP Resources implementation
-│   ├── Resources/
-│   │   ├── McpResource.php                   # Base resource class
-│   │   ├── RegisterAbilityAsMcpResource.php  # Ability-to-resource conversion
-│   │   └── McpResourceValidator.php          # Resource validation
-│   │   # MCP Prompts implementation
-│   └── Prompts/
-│       ├── Contracts/                         # Prompt interfaces
-│       │   └── McpPromptBuilderInterface.php  # Prompt builder interface
-│       ├── McpPrompt.php                      # Base prompt class
-│       ├── McpPromptBuilder.php               # Prompt builder implementation
-│       ├── McpPromptValidator.php             # Prompt validation
-│       └── RegisterAbilityAsMcpPrompt.php     # Ability-to-prompt conversion
-│
-│   # Request processing handlers
-├── Handlers/
-│   ├── HandlerHelperTrait.php  # Shared handler utilities
-│   ├── Initialize/              # Initialization handlers
-│   ├── Tools/                   # Tool request handlers
-│   ├── Resources/               # Resource request handlers
-│   ├── Prompts/                 # Prompt request handlers
-│   └── System/                  # System request handlers
-│
-│   # Infrastructure concerns
-├── Infrastructure/
-│   │   # Error handling system
-│   ├── ErrorHandling/
-│   │   ├── Contracts/                        # Error handling interfaces
-│   │   │   └── McpErrorHandlerInterface.php  # Error handler interface
-│   │   ├── ErrorLogMcpErrorHandler.php       # Default error handler
-│   │   ├── NullMcpErrorHandler.php           # Null object pattern
-│   │   └── McpErrorFactory.php               # Error response factory
-│   │   # Monitoring and observability
-│   └── Observability/
-│       ├── Contracts/                                # Observability interfaces
-│       │   └── McpObservabilityHandlerInterface.php  # Observability interface
-│       ├── ErrorLogMcpObservabilityHandler.php       # Default handler
-│       ├── NullMcpObservabilityHandler.php           # Null object pattern
-│       ├── McpObservabilityHelperTrait.php           # Helper trait
-│       ├── ConsoleObservabilityHandler.php          # Console output handler
-│       └── FailureReason.php                        # Standardized failure reasons
-│
-│   # Transport layer implementations
-├── Transport/
-│   ├── Contracts/
-│   │   ├── McpTransportInterface.php     # Base transport interface
-│   │   └── McpRestTransportInterface.php # REST transport interface
-│   ├── HttpTransport.php                 # Unified HTTP transport (MCP 2025-06-18)
-│   │   # Transport infrastructure
-│   └── Infrastructure/
-│       ├── HttpRequestContext.php       # HTTP request context
-│       ├── HttpRequestHandler.php       # HTTP request processing
-│       ├── HttpSessionValidator.php     # Session validation
-│       ├── JsonRpcResponseBuilder.php   # JSON-RPC response building
-│       ├── McpTransportContext.php      # Transport context
-│       ├── RequestRouter.php            # Request routing
-│       └── SessionManager.php           # Session management
-│
-│   # Server factories
-├── Servers/
-    └── DefaultServerFactory.php  # Default server creation
-```
-
-### Key Classes
-
-#### `McpAdapter`
-
-The main registry class that manages multiple MCP servers:
-
-- **Singleton Pattern**: Ensures single instance across the application
-- **Server Management**: Create, configure, and retrieve MCP servers
-- **Initialization**: Handles WordPress integration and action hooks
-- **REST API Integration**: Automatically integrates with WordPress REST API
-
-#### `McpServer`
-
-Individual server management with comprehensive configuration:
-
-- **Server Identity**: Unique ID, namespace, route, name, and description
-- **Component Registration**: Tools, resources, and prompts management
-- **Transport Configuration**: Multiple transport method support
-- **Error Handling**: Server-specific error handling and logging
-- **Validation**: Built-in validation for all registered components
+For a full breakdown of the component structure, see the [Architecture Overview](docs/architecture/overview.md).
 
 ## Dependencies
 
-### Required Dependencies
-
 - **PHP**: >= 7.4
-- **WordPress**: >= 6.8 (6.9+ recommended)
-- **[WordPress Abilities API](https://make.wordpress.org/core/2025/11/10/abilities-api-in-wordpress-6-9/)**: Included in WordPress core since 6.9. For WordPress 6.8, install the [Abilities API plugin](https://github.com/WordPress/abilities-api) separately (note: the plugin repository was archived in February 2026).
-- **[php-mcp-schema](https://github.com/WordPress/php-mcp-schema)** (^0.1.0): Typed DTOs for MCP protocol types (MCP 2025-11-25)
-
-### WordPress Abilities API Integration
-
-Since WordPress 6.9, the [Abilities API](https://make.wordpress.org/core/2025/11/10/abilities-api-in-wordpress-6-9/) is a core API and does not require a separate plugin.
-
-The Abilities API provides:
-
-- Standardized ability registration (`wp_register_ability()`)
-- Ability retrieval and management (`wp_get_ability()`)
-- Schema definition for inputs and outputs
-- Permission callback system
-- Execute callback system
+- **WordPress**: >= 6.9 (includes the [Abilities API](https://developer.wordpress.org/news/2025/11/introducing-the-wordpress-abilities-api/) in core — no separate plugin)
+- **[php-mcp-schema](https://github.com/WordPress/php-mcp-schema)** (`^0.1.0`): Typed DTOs for MCP protocol types — installed automatically via Composer
 
 ## Installation
 
-### With Composer (Primary Installation Method)
+### As a WordPress Plugin (Recommended)
 
-The MCP Adapter is designed to be installed as a Composer package. This is the primary and recommended installation method:
+MCP Adapter is designed to be installed as a WordPress plugin. To install you should download the latest stable release from the [GitHub Releases page](https://github.com/WordPress/mcp-adapter/releases/latest) and install it like any other WordPress plugin.
+
+#### With WP-CLI
+
+```bash
+wp plugin install https://github.com/WordPress/mcp-adapter/releases/latest/download/mcp-adapter.zip --activate
+```
+
+#### With WP-Env
+
+```jsonc
+// .wp-env.json
+{
+  "$schema": "https://schemas.wp.org/trunk/wp-env.json",
+  "plugins": [
+    "https://github.com/WordPress/mcp-adapter/releases/latest/download/mcp-adapter.zip"
+  ]
+}
+```
+
+### As a Composer Library (for plugin developers)
+
+Plugin developers may wish to install MCP Adapter as a Composer dependency to integrate MCP functionality into their own plugins.
 
 ```bash
 composer require wordpress/mcp-adapter
 ```
 
-> **Note:** On WordPress 6.8, you must also install the Abilities API separately: `composer require wordpress/abilities-api wordpress/mcp-adapter`. On WordPress 6.9+, the Abilities API is built into core and does not need to be installed.
-
 #### Using Jetpack Autoloader (Highly Recommended)
 
 When multiple plugins use the MCP Adapter, it's highly recommended to use the [Jetpack Autoloader](https://github.com/Automattic/jetpack-autoloader) to prevent version conflicts. The Jetpack Autoloader ensures that only the latest version of shared packages is loaded, eliminating conflicts when different plugins use different versions of the same dependency.
-
-Add the Jetpack Autoloader to your project:
 
 ```bash
 composer require automattic/jetpack-autoloader
@@ -226,74 +96,22 @@ Then load it in your main plugin file instead of the standard Composer autoloade
 
 ```php
 <?php
-// Load the Jetpack autoloader instead of vendor/autoload.php
 require_once plugin_dir_path( __FILE__ ) . 'vendor/autoload_packages.php';
 ```
 
-**Benefits of using Jetpack Autoloader:**
-- **Version Conflict Resolution**: Automatically loads the latest version of shared packages
-- **Plugin Compatibility**: Prevents errors when multiple plugins use different versions of MCP Adapter
-- **WordPress Optimized**: Designed specifically for WordPress plugin development
-- **Automatic Management**: No manual intervention needed when plugins update their dependencies
-
-### As a Plugin (Alternative Method)
-
-Alternatively, you can install the MCP Adapter as a traditional WordPress plugin, though the Composer package method is preferred for most use cases.
-
-#### From GitHub Releases
-
-Download the latest stable release from the [GitHub Releases page](https://github.com/WordPress/mcp-adapter/releases/latest).
-
-#### Development Version (Git Clone)
-
-For the latest development version or to contribute to the project:
-
-```bash
-# Clone the repository
-git clone https://github.com/WordPress/mcp-adapter.git wp-content/plugins/mcp-adapter
-
-# Navigate to the plugin directory
-cd wp-content/plugins/mcp-adapter
-
-# Install dependencies
-composer install
-```
-
-This will give you the latest development version from the `trunk` branch with all dependencies installed.
-
-#### With WP-Env
-
-```jsonc
-// .wp-env.json
-{
-  "$schema": "https://schemas.wp.org/trunk/wp-env.json",
-  // ... other config ...
-  "plugins": [
-    "WordPress/mcp-adapter",
-    // ... other plugins ...
-  ],
-  // ... more config ...
-}
-```
-
-> **Note:** On WordPress 6.8, also add `"WordPress/abilities-api"` to the plugins array. On WordPress 6.9+, the Abilities API is included in core.
-
 ### Using MCP Adapter in Your Plugin
 
-Using the MCP Adapter in your plugin is straightforward, just check availability and instantiate:
+Check availability and initialize on `plugins_loaded` so all plugins are available before the adapter starts:
 
 ```php
-use WP\MCP\Core\McpAdapter;
+add_action( 'plugins_loaded', function() {
+    if ( ! class_exists( 'WP\MCP\Core\McpAdapter' ) ) {
+        // MCP Adapter is not active — show an admin notice or return early.
+        return;
+    }
 
-// 1. Check if MCP Adapter is available
-if ( ! class_exists( McpAdapter::class ) ) {
-    // Handle missing dependency (show admin notice, etc.)
-    return;
-}
-
-// 2. Initialize the adapter
-McpAdapter::instance();
-// That's it!
+    \WP\MCP\Core\McpAdapter::instance();
+} );
 ```
 
 ## Basic Usage
@@ -301,7 +119,8 @@ McpAdapter::instance();
 The MCP Adapter automatically creates a default server that exposes registered WordPress abilities through a layered architecture. This provides immediate MCP functionality without requiring manual server configuration.
 
 **How it works:**
-- WordPress abilities registered via `wp_register_ability()` with the `meta.mcp.public` flag set to `true` are discoverable and executable on the default server via its built-in adapter tools
+- WordPress abilities registered via `wp_register_ability()` with `meta.public` set to `true` are discoverable and executable on the default server via its built-in adapter tools
+- Set `meta.mcp.public` explicitly to override the high-level setting for MCP only; `false` opts a public ability out, while `true` exposes an otherwise private ability to MCP
 - On the default server, public abilities are accessed through `mcp-adapter/discover-abilities`, `mcp-adapter/get-ability-info`, and `mcp-adapter/execute-ability` rather than being auto-registered individually in `tools/list`
 - Alternatively, abilities can be explicitly listed when creating a [custom MCP server](#creating-custom-mcp-servers); in that case, they can be exposed directly as MCP tools, resources, or prompts without requiring the `meta.mcp.public` flag
 - The default server supports both HTTP and STDIO transports and supports multiple MCP protocol versions
@@ -361,19 +180,24 @@ add_action( 'wp_abilities_api_init', function() {
             return current_user_can( 'read' );
         },
         'meta' => [
-            'mcp' => [
-                'public' => true, // Required for default MCP server access
-            ],
+            'public' => true, // Expose to clients, including the default MCP server
         ],
     ]);
 });
 
-// With the meta.mcp.public flag, the ability is exposed through the default MCP server.
+// With the meta.public flag, the ability is exposed through the default MCP server.
 // In the default server configuration, discover it via `discover-abilities`
 // and invoke it via `mcp-adapter/execute-ability` rather than expecting
 // it to appear as its own entry in `tools/list`.
-// Without the meta.mcp.public flag, abilities are only accessible
-// through custom MCP servers that explicitly list them.
+// To opt out of MCP while remaining public to other clients, explicitly set
+// meta.mcp.public to false.
+// To expose only through MCP, omit `meta.public` and set `meta.mcp.public` to true.
+// Without either public flag, abilities are only accessible through custom MCP
+// servers that explicitly list them.
+// Note: how far `meta.public` reaches depends on the WordPress version. WordPress
+// core starts applying `meta.public` to the REST API (`meta.show_in_rest`) in 7.1. On
+// WordPress 6.9 and 7.0, this adapter honors `meta.public` for MCP, but REST API
+// access still requires setting `meta.show_in_rest` to true.
 ```
 
 </details>
@@ -482,24 +306,24 @@ The [`@automattic/mcp-wordpress-remote`](https://www.npmjs.com/package/@automatt
 For advanced use cases, you can create custom MCP servers with specific configurations:
 
 ```php
-add_action('mcp_adapter_init', function($adapter) {
+add_action( 'mcp_adapter_init', function( $adapter ) {
     $adapter->create_server(
         'my-server-id',                    // Unique server identifier
         'my-namespace',                    // REST API namespace
-        'mcp',                            // REST API route
-        'My MCP Server',                  // Server name
-        'Description of my server',       // Server description
-        'v1.0.0',                        // Server version
-        [                                 // Transport methods
-            \WP\MCP\Transport\HttpTransport::class,  // Recommended: MCP 2025-06-18 compliant
-        ],
-        \WP\MCP\Infrastructure\ErrorHandling\ErrorLogMcpErrorHandler::class, // Error handler
-        \WP\MCP\Infrastructure\Observability\NullMcpObservabilityHandler::class, // Observability handler
-        ['my-plugin/my-ability'],         // Abilities to expose as tools
-        [],                              // Resources (optional)
-        [],                              // Prompts (optional)
+        'mcp',                             // REST API route
+        'My MCP Server',                   // Server name
+        'Description of my server',        // Server description
+        'v1.0.0',                          // Server version
+        array(                             // Transport methods
+            \WP\MCP\Transport\HttpTransport::class,
+        ),
+        \WP\MCP\Infrastructure\ErrorHandling\ErrorLogMcpErrorHandler::class,        // Error handler
+        \WP\MCP\Infrastructure\Observability\NullMcpObservabilityHandler::class,    // Observability handler
+        array( 'my-plugin/my-ability' ),   // Abilities to expose as tools
+        array(),                           // Resources (optional)
+        array()                            // Prompts (optional)
     );
-});
+} );
 ```
 
 ### Custom Transport Implementation

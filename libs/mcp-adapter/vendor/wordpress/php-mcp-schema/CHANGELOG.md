@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-08-10
+
+### Fixed
+
+- Open MCP schema types now preserve unrecognized fields during `fromArray()` and `toArray()` round trips, including additional JSON Schema keywords such as `$defs` in tool input and output schemas.
+
+## [0.1.2] - 2026-06-05
+
+### Fixed
+
+- `ToolInputSchema::toArray()` and `ToolOutputSchema::toArray()` now always emit the `properties` key as a JSON object, even for tools that declare no parameters. Parameter-less tools previously produced `{"type":"object"}` (key omitted) or `[]` (JSON array), both of which strict JSON Schema validators such as OpenAI strict function-calling mode reject with `object schema missing properties`. Tools with parameters are unchanged. The fix is mirrored in the TypeScript generator so a clean regeneration reproduces the patched output.
+
 ## [0.1.1] - 2026-04-10
 
 ### Fixed

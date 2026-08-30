@@ -21,22 +21,16 @@ use DateTime;
 class McpValidator {
 
 	/**
-	 * Allowed MIME types for MCP icons per specification.
+	 * URI scheme grammar per RFC 3986 §3.1 (unanchored regex fragment).
 	 *
-	 * MUST support: image/png, image/jpeg, image/jpg
-	 * SHOULD support: image/svg+xml, image/webp
+	 * Shared by URI validation and scheme folding so the two can never drift
+	 * apart on what counts as a scheme.
 	 *
-	 * @since 0.5.0
+	 * @since 0.6.0
 	 *
-	 * @var array<string>
+	 * @var string
 	 */
-	private static array $allowed_icon_mime_types = array(
-		'image/png',
-		'image/jpeg',
-		'image/jpg',
-		'image/svg+xml',
-		'image/webp',
-	);
+	private const URI_SCHEME_PATTERN = '[a-zA-Z][a-zA-Z0-9+.-]*';
 
 	/**
 	 * Validate an MCP component name.
@@ -66,32 +60,6 @@ class McpValidator {
 
 		// Only allow letters, numbers, hyphens, underscores, and dots per MCP spec.
 		return (bool) preg_match( '/^[a-zA-Z0-9_.-]+$/', $name );
-	}
-
-	/**
-	 * Validate image MIME type.
-	 *
-	 * Checks if the MIME type is a valid image type according to MCP specification.
-	 *
-	 * @param string $mime_type The MIME type to validate.
-	 *
-	 * @return bool True if valid image MIME type, false otherwise.
-	 */
-	public static function validate_image_mime_type( string $mime_type ): bool {
-		return str_starts_with( strtolower( $mime_type ), 'image/' );
-	}
-
-	/**
-	 * Validate audio MIME type.
-	 *
-	 * Checks if the MIME type is a valid audio type according to MCP specification.
-	 *
-	 * @param string $mime_type The MIME type to validate.
-	 *
-	 * @return bool True if valid audio MIME type, false otherwise.
-	 */
-	public static function validate_audio_mime_type( string $mime_type ): bool {
-		return str_starts_with( strtolower( $mime_type ), 'audio/' );
 	}
 
 	/**
@@ -178,7 +146,7 @@ class McpValidator {
 	 *
 	 * Validates icon fields per MCP 2025-11-25 specification:
 	 * - src (required): Valid URL or data: URI
-	 * - mimeType (optional): One of allowed image MIME types
+	 * - mimeType (optional): String emitted as declared
 	 * - sizes (optional): Array of size strings in WxH format or "any"
 	 * - theme (optional): "light" or "dark"
 	 *
@@ -200,17 +168,9 @@ class McpValidator {
 			$errors[] = __( 'Icon src must be a valid URL (http/https) or data: URI', 'mcp-adapter' );
 		}
 
-		// mimeType is optional but must be valid if present.
-		if ( isset( $icon['mimeType'] ) ) {
-			if ( ! is_string( $icon['mimeType'] ) ) {
-				$errors[] = __( 'Icon mimeType must be a string', 'mcp-adapter' );
-			} elseif ( ! self::validate_icon_mime_type( $icon['mimeType'] ) ) {
-				$errors[] = sprintf(
-				/* translators: %s: comma-separated list of allowed MIME types */
-					__( 'Icon mimeType must be one of: %s', 'mcp-adapter' ),
-					implode( ', ', self::$allowed_icon_mime_types )
-				);
-			}
+		// mimeType is optional. Only its type is checked.
+		if ( isset( $icon['mimeType'] ) && ! is_string( $icon['mimeType'] ) ) {
+			$errors[] = __( 'Icon mimeType must be a string', 'mcp-adapter' );
 		}
 
 		// sizes is optional but must be valid if present.
@@ -280,22 +240,6 @@ class McpValidator {
 		}
 
 		return false;
-	}
-
-	/**
-	 * Validate an icon MIME type.
-	 *
-	 * Per MCP spec, clients MUST support image/png, image/jpeg (and image/jpg).
-	 * Clients SHOULD support image/svg+xml, image/webp.
-	 *
-	 * @param string $mime_type The MIME type to validate.
-	 *
-	 * @return bool True if valid icon MIME type, false otherwise.
-	 * @since 0.5.0
-	 *
-	 */
-	public static function validate_icon_mime_type( string $mime_type ): bool {
-		return in_array( strtolower( trim( $mime_type ) ), self::$allowed_icon_mime_types, true );
 	}
 
 	/**
@@ -490,6 +434,36 @@ class McpValidator {
 	}
 
 	/**
+	 * Normalize a `_meta` value for inclusion in a protocol DTO.
+	 *
+	 * MCP declares `_meta` as `{ [key: string]: unknown }` — a JSON object. PHP has one
+	 * array type for both JSON shapes, so a sequential array (including an empty one)
+	 * would serialize to a JSON array and put non-conformant output on the wire. Those
+	 * are treated as absent, as is any non-array value.
+	 *
+	 * Returns null rather than raising so an incorrectly shaped optional `_meta` does
+	 * not withhold the payload it accompanies.
+	 *
+	 * @since 0.6.0
+	 *
+	 * @param mixed $meta The raw `_meta` value.
+	 *
+	 * @return array<array-key, mixed>|null A non-empty, non-list array suitable for JSON-object encoding, or null if absent/invalid.
+	 */
+	public static function normalize_meta( $meta ): ?array {
+		if ( ! is_array( $meta ) || array() === $meta ) {
+			return null;
+		}
+
+		// A list serializes to a JSON array. array_is_list() needs PHP 8.1; the floor is 7.4.
+		if ( array_keys( $meta ) === range( 0, count( $meta ) - 1 ) ) {
+			return null;
+		}
+
+		return $meta;
+	}
+
+	/**
 	 * Validate a resource URI format.
 	 *
 	 * Per MCP spec: "The URI can use any protocol; it is up to the server how to interpret it."
@@ -512,22 +486,28 @@ class McpValidator {
 
 		// Basic URI validation: must have scheme followed by colon (RFC 3986).
 		// This accepts any protocol as per MCP specification.
-		return (bool) preg_match( '/^[a-zA-Z][a-zA-Z0-9+.-]*:.+/', $uri );
+		return (bool) preg_match( '/^' . self::URI_SCHEME_PATTERN . ':.+/', $uri );
 	}
 
 	/**
-	 * Validate general MIME type format.
+	 * Lowercase the scheme (the part before the first ":") of a URI.
 	 *
-	 * Validates that a MIME type follows the standard format: type/subtype
-	 * where both type and subtype contain valid characters.
+	 * URI schemes are case-insensitive per RFC 3986, so "Foo://x" and "foo://x"
+	 * identify the same resource. Lowercasing the scheme on both sides of a
+	 * comparison lets the two forms match. Everything after the scheme is left
+	 * untouched, because case may be meaningful there.
 	 *
-	 * @param string $mime_type The MIME type to validate.
+	 * @param string $uri Resource URI.
 	 *
-	 * @return bool True if valid MIME type format, false otherwise.
+	 * @return string Same URI with a lowercased scheme.
+	 * @since 0.6.0
 	 */
-	public static function validate_mime_type( string $mime_type ): bool {
-		// RFC 2045 compliant: allows +, ., and other valid MIME type characters.
-		// Examples: image/svg+xml, application/vnd.api+json, text/plain.
-		return (bool) preg_match( '/^[a-zA-Z0-9][a-zA-Z0-9!#$&^_.+-]*\/[a-zA-Z0-9][a-zA-Z0-9!#$&^_.+-]*$/', $mime_type );
+	public static function fold_uri_scheme( string $uri ): string {
+		// On PCRE failure preg_replace_callback() returns null; keep the URI as-is.
+		return preg_replace_callback(
+			'/^(' . self::URI_SCHEME_PATTERN . '):/',
+			static fn( array $matches ): string => strtolower( $matches[1] ) . ':',
+			$uri
+		) ?? $uri;
 	}
 }

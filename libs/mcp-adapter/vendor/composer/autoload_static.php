@@ -4,13 +4,17 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit025553dd515d38db8fa654dc1bcef58c
+class ComposerStaticInitbfa32ba59be79ad50b3c83430daa6a4d
 {
     public static $prefixLengthsPsr4 = array (
         'W' =>
         array (
             'WP\\McpSchema\\' => 13,
             'WP\\MCP\\' => 7,
+        ),
+        'A' =>
+        array (
+            'Automattic\\Jetpack\\Autoloader\\' => 30,
         ),
     );
 
@@ -23,13 +27,23 @@ class ComposerStaticInit025553dd515d38db8fa654dc1bcef58c
         array (
             0 => __DIR__ . '/../..' . '/includes',
         ),
+        'Automattic\\Jetpack\\Autoloader\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/automattic/jetpack-autoloader/src',
+        ),
     );
 
     public static $classMap = array (
+        'Automattic\\Jetpack\\Autoloader\\AutoloadFileWriter' => __DIR__ . '/..' . '/automattic/jetpack-autoloader/src/AutoloadFileWriter.php',
+        'Automattic\\Jetpack\\Autoloader\\AutoloadGenerator' => __DIR__ . '/..' . '/automattic/jetpack-autoloader/src/AutoloadGenerator.php',
+        'Automattic\\Jetpack\\Autoloader\\AutoloadProcessor' => __DIR__ . '/..' . '/automattic/jetpack-autoloader/src/AutoloadProcessor.php',
+        'Automattic\\Jetpack\\Autoloader\\CustomAutoloaderPlugin' => __DIR__ . '/..' . '/automattic/jetpack-autoloader/src/CustomAutoloaderPlugin.php',
+        'Automattic\\Jetpack\\Autoloader\\ManifestGenerator' => __DIR__ . '/..' . '/automattic/jetpack-autoloader/src/ManifestGenerator.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'WP\\MCP\\Abilities\\DiscoverAbilitiesAbility' => __DIR__ . '/../..' . '/includes/Abilities/DiscoverAbilitiesAbility.php',
         'WP\\MCP\\Abilities\\ExecuteAbilityAbility' => __DIR__ . '/../..' . '/includes/Abilities/ExecuteAbilityAbility.php',
         'WP\\MCP\\Abilities\\GetAbilityInfoAbility' => __DIR__ . '/../..' . '/includes/Abilities/GetAbilityInfoAbility.php',
+        'WP\\MCP\\Abilities\\McpAbilityExposure' => __DIR__ . '/../..' . '/includes/Abilities/McpAbilityExposure.php',
         'WP\\MCP\\Abilities\\McpAbilityHelperTrait' => __DIR__ . '/../..' . '/includes/Abilities/McpAbilityHelperTrait.php',
         'WP\\MCP\\Autoloader' => __DIR__ . '/../..' . '/includes/Autoloader.php',
         'WP\\MCP\\Cli\\McpCommand' => __DIR__ . '/../..' . '/includes/Cli/McpCommand.php',
@@ -282,9 +296,9 @@ class ComposerStaticInit025553dd515d38db8fa654dc1bcef58c
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit025553dd515d38db8fa654dc1bcef58c::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit025553dd515d38db8fa654dc1bcef58c::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit025553dd515d38db8fa654dc1bcef58c::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitbfa32ba59be79ad50b3c83430daa6a4d::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitbfa32ba59be79ad50b3c83430daa6a4d::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInitbfa32ba59be79ad50b3c83430daa6a4d::$classMap;
 
         }, null, ClassLoader::class);
     }

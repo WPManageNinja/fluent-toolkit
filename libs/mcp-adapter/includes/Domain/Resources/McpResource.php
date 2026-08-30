@@ -149,10 +149,10 @@ final class McpResource implements McpComponentInterface {
 			$resource_data['description'] = $config['description'];
 		}
 
-		// Include mimeType only when valid.
+		// Include mimeType when non-empty. The value itself is not checked.
 		if ( isset( $config['mimeType'] ) ) {
 			$mime_type = trim( $config['mimeType'] );
-			if ( '' !== $mime_type && McpValidator::validate_mime_type( $mime_type ) ) {
+			if ( '' !== $mime_type ) {
 				$resource_data['mimeType'] = $mime_type;
 			}
 		}
@@ -170,8 +170,9 @@ final class McpResource implements McpComponentInterface {
 			}
 		}
 
-		if ( isset( $config['meta'] ) && is_array( $config['meta'] ) && ! empty( $config['meta'] ) ) {
-			$resource_data['_meta'] = $config['meta'];
+		$resource_meta = McpValidator::normalize_meta( $config['meta'] ?? null );
+		if ( null !== $resource_meta ) {
+			$resource_data['_meta'] = $resource_meta;
 		}
 
 		// Create the Resource DTO - wrap in try-catch since Annotations::fromArray() and ResourceDto::fromArray() can throw.

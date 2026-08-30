@@ -6,10 +6,16 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Automattic\\Jetpack\\Autoloader\\AutoloadFileWriter' => $vendorDir . '/automattic/jetpack-autoloader/src/AutoloadFileWriter.php',
+    'Automattic\\Jetpack\\Autoloader\\AutoloadGenerator' => $vendorDir . '/automattic/jetpack-autoloader/src/AutoloadGenerator.php',
+    'Automattic\\Jetpack\\Autoloader\\AutoloadProcessor' => $vendorDir . '/automattic/jetpack-autoloader/src/AutoloadProcessor.php',
+    'Automattic\\Jetpack\\Autoloader\\CustomAutoloaderPlugin' => $vendorDir . '/automattic/jetpack-autoloader/src/CustomAutoloaderPlugin.php',
+    'Automattic\\Jetpack\\Autoloader\\ManifestGenerator' => $vendorDir . '/automattic/jetpack-autoloader/src/ManifestGenerator.php',
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
     'WP\\MCP\\Abilities\\DiscoverAbilitiesAbility' => $baseDir . '/includes/Abilities/DiscoverAbilitiesAbility.php',
     'WP\\MCP\\Abilities\\ExecuteAbilityAbility' => $baseDir . '/includes/Abilities/ExecuteAbilityAbility.php',
     'WP\\MCP\\Abilities\\GetAbilityInfoAbility' => $baseDir . '/includes/Abilities/GetAbilityInfoAbility.php',
+    'WP\\MCP\\Abilities\\McpAbilityExposure' => $baseDir . '/includes/Abilities/McpAbilityExposure.php',
     'WP\\MCP\\Abilities\\McpAbilityHelperTrait' => $baseDir . '/includes/Abilities/McpAbilityHelperTrait.php',
     'WP\\MCP\\Autoloader' => $baseDir . '/includes/Autoloader.php',
     'WP\\MCP\\Cli\\McpCommand' => $baseDir . '/includes/Cli/McpCommand.php',
