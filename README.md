@@ -69,11 +69,19 @@ bash build.sh          # create release zip → builds/fluent-toolkit-{version}.
 
 Fluent Toolkit can provide the official WordPress MCP Adapter package as a bundled fallback dependency. The adapter stays isolated behind Toolkit's adapter provider so it can be updated or removed independently.
 
+`libs/mcp-adapter/` is an unmodified copy of the upstream `mcp-adapter.zip` release asset — currently **0.6.1**. To update it, replace the directory wholesale from a new release rather than patching files in place; Toolkit-side workarounds belong in `includes/Mcp/AdapterBootstrap.php`.
+
+Adapter 0.6.0 and newer require **WordPress 6.9+**, where the Abilities API ships in core; the standalone Abilities API plugin is no longer a supported path. `AdapterBootstrap` will not load the bundled copy on older WordPress, and the MCP page reports the adapter as unavailable there.
+
 Toolkit only bundles the adapter fallback. Authentication and authorization for MCP routes should be handled outside this plugin.
 
 ---
 
 ### Changelog
+
+#### 2.1.1
+- Fixed recurring "ability does not exist" errors from the MCP adapter's default server
+- Bundled MCP Adapter updated to 0.6.1; MCP now requires WordPress 6.9+
 
 #### 2.0.5
 - Fixed standalone MCP Adapter collision handling

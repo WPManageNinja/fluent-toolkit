@@ -30,6 +30,10 @@ if (!defined('WP_PLUGIN_DIR')) {
     define('WP_PLUGIN_DIR', $pluginDir);
 }
 
+// Report a WordPress version the bundled adapter supports, so that this test
+// exercises standalone-plugin detection rather than the minimum-version gate.
+$GLOBALS['wp_version'] = '6.9';
+
 $bootstrapFile = $root . '/includes/Mcp/AdapterBootstrap.php';
 
 if (!file_exists($bootstrapFile)) {

@@ -4,7 +4,7 @@ Tags: fluent plugins, toolkit
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.1.0
+Stable tag: 2.1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -24,6 +24,11 @@ https://github.com/WPManageNinja/fluent-toolkit/releases/latest
 Upload the zip from your WordPress dashboard, activate Fluent Toolkit, then open Dashboard > Fluent Toolkit.
 
 == Changelog ==
+
+= 2.1.1 =
+* Fixed: repeated "WordPress ability ... does not exist" errors logged on every REST API request when another plugin registered abilities before the MCP adapter did
+* Updated: bundled WordPress MCP Adapter from 0.5.0 to 0.6.1
+* Note: MCP now requires WordPress 6.9 or newer, where the Abilities API ships in core. On older WordPress the adapter is not loaded and MCP is reported as unavailable; the rest of the plugin is unaffected
 
 = 2.1.0 =
 * New: Addon updates now appear on the Plugins screen right after release — no more waiting out wp.org's update-check delay

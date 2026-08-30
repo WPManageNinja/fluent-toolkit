@@ -18,7 +18,7 @@ WordPress plugin that unifies Fluent plugin admin UIs into one workspace, manage
 - `src/unified-ui.js` → `dist/unified-ui.js` — sidebar DOM interactions (mobile drawer, WP menu drawer, theme toggle, hash routing, workspace switcher). Reads per-page flags from `data-*` attributes on `.fluent_uui`.
 - `src/unified-ui.scss` + `src/unified-ui/_utilities.scss` → `dist/unified-ui.css` — sidebar styles.
 - `src/components/Dashboard.vue` + `src/style.scss` — FluentHub admin dashboard (Vue 3 + Element Plus).
-- `includes/Mcp/` — MCP adapter bootstrap.
+- `includes/Mcp/AdapterBootstrap.php` — loads the bundled MCP adapter (`libs/mcp-adapter/`, an unmodified upstream release copy) on `plugins_loaded` @999, unless another plugin already supplies one.
 
 ## Settings
 
@@ -30,6 +30,14 @@ WordPress plugin that unifies Fluent plugin admin UIs into one workspace, manage
 ## Gotcha: other Fluent plugins strip foreign scripts
 
 FluentCRM and friends call `wp_dequeue_script()` on non-Fluent scripts on their own admin pages. `wp_enqueue_script()` from this plugin gets removed silently. Print `<script src>` directly via `admin_print_footer_scripts` instead (see `UnifiedUiHandler::printUnifiedUiScript()`). CSS via `wp_enqueue_style()` is not stripped — that path is fine.
+
+## Gotcha: the MCP adapter registers its abilities too late
+
+Core's Abilities API registry is a lazy singleton — `wp_abilities_api_init` fires once, on the first `WP_Abilities_Registry::get_instance()` call, and never again that request. `McpAdapter` only adds its `wp_abilities_api_init` / `wp_abilities_api_categories_init` listeners from `McpAdapter::init()`, which runs on `rest_api_init` @15, so any other plugin registering an ability on `init` fires the hook first and the adapter's three abilities (`mcp-adapter/discover-abilities`, `get-ability-info`, `execute-ability`) never register. The default server then logs "ability does not exist" for each one on every REST request.
+
+`AdapterBootstrap::hookDefaultAbilities()` adds those same listeners at `plugins_loaded`, before the registry can be built. It reuses the adapter's own callables so WordPress dedupes when `McpAdapter::init()` adds them again — don't wrap them in closures, that double-registers the abilities. Don't "fix" this by hooking `McpAdapter::init()` to `init` early either: that also pulls forward `DefaultServerFactory::create()`, which fires `wp_abilities_api_init` at `init` @1 and breaks every other plugin that registers abilities at `init` @10.
+
+Still unfixed upstream as of adapter 0.6.1 — re-check when bumping the bundled library.
 
 ## Conventions
 
