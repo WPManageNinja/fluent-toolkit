@@ -92,7 +92,7 @@ class UnifiedUiHandler
                 'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentbooking_icon.svg',
                 'logo'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentbooking_logo.svg',
                 'items'         => $bookingMenu,
-                'has_dark_mode' => false,
+                'has_dark_mode' => true,
                 'dashboard_url' => admin_url('admin.php?page=fluent-booking#/')
             ],
             'fluent-boards'   => [
@@ -161,7 +161,7 @@ class UnifiedUiHandler
                 'title'         => 'Code Snippets',
                 'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentsnippets_icon.svg',
                 'items'         => $snippetsMenu,
-                'has_dark_mode' => false,
+                'has_dark_mode' => true,
                 'group'         => 'others',
                 'dashboard_url' => admin_url('admin.php?page=fluent-snippets#/')
             ],
@@ -551,7 +551,7 @@ class UnifiedUiHandler
                                     <ul class="fui-product-nav">
                                         <?php foreach ($appItems as $itemKey => $item):
                                             $itemHash = parse_url($item['url'], PHP_URL_FRAGMENT);
-                                            $hasSub = $isCurrent && !empty($item['sub_menu']);
+                                            $hasSub = !empty($item['sub_menu']);
                                             $isServerActive = $isCurrent && !$itemHash && ($itemKey === $plugin_page);
                                             ?>
                                             <li class="fui-item<?php echo $hasSub ? ' fui-item--has-sub' : ''; ?>">
@@ -585,7 +585,7 @@ class UnifiedUiHandler
                                                             <li>
                                                                 <a href="<?php echo esc_url($subItem['url']); ?>"
                                                                    class="fui-apps-submenu-item"
-                                                                   data-fui-hash="<?php echo $subHash ? '#' . esc_attr($subHash) : ''; ?>">
+                                                                   <?php echo ($isCurrent && $subHash) ? 'data-fui-hash="#' . esc_attr($subHash) . '"' : ''; ?>>
                                                                 <span
                                                                     class="fui-app-title"><?php echo esc_html($subItem['title']); ?></span>
                                                                 </a>

@@ -114,6 +114,19 @@
     color: oklch(42% 0.13 70);
     font-size: 13px;
     padding: 14px 24px;
+
+    &.ft-mcp-note-ok {
+      background: var(--ok-soft);
+      border-top-color: oklch(88% 0.05 155);
+      color: oklch(38% 0.13 155);
+    }
+  }
+
+  .ft-connect-actions {
+    display: flex;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    gap: 8px;
   }
 
   .ft-switch {
@@ -198,6 +211,35 @@
       &:focus {
         border-color: var(--accent-border);
         box-shadow: 0 0 0 3px oklch(58% 0.18 280 / .12);
+      }
+    }
+
+    .ft-input-affix {
+      position: relative;
+
+      input {
+        padding-right: 38px;
+      }
+    }
+
+    .ft-input-btn {
+      align-items: center;
+      background: none;
+      border: 0;
+      color: var(--text-soft);
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      padding: 0;
+      position: absolute;
+      right: 4px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 30px;
+      height: 30px;
+
+      &:hover {
+        color: var(--text);
       }
     }
   }

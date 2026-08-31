@@ -89,7 +89,19 @@
                         <h2>Connect client</h2>
                         <p>Each Fluent plugin runs its own MCP server, so your client needs one entry per endpoint. The same Application Password works for all of them.</p>
                     </div>
-                    <a class="ft-btn ft-btn-ghost" :href="activeProduct.app_passwords_url" target="_blank" rel="noopener">Create Application Password</a>
+                    <div class="ft-connect-actions">
+                        <button
+                            v-if="canCreateAppPassword"
+                            class="ft-btn ft-btn-primary"
+                            :disabled="creatingPassword"
+                            @click="createAppPassword()"
+                        >
+                            {{ creatingPassword ? 'Creating…' : 'Create Application Password' }}
+                        </button>
+                        <a class="ft-btn ft-btn-ghost" :href="appPasswordsUrl" target="_blank" rel="noopener">
+                            {{ canCreateAppPassword ? 'Manage passwords' : 'Create Application Password' }}
+                        </a>
+                    </div>
                 </div>
 
                 <div class="ft-credential-row">
@@ -99,8 +111,31 @@
                     </label>
                     <label>
                         <span>Application password</span>
-                        <input type="password" v-model="appPassword" placeholder="xxxx xxxx xxxx xxxx xxxx xxxx" />
+                        <div class="ft-input-affix">
+                            <input
+                                :type="showPassword ? 'text' : 'password'"
+                                v-model="appPassword"
+                                placeholder="xxxx xxxx xxxx xxxx xxxx xxxx"
+                            />
+                            <button
+                                type="button"
+                                class="ft-input-btn"
+                                :title="showPassword ? 'Hide password' : 'Show password'"
+                                :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                                @click="showPassword = !showPassword"
+                            >
+                                <svg v-if="showPassword" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 4.24A9.1 9.1 0 0 1 12 4c7 0 10 8 10 8a18.5 18.5 0 0 1-2.16 3.19M6.6 6.6A18.5 18.5 0 0 0 2 12s3 8 10 8a9.7 9.7 0 0 0 5.4-1.6"/><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88"/><path d="m2 2 20 20"/></svg>
+                                <svg v-else width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-8 10-8 10 8 10 8-3 8-10 8-10-8-10-8Z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+                        </div>
                     </label>
+                </div>
+
+                <div class="ft-mcp-note ft-mcp-note-ok" v-if="generatedName">
+                    Created <strong>{{ generatedName }}</strong> and filled it in above. WordPress shows an application password only once — copy the snippet before you leave this page. You can revoke it any time from your profile.
+                </div>
+                <div class="ft-mcp-note" v-else-if="appPasswordNotice">
+                    {{ appPasswordNotice }}
                 </div>
 
                 <div class="ft-channels ft-client-tabs" role="tablist">
@@ -172,12 +207,21 @@ export default {
                     provider: 'missing',
                 },
                 products: [],
+                app_password: {
+                    available: false,
+                    reason: '',
+                    user_login: '',
+                    manage_url: '',
+                },
             },
             activeProductSlug: 'fluent-crm',
             activeClient: 'codex',
             snippetScope: 'single',
             loading: false,
             saving: false,
+            creatingPassword: false,
+            showPassword: false,
+            generatedName: '',
             username: window.fluentToolkitVars.current_user_login || '',
             appPassword: '',
             clients: [
@@ -198,6 +242,32 @@ export default {
         },
         activeProduct() {
             return this.products.find(product => product.slug === this.activeProductSlug) || this.products[0] || null;
+        },
+        appPasswordSupport() {
+            return this.overview.app_password || {};
+        },
+        canCreateAppPassword() {
+            return !!this.appPasswordSupport.available;
+        },
+        appPasswordsUrl() {
+            return this.appPasswordSupport.manage_url
+                || (this.activeProduct && this.activeProduct.app_passwords_url)
+                || '';
+        },
+        // Only explain why the inline button is missing; when it works the button
+        // speaks for itself.
+        appPasswordNotice() {
+            if (this.canCreateAppPassword) {
+                return '';
+            }
+
+            const notices = {
+                site_disabled: 'Application passwords are disabled on this site. WordPress requires HTTPS for them unless the site runs in a local environment.',
+                user_disabled: 'Application passwords are disabled for your user account.',
+                unsupported: 'This WordPress version does not support application passwords.',
+            };
+
+            return notices[this.appPasswordSupport.reason] || '';
         },
         adapterLabel() {
             if (!this.overview.adapter.available) {
@@ -373,6 +443,27 @@ export default {
                 })
                 .finally(() => {
                     this.saving = false;
+                });
+        },
+        createAppPassword() {
+            this.creatingPassword = true;
+
+            this.$post('fluent_toolkit_mcp_create_app_password', {
+                name: 'FluentHub MCP',
+            })
+                .then(response => {
+                    const created = response.app_password || {};
+                    this.username = created.username || this.username;
+                    this.appPassword = created.password || '';
+                    this.generatedName = created.name || '';
+                    this.showPassword = true;
+                    this.$notify.success(response.message);
+                })
+                .catch(error => {
+                    this.$handleError(error);
+                })
+                .finally(() => {
+                    this.creatingPassword = false;
                 });
         },
         copySnippet() {

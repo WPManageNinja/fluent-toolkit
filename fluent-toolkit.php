@@ -36,6 +36,7 @@ class FluentToolkitBootstrap
         add_action('wp_ajax_fluent_toolkit_save_dashboard_settings', array($this, 'saveDashboardSettings'));
         add_action('wp_ajax_fluent_toolkit_mcp_overview', array($this, 'fetchMcpOverview'));
         add_action('wp_ajax_fluent_toolkit_mcp_toggle', array($this, 'toggleMcpAccess'));
+        add_action('wp_ajax_fluent_toolkit_mcp_create_app_password', array($this, 'createMcpAppPassword'));
 
         // add plugin menu link to plugins page
         add_filter('plugin_action_links_' . plugin_basename(__FILE__), function ($links) {
@@ -299,6 +300,28 @@ class FluentToolkitBootstrap
         $this->verifySettingsAjaxRequest();
 
         wp_send_json(\FluentToolkit\Classes\McpManager::status(), 200);
+    }
+
+    public function createMcpAppPassword()
+    {
+        $this->verifySettingsAjaxRequest();
+
+        $name = isset($_POST['name']) ? sanitize_text_field(wp_unslash($_POST['name'])) : '';
+
+        $created = \FluentToolkit\Classes\McpManager::createAppPassword($name);
+
+        if (is_wp_error($created)) {
+            wp_send_json(array('message' => $created->get_error_message()), 422);
+        }
+
+        wp_send_json(array(
+            'message'      => sprintf(
+                /* translators: %s: application password name. */
+                __('Application password "%s" created.', 'fluent-toolkit'),
+                $created['name']
+            ),
+            'app_password' => $created,
+        ), 200);
     }
 
     public function saveDashboardSettings()

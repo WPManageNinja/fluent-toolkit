@@ -368,7 +368,8 @@
 }
 
 .fui-product-section.is-open > .fui-product-nav {
-    max-height: 800px;
+    /* Roomy enough for a long app menu with a sub-menu expanded inside it. */
+    max-height: 1600px;
 }
 
 /* Non-current product's items — muted (they navigate away on click) */

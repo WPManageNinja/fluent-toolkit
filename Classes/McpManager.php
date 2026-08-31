@@ -11,6 +11,7 @@ class McpManager
     const FLUENTCRM_PLUGIN_FILE = 'fluent-crm/fluent-crm.php';
     const FLUENTCAMPAIGN_PLUGIN_FILE = 'fluentcampaign-pro/fluentcampaign-pro.php';
     const FLUENTCRM_OPTION_KEY = 'mcp_enabled';
+    const APP_PASSWORD_NAME = 'FluentHub MCP';
 
     public static function status()
     {
@@ -47,9 +48,156 @@ class McpManager
         $products = array_values(array_filter(array_map([__CLASS__, 'normalizeProduct'], (array) $products)));
 
         return [
-            'adapter'  => $adapter,
-            'products' => $products,
+            'adapter'      => $adapter,
+            'products'     => $products,
+            'app_password' => self::appPasswordSupport(),
         ];
+    }
+
+    /**
+     * Whether this user can mint an application password from the MCP screen.
+     *
+     * WordPress only allows them over SSL (or on a local environment) and each
+     * user/role can have them switched off, so the UI needs the reason too — a
+     * dead "Generate" button with no explanation is worse than the profile link.
+     */
+    public static function appPasswordSupport()
+    {
+        $support = [
+            'available'  => false,
+            'reason'     => '',
+            'user_login' => '',
+            'manage_url' => admin_url('profile.php#application-passwords-section'),
+        ];
+
+        $user = function_exists('wp_get_current_user') ? wp_get_current_user() : null;
+
+        if (!$user || !$user->exists()) {
+            $support['reason'] = 'no_user';
+
+            return $support;
+        }
+
+        $support['user_login'] = $user->user_login;
+
+        if (!class_exists('\WP_Application_Passwords')) {
+            $support['reason'] = 'unsupported';
+
+            return $support;
+        }
+
+        if (function_exists('wp_is_application_passwords_available') && !wp_is_application_passwords_available()) {
+            $support['reason'] = 'site_disabled';
+
+            return $support;
+        }
+
+        if (function_exists('wp_is_application_passwords_available_for_user') && !wp_is_application_passwords_available_for_user($user)) {
+            $support['reason'] = 'user_disabled';
+
+            return $support;
+        }
+
+        $support['available'] = true;
+
+        return $support;
+    }
+
+    /**
+     * Create an application password for the current user and hand back the
+     * plaintext once — WordPress hashes it immediately and never shows it again.
+     */
+    public static function createAppPassword($name = '')
+    {
+        $support = self::appPasswordSupport();
+
+        if (!$support['available']) {
+            return new \WP_Error(
+                'fluent_toolkit_app_password_unavailable',
+                self::appPasswordUnavailableMessage($support['reason'])
+            );
+        }
+
+        $user = wp_get_current_user();
+        $name = sanitize_text_field($name);
+
+        if (!$name) {
+            $name = self::APP_PASSWORD_NAME;
+        }
+
+        $name = self::uniqueAppPasswordName($user->ID, $name);
+
+        $created = \WP_Application_Passwords::create_new_application_password($user->ID, [
+            'name' => $name,
+        ]);
+
+        if (is_wp_error($created)) {
+            return $created;
+        }
+
+        return [
+            'password' => self::chunkPassword($created[0]),
+            'username' => $user->user_login,
+            'name'     => $name,
+            'uuid'     => isset($created[1]['uuid']) ? $created[1]['uuid'] : '',
+        ];
+    }
+
+    /**
+     * Match the spaced-out form the profile screen shows.
+     *
+     * create_new_application_password() returns the raw 24-character string; the
+     * REST controller behind wp-admin runs it through chunk_password() first.
+     * Authentication strips non-alphanumerics, so both forms work — this is only
+     * so a password minted here looks like one minted from the profile page.
+     */
+    private static function chunkPassword($password)
+    {
+        if (method_exists('\WP_Application_Passwords', 'chunk_password')) {
+            return \WP_Application_Passwords::chunk_password($password);
+        }
+
+        return trim(chunk_split(preg_replace('/[^a-z\d]/i', '', $password), 4, ' '));
+    }
+
+    private static function appPasswordUnavailableMessage($reason)
+    {
+        if ($reason === 'site_disabled') {
+            return __('Application passwords are disabled on this site. They require HTTPS unless the site runs in a local environment.', 'fluent-toolkit');
+        }
+
+        if ($reason === 'user_disabled') {
+            return __('Application passwords are disabled for your user account.', 'fluent-toolkit');
+        }
+
+        if ($reason === 'unsupported') {
+            return __('This WordPress version does not support application passwords.', 'fluent-toolkit');
+        }
+
+        return __('Application passwords are not available right now.', 'fluent-toolkit');
+    }
+
+    /**
+     * WordPress rejects a duplicate name outright, so suffix until it is free.
+     */
+    private static function uniqueAppPasswordName($userId, $name)
+    {
+        $existing = \WP_Application_Passwords::get_user_application_passwords($userId);
+
+        if (!is_array($existing) || !$existing) {
+            return $name;
+        }
+
+        $taken = wp_list_pluck($existing, 'name');
+        $candidate = $name;
+        $suffix = 2;
+
+        while (in_array($candidate, $taken, true) && $suffix < 100) {
+            $candidate = $name . ' ' . $suffix;
+            $suffix++;
+        }
+
+        return $candidate;
     }
 
     public static function setProductMcpEnabled($slug, $enabled)

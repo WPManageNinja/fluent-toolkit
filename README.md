@@ -79,6 +79,11 @@ Toolkit only bundles the adapter fallback. Authentication and authorization for 
 
 ### Changelog
 
+#### 2.1.1 (Date: 31 Aug, 2026)
+- Styling Improvements for the plugin dashboard
+-Updated MCP Adapter to the latest version - 0.6.1
+- Added Dark mode support to more Fluent Plugins
+
 #### 2.1.1
 - Fixed recurring "ability does not exist" errors from the MCP adapter's default server
 - Bundled MCP Adapter updated to 0.6.1; MCP now requires WordPress 6.9+
