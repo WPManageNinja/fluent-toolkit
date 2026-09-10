@@ -148,7 +148,8 @@ class FluentToolkitBootstrap
 
     public function installBetaPlugin()
     {
-        $nonce = isset($_REQUEST['__nonce']) ? sanitize_text_field($_REQUEST['__nonce']) : '';
+        $nonce = $_REQUEST['_ft_nonce'] ?? $_REQUEST['__nonce'] ?? '';
+        $nonce = sanitize_text_field($nonce);
         if (!wp_verify_nonce($nonce, 'fluent_toolkit_nonce')) {
             wp_send_json(array('message' => __('Invalid nonce.', 'fluent-toolkit')), 403);
         }
@@ -261,7 +262,8 @@ class FluentToolkitBootstrap
     public function activatePlugin()
     {
         // Nonce first — see verifySettingsAjaxRequest() for the rationale.
-        $nonce = isset($_REQUEST['__nonce']) ? sanitize_text_field($_REQUEST['__nonce']) : '';
+        $nonce = $_REQUEST['_ft_nonce'] ?? $_REQUEST['__nonce'] ?? '';
+        $nonce = sanitize_text_field($nonce);
         if (!wp_verify_nonce($nonce, 'fluent_toolkit_nonce')) {
             wp_send_json(array('message' => __('Invalid nonce.', 'fluent-toolkit')), 403);
         }
@@ -421,7 +423,8 @@ class FluentToolkitBootstrap
     {
         // Nonce first — the CSRF gate has to fail closed before any capability
         // check leaks (via timing) whether the visitor is a privileged user.
-        $nonce = isset($_REQUEST['__nonce']) ? sanitize_text_field($_REQUEST['__nonce']) : '';
+        $nonce = $_REQUEST['_ft_nonce'] ?? $_REQUEST['__nonce'] ?? '';
+        $nonce = sanitize_text_field($nonce);
         if (!wp_verify_nonce($nonce, 'fluent_toolkit_nonce')) {
             wp_send_json(array('message' => __('Invalid nonce.', 'fluent-toolkit')), 403);
         }
