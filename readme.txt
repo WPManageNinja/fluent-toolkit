@@ -4,7 +4,7 @@ Tags: fluent plugins, toolkit
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.1.1
+Stable tag: 2.1.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -24,6 +24,11 @@ https://github.com/WPManageNinja/fluent-toolkit/releases/latest
 Upload the zip from your WordPress dashboard, activate Fluent Toolkit, then open Dashboard > Fluent Toolkit.
 
 == Changelog ==
+
+= 2.1.2 (Date: 17 Sep, 2026) =
+* Fixed: FluentAuth 3.0's Settings and Security screens rendered underneath the Unified UI sidebar — the settings pane and section bar are now laid out inside the content column
+* Fixed: FluentSMTP 2.4's app header rendered across the Unified UI sidebar and over the page heading
+* Fixed: Unified UI sidebar links for FluentAuth 3.0 now point at its current screens instead of bouncing through redirects
 
 = 2.1.1 (Date: 31 Aug, 2026) =
 * Styling Improvements for the plugin dashboard

@@ -1,0 +1,120 @@
+/* ── FluentAuth ──────────────────────────────────────────── */
+
+/*
+ * FluentAuth 3.0 pins its own chrome to the viewport: the app bar, the section bar
+ * under it, and the whole settings pane are `position: fixed`, offset from the left
+ * by `--fls-shell-left` — a runtime measurement of where `#wpcontent` starts, i.e.
+ * the width of wp-admin's own menu. Inside the unified UI that measurement is wrong
+ * twice over: our sidebar sits to the right of `#wpcontent`'s left edge, so anything
+ * pinned to it slides underneath the sidebar, and we hide the admin bar, so the
+ * 32px top offsets those rules carry leave a dead band under the app bar.
+ *
+ * FluentAuth already has a flow version of this layout — it drops to it below 960px,
+ * where the same fixed chrome would not fit. These rules put our shell on that same
+ * footing at every width: the bars go sticky inside the content column, and the
+ * settings pane goes back into the page with its nav as a sticky column.
+ *
+ * Everything is scoped under `#fluent_auth_app` so it outranks the plugin's own
+ * media queries regardless of stylesheet order.
+ *
+ * The heights the sticky offsets are built from:
+ *   app bar   56px   (`--fls-chrome` when there is no section bar)
+ *   + sub bar 48px   (`--fls-chrome` becomes 104px on `.has-subnav`)
+ * `margin-left: -20px` cancels `.fui-app-content`'s left padding so a bar still
+ * spans the full width of the content column.
+ */
+
+$fui-auth-bar: 56px;
+$fui-auth-subbar: 48px;
+
+#fluent_auth_app {
+  .fframe_app {
+    /* The bars are back in flow, so the page no longer pads itself past them. */
+    padding-top: 0;
+    /*
+     * What sits below the chrome measures itself off this (the findings aside, for
+     * one). Without wp-admin's bar the chrome's underside is just its own height.
+     */
+    --fls-chrome-bottom: var(--fls-chrome);
+  }
+
+  .fls_app_bar {
+    position: sticky;
+    top: 0;
+    /* Left/right are stickiness thresholds once this is sticky — release both. */
+    left: auto;
+    right: auto;
+    z-index: 999;
+    margin-left: -20px;
+  }
+
+  .fls_sub_bar {
+    position: sticky;
+    top: $fui-auth-bar;
+    left: auto;
+    right: auto;
+    /* Under the bar above it, matching the plugin's own stacking order. */
+    z-index: 998;
+    margin-left: -20px;
+  }
+
+  /*
+   * The settings header sticks against the page at every width now — under the app
+   * bar, not under the app bar plus an admin bar that is not there. The plugin's own
+   * offsets for both of these count 32px for the admin bar, which the unified UI hides.
+   */
+  .fls_settings_header {
+    top: $fui-auth-bar;
+  }
+
+  /* Clear of the app bar and the settings header a jump-to-section lands under. */
+  .fls_section {
+    scroll-margin-top: $fui-auth-bar + 64px + 12px;
+  }
+}
+
+/*
+ * The settings pane, as a column rather than a pinned panel. Below 960px FluentAuth
+ * stacks the nav above the body on its own, and that is the right shape for our
+ * mobile drawer too, so this stops where its own rules take over.
+ */
+@media (min-width: 961px) {
+  #fluent_auth_app {
+    .fls_settings {
+      position: static;
+      overflow: visible;
+      margin-left: -20px;
+      min-height: calc(100vh - #{$fui-auth-bar});
+    }
+
+    /*
+     * Pinned under the app bar and scrolling on its own, the way it read when the
+     * whole pane was fixed. `align-self` is what keeps `align-items: stretch` from
+     * stretching it to the pane's full height, which would leave it nothing to
+     * stick over.
+     */
+    .fls_settings_nav {
+      position: sticky;
+      top: $fui-auth-bar;
+      align-self: flex-start;
+      height: calc(100vh - #{$fui-auth-bar});
+    }
+
+    /* The page scrolls now, so the body is no longer a scroll container of its own. */
+    .fls_settings_body {
+      height: auto;
+      overflow: visible;
+    }
+  }
+}
+
+/* The sidebar is an off-canvas drawer here, so the content column has no left pad. */
+@media (max-width: 782px) {
+  #fluent_auth_app {
+    .fls_app_bar,
+    .fls_sub_bar,
+    .fls_settings {
+      margin-left: 0;
+    }
+  }
+}

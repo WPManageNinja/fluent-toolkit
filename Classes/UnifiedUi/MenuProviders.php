@@ -91,6 +91,36 @@ class MenuProviders
 
         $baseUrl = admin_url('admin.php?page=fluent-auth#/');
 
+        // FluentAuth 3.0 moved every configurable screen under #/settings and put
+        // the scan, the findings and the recovery page behind one #/security tab.
+        // The old top-level paths (#/auth-shortcodes, #/login-redirects,
+        // #/custom-wp-emails) survive only as redirects over there, so linking
+        // them here would cost a bounce on every click.
+        if (version_compare(FLUENT_AUTH_VERSION, '3.0.0', '>=')) {
+            return [
+                'dashboard' => [
+                    'title'    => __('Dashboard', 'fluent-toolkit'),
+                    'url'      => $baseUrl,
+                    'icon_svg' => Icons::get('dashboard')
+                ],
+                'logs'      => [
+                    'title'    => __('Auth Logs', 'fluent-toolkit'),
+                    'url'      => $baseUrl . 'logs',
+                    'icon_svg' => Icons::get('reports')
+                ],
+                'security'  => [
+                    'title'    => __('Security', 'fluent-toolkit'),
+                    'url'      => $baseUrl . 'security',
+                    'icon_svg' => Icons::get('check')
+                ],
+                'settings'  => [
+                    'title'    => __('Security Settings', 'fluent-toolkit'),
+                    'url'      => $baseUrl . 'settings',
+                    'icon_svg' => Icons::get('settings')
+                ]
+            ];
+        }
+
         return [
             'dashboard'        => [
                 'title'    => __('Dashboard', 'fluent-toolkit'),

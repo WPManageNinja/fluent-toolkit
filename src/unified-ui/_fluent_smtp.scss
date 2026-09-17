@@ -1,0 +1,56 @@
+/* ── FluentSMTP ──────────────────────────────────────────── */
+
+/*
+ * FluentSMTP 2.4 pins its app bar the same way FluentAuth 3.0 pins its own, and it
+ * goes wrong here for the same two reasons — see _fluent_auth.scss for the long
+ * version. In short: `position: fixed` offset by `--fsm-shell-left`, a runtime
+ * measurement of where `#wpcontent` starts, lands the bar under our sidebar rather
+ * than beside it, and the `top: 32px` it carries is room for an admin bar the
+ * unified UI hides.
+ *
+ * FluentSMTP drops to a sticky bar of its own below 960px. These rules put our shell
+ * on that footing at every width. `#fluent_mail_app` is the Vue root (see the
+ * plugin's app/Views/admin/menu.php), and scoping to the id outranks the plugin's own
+ * media queries regardless of stylesheet order.
+ *
+ * Note there is deliberately no `fui-hide-app-headers` rule here, unlike the other
+ * plugin partials. FluentSMTP sits in the sidebar's `others` group, which renders as
+ * a flat link with no item list, so its own bar is the only navigation these screens
+ * have — hiding it would leave the app with no way out but the browser's Back button.
+ */
+
+$fui-smtp-bar: 56px;
+
+#fluent_mail_app {
+  .fsm_app {
+    /* The bar is back in flow, so the page no longer pads itself past it. */
+    padding-top: 0;
+  }
+
+  .fsm_app_bar {
+    position: sticky;
+    /* No admin bar above us, so the bar sticks to the top of the viewport. */
+    top: 0;
+    /* Left/right are stickiness thresholds once this is sticky — release both. */
+    left: auto;
+    right: auto;
+    z-index: 999;
+    /* Cancels `.fui-app-content`'s left padding so the bar spans the column. */
+    margin-left: -20px;
+  }
+
+  /*
+   * The dashboard's right-hand column sticks under the bar. The plugin's 88px is the
+   * app bar plus the admin bar; here it is just the app bar.
+   */
+  .fsm_split_aside {
+    top: $fui-smtp-bar;
+  }
+}
+
+/* The sidebar is an off-canvas drawer here, so the content column has no left pad. */
+@media (max-width: 782px) {
+  #fluent_mail_app .fsm_app_bar {
+    margin-left: 0;
+  }
+}

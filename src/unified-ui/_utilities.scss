@@ -178,18 +178,7 @@ select {
   }
 }
 
-#fluent_auth_app {
-  .fframe_app {
-    padding-top: 0;
-  }
-
-  .fls_app_bar {
-    position: sticky;
-    top: 0;
-    z-index: 999;
-    margin-left: -20px;
-  }
-}
+/* FluentAuth's shell overrides live in _fluent_auth.scss. */
 
 #fluent_snippets_app {
   .fsnip_app {
