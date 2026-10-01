@@ -14,7 +14,7 @@ app.use(ElLoading);
 const request = function (method, action, data = {}) {
     data.query_timestamp = Date.now();
     data.action = action;
-    data.__nonce = window.fluentToolkitVars.nonce;
+    data._ft_nonce = window.fluentToolkitVars.nonce;
 
     return new Promise((resolve, reject) => {
         window.jQuery.ajax({
