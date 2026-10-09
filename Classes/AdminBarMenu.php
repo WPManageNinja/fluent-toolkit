@@ -93,6 +93,22 @@ class AdminBarMenu
         return apply_filters('fluent_toolkit/admin_bar_apps', $apps);
     }
 
+    /**
+     * Admin URL of the app screen for a plugin directory slug (e.g.
+     * `fluent-smtp` → Settings → FluentSMTP). Used by the FluentHub plugin
+     * list for its "Settings" button. Returns '' for unknown slugs.
+     */
+    public static function dashboardUrlForPlugin($pluginSlug)
+    {
+        foreach (self::appDirectory() as $app) {
+            if (!empty($app['plugin']) && $app['plugin'] === $pluginSlug) {
+                return admin_url($app['page']);
+            }
+        }
+
+        return '';
+    }
+
     private static function appDirectory()
     {
         return [
@@ -100,76 +116,91 @@ class AdminBarMenu
                 'title'    => __('CRM', 'fluent-toolkit'),
                 'constant' => 'FLUENTCRM',
                 'page'     => 'admin.php?page=fluentcrm-admin#/',
+                'plugin'   => 'fluent-crm',
             ],
             'cart'       => [
                 'title'    => __('Commerce', 'fluent-toolkit'),
                 'constant' => 'FLUENTCART_VERSION',
                 'page'     => 'admin.php?page=fluent-cart#/',
+                'plugin'   => 'fluent-cart',
             ],
             'forms'      => [
                 'title'    => __('Forms', 'fluent-toolkit'),
                 'constant' => 'FLUENTFORM_VERSION',
                 'page'     => 'admin.php?page=fluent_forms#/',
+                'plugin'   => 'fluentform',
             ],
             'support'    => [
                 'title'    => __('Support Tickets', 'fluent-toolkit'),
                 'constant' => 'FLUENT_SUPPORT_VERSION',
                 'page'     => 'admin.php?page=fluent-support#/',
+                'plugin'   => 'fluent-support',
             ],
             'booking'    => [
                 'title'    => __('Appointments', 'fluent-toolkit'),
                 'constant' => 'FLUENT_BOOKING_VERSION',
                 'page'     => 'admin.php?page=fluent-booking#/',
+                'plugin'   => 'fluent-booking',
             ],
             'boards'     => [
                 'title'    => __('Projects', 'fluent-toolkit'),
                 'constant' => 'FLUENT_BOARDS',
                 'page'     => 'admin.php?page=fluent-boards#/',
+                'plugin'   => 'fluent-boards',
             ],
             'paymattic'  => [
                 'title'    => __('Payments & Donations', 'fluent-toolkit'),
                 'constant' => 'WPPAYFORM_VERSION',
                 'page'     => 'admin.php?page=wppayform.php#/',
+                'plugin'   => 'wp-payment-form',
             ],
             'tables'     => [
                 'title'    => __('Data & Tables', 'fluent-toolkit'),
                 'constant' => 'NINJA_TABLES_VERSION',
                 'page'     => 'admin.php?page=ninja_tables#/',
+                'plugin'   => 'ninja-tables',
             ],
             'affiliate'  => [
                 'title'    => __('Affiliates', 'fluent-toolkit'),
                 'constant' => 'FLUENT_AFFILIATE_VERSION',
                 'page'     => 'admin.php?page=fluent-affiliate#/',
+                'plugin'   => 'fluent-affiliate',
             ],
             'player'     => [
                 'title'    => __('Media & Player', 'fluent-toolkit'),
                 'constant' => 'FLUENT_PLAYER_VERSION',
                 'page'     => 'admin.php?page=fluent-player#/',
+                'plugin'   => 'fluent-player',
             ],
             'auth'       => [
                 'title'    => __('Auth & Security', 'fluent-toolkit'),
                 'constant' => 'FLUENT_AUTH_VERSION',
                 'page'     => 'admin.php?page=fluent-auth#/',
+                'plugin'   => 'fluent-security',
             ],
             'mail'       => [
                 'title'    => __('Email Delivery (SMTP)', 'fluent-toolkit'),
                 'constant' => 'FLUENTMAIL_PLUGIN_VERSION',
                 'page'     => 'options-general.php?page=fluent-mail#/',
+                'plugin'   => 'fluent-smtp',
             ],
             'snippets'   => [
                 'title'    => __('Code Snippets', 'fluent-toolkit'),
                 'constant' => 'FLUENT_SNIPPETS_PLUGIN_VERSION',
                 'page'     => 'admin.php?page=fluent-snippets#/',
+                'plugin'   => 'easy-code-manager',
             ],
             'social'     => [
                 'title'    => __('Social Reviews', 'fluent-toolkit'),
                 'constant' => 'WPSOCIALREVIEWS_VERSION',
                 'page'     => 'admin.php?page=wpsocialninja.php#/',
+                'plugin'   => 'wp-social-reviews',
             ],
             'community'  => [
                 'title'    => __('Community', 'fluent-toolkit'),
                 'constant' => 'FLUENT_COMMUNITY_PLUGIN_VERSION',
                 'page'     => 'admin.php?page=fluent-community',
+                'plugin'   => 'fluent-community',
             ],
         ];
     }
