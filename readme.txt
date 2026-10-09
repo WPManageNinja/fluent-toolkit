@@ -4,7 +4,7 @@ Tags: fluent plugins, toolkit
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.1.2
+Stable tag: 2.1.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -24,6 +24,11 @@ https://github.com/WPManageNinja/fluent-toolkit/releases/latest
 Upload the zip from your WordPress dashboard, activate Fluent Toolkit, then open Dashboard > Fluent Toolkit.
 
 == Changelog ==
+
+= 2.1.3 (Date: 09 Oct, 2026) =
+* New: "Settings" link for active plugins in the FluentHub plugin list
+* Fixed: FluentSupport single-ticket action bar overlapping the app navbar in the Unified UI
+* Improved: Namespaced the AJAX nonce request key
 
 = 2.1.2 (Date: 17 Sep, 2026) =
 * Fixed: FluentAuth 3.0's Settings and Security screens rendered underneath the Unified UI sidebar — the settings pane and section bar are now laid out inside the content column
