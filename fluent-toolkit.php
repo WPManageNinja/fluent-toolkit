@@ -107,6 +107,9 @@ class FluentToolkitBootstrap
                 $betaVersions[$index]['installed_version'] = $allPlugins[$fullSlug]['Version'];
                 $betaVersions[$index]['status'] = 'installed';
                 $betaVersions[$index]['is_active'] = is_plugin_active($fullSlug);
+                if ($betaVersions[$index]['is_active']) {
+                    $betaVersions[$index]['dashboard_url'] = \FluentToolkit\Classes\AdminBarMenu::dashboardUrlForPlugin($betaVersion['slug']);
+                }
                 if (version_compare($betaVersions[$index]['installed_version'], $betaVersion['stable_version'], '<')) {
                     $betaVersions[$index]['has_update'] = 'yes';
                 }

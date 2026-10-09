@@ -16,6 +16,31 @@
     margin-top: 20px;
     padding-top: 0;
   }
+
+  // Single ticket: the ticket action bar sits under FluentSupport's own navbar (56px),
+  // and the ticket, the filter menu and the filtered ticket list start below the bar
+  // (57px). Under 1025px the bar is static, so FluentSupport's own spacing applies.
+  @media screen and (min-width: 1025px) {
+    .fs_combined_top_bar {
+      top: 56px;
+    }
+    .fs_tickets_view_wrapper {
+      .fs_view_ticket {
+        margin-top: 81px;
+      }
+      .fs_tk_inner_sidebar.has-view-route {
+        padding-top: 61px;
+      }
+      .fs_tickets_tiny_nav {
+        margin-top: 61px;
+      }
+    }
+  }
+}
+
+// App headers hidden: FluentSupport's navbar is gone, so the ticket action bar takes the top.
+.fluent_uui.fui-hide-app-headers .fs_combined_top_bar {
+  top: 0;
 }
 
 .fui_app_fluent-support {
@@ -72,9 +97,6 @@
   }
   .fs_customers {
     padding-top: 0;
-  }
-  .fs_combined_top_bar {
-    top: 0;
   }
   #alpha_app {
     .fs_mailboxes {

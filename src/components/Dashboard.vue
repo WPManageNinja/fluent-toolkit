@@ -194,6 +194,10 @@
                                     <span class="ft-dot-sep"></span>
                                     <a :href="plugin.changelog_url" target="_blank" rel="noopener" class="ft-meta-link">Changelog</a>
                                 </template>
+                                <template v-if="plugin.dashboard_url">
+                                    <span class="ft-dot-sep"></span>
+                                    <a :href="plugin.dashboard_url" class="ft-meta-link">Settings</a>
+                                </template>
                             </div>
                         </div>
                     </div>
