@@ -25,6 +25,11 @@ echo "Building ${PLUGIN_SLUG} v${VERSION}..."
 rm -rf builds/* dist
 mkdir -p "${BUILD_DIR}"
 
+# Refresh the Vue translation map (Classes/TransStrings.php) and lint it
+echo "Generating translation map..."
+if ! node i18n.node.js; then echo 'translation map generation failed'; exit 1; fi
+if ! node tests/lint/translation-map.js; then echo 'translation map lint failed'; exit 1; fi
+
 # Run asset build
 echo "Compiling assets..."
 npx mix --production

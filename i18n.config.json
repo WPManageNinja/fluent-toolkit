@@ -1,0 +1,35 @@
+{
+    "_comment": "Read by i18n.node.js (generator) and tests/lint/translation-map.js. Paths are relative to the repo root. The `runtime` block is only used by the fluent-plugins-skills installer.",
+    "textDomain": "fluent-toolkit",
+    "namespace": "FluentToolkit\\Classes",
+    "abspathGuard": true,
+    "helpers": {
+        "t": [
+            "$t"
+        ],
+        "n": [
+            "$_n"
+        ],
+        "x": [
+            "$_x"
+        ]
+    },
+    "reservedWords": "src/reservedWords.json",
+    "targets": [
+        {
+            "name": "admin",
+            "sourceDirs": [
+                "src"
+            ],
+            "output": "Classes/TransStrings.php",
+            "className": "TransStrings",
+            "method": "getStrings"
+        }
+    ],
+    "runtime": {
+        "file": "src/i18n.js",
+        "mapGlobal": "window.fluentToolkitVars.i18n",
+        "definitions": [],
+        "packageManager": "pnpm"
+    }
+}

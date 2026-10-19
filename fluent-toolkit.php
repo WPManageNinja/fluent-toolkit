@@ -441,6 +441,7 @@ class FluentToolkitBootstrap
     private function loadClasses()
     {
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/AdminMenu.php';
+        require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/TransStrings.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/AdminBarMenu.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'includes/Mcp/AdapterBootstrap.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/ToolkitHelper.php';

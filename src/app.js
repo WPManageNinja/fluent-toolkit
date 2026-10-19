@@ -2,6 +2,7 @@ import {createApp} from 'vue'
 import App from './components/App.vue'
 
 import {ElNotification, ElMessageBox, ElLoading} from "element-plus";
+import {$t, $_n, $_x} from './i18n.js';
 
 require('./style.scss');
 
@@ -47,6 +48,9 @@ function convertToText(obj) {
 }
 
 app.config.globalProperties.appVars = window.fluentToolkitVars;
+app.config.globalProperties.$t = $t;
+app.config.globalProperties.$_n = $_n;
+app.config.globalProperties.$_x = $_x;
 
 app.mixin({
     methods: {
@@ -66,11 +70,11 @@ app.mixin({
                 errorMessage = convertToText(response);
             }
             if (!errorMessage) {
-                errorMessage = 'Something is wrong!';
+                errorMessage = $t('Something went wrong. Please try again.');
             }
             this.$notify({
                 type: 'error',
-                title: 'Error',
+                title: $t('Error'),
                 message: errorMessage,
                 dangerouslyUseHTMLString: true
             });

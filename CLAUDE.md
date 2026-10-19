@@ -18,6 +18,7 @@ WordPress plugin that unifies Fluent plugin admin UIs into one workspace, manage
 - `src/unified-ui.js` → `dist/unified-ui.js` — sidebar DOM interactions (mobile drawer, WP menu drawer, theme toggle, hash routing, workspace switcher). Reads per-page flags from `data-*` attributes on `.fluent_uui`.
 - `src/unified-ui.scss` + `src/unified-ui/_utilities.scss` → `dist/unified-ui.css` — sidebar styles.
 - `src/components/Dashboard.vue` + `src/style.scss` — FluentHub admin dashboard (Vue 3 + Element Plus).
+- `i18n.node.js` + `i18n.config.json` → `Classes/TransStrings.php` — generated Vue translation map (see Translations). `src/i18n.js` holds the `$t` / `$_n` / `$_x` runtime.
 - `includes/Mcp/AdapterBootstrap.php` — loads the bundled MCP adapter (`libs/mcp-adapter/`, an unmodified upstream release copy) on `plugins_loaded` @999, unless another plugin already supplies one.
 
 ## Settings
@@ -46,6 +47,10 @@ Still unfixed upstream as of adapter 0.6.1 — re-check when bumping the bundled
 - Sidebar root div carries class chains: `fluent_uui [fui-hide-app-headers|fui-has-app-headers] fui_app_{slug}` and `data-has-dark-mode="0|1"`. JS reads dark-mode flag from that attribute.
 - The mobile breakpoint is `782px` (matches WP admin).
 - Icon colors in the dashboard settings list: indigo / violet / amber — see `.ft-setting-icon--*` in `src/style.scss`.
+
+## Translations
+
+Use translations consistently: `__('text', 'fluent-toolkit')` in PHP and `$t('text')` in Vue. Do not split a sentence across several `$t()` calls or concatenate a `$t()` result with a value; use placeholders (`$t('Update to %s', version)`, `$_n('%s update', '%s updates', n)`) and `$_x('Ready', 'MCP status')` when one English word needs different translations in different places. Vue strings reach translators through the generated `Classes/TransStrings.php`, localized as `fluentToolkitVars.i18n`: after adding or changing `$t()` / `$_n()` / `$_x()` strings run `pnpm run translate` (`build.sh` fails on a stale map). Put a `<!-- translators: ... -->` or `// translators: ...` comment on the line directly above any string with placeholders (and `/* translators: ... */` above PHP `sprintf(__())`); the lint fails on a placeholder string without one, on em/en dashes in UI text, and on keys with leading or trailing whitespace. Paragraphs of 120+ characters go in `src/reservedWords.json` under a short `Snake_Case_Key` and the template calls `$t('Snake_Case_Key')`. See `docs/js-translations.md`.
 
 ## Dashboard plugin icon
 

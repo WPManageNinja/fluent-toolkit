@@ -130,6 +130,7 @@ class AdminMenu
             'dashboard_url'      => self::url(),
             'current_user_login' => $currentUserLogin,
             'settings'           => $toolkitSettings,
+            'i18n'               => TransStrings::getStrings(),
             'caps'               => [
                 'install_plugins'  => current_user_can('install_plugins'),
                 'update_plugins'   => current_user_can('update_plugins'),
