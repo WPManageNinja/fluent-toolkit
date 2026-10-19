@@ -1,7 +1,7 @@
 <template>
     <TopBar :active-view="activeView" @navigate="$emit('navigate', $event)">
         <template #actions>
-            <button class="ft-iconbtn" @click="getBetaPlugins(true)" title="Refresh plugin list" aria-label="Refresh plugin list">
+            <button class="ft-iconbtn" @click="getBetaPlugins(true)" :title="$t('Refresh plugin list')" :aria-label="$t('Refresh plugin list')">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
             </button>
         </template>
@@ -17,19 +17,20 @@
                 </svg>
             </span>
             <div class="ft-update-banner-text">
-                <strong>FluentHub {{ sourceVersion ? 'v' + sourceVersion + ' ' : 'update ' }}is available</strong>
-                <span>You're running v{{ appVars.version }}. Update to get the latest features and fixes.</span>
+                <strong>{{ updateBannerTitle }}</strong>
+                <!-- translators: %s is the installed FluentHub version, for example v2.1.3 -->
+                <span>{{ $t("You're running %s. Update to get the latest features and fixes.", 'v' + appVars.version) }}</span>
             </div>
             <button class="ft-btn ft-btn-accent" :disabled="installing" @click="updateToolkit()">
-                {{ installing ? 'Updating…' : 'Update Now' }}
+                {{ installing ? $t('Updating…') : $t('Update now') }}
             </button>
         </section>
 
-        <section class="ft-card ft-workspace-card" v-loading="unifiedUiSaving" element-loading-text="Saving setting...">
+        <section class="ft-card ft-workspace-card" v-loading="unifiedUiSaving" :element-loading-text="$t('Saving…')">
             <header class="ft-card-head">
-                <span class="ft-card-eyebrow">Unified Fluent Workspace</span>
-                <h2 class="ft-card-title">Fluent Unified UI</h2>
-                <p class="ft-card-sub">Turn on a unified Fluent workspace that brings your Fluent tools into one cleaner, focused and easier-to-manage experience.</p>
+                <span class="ft-card-eyebrow">{{ $t('Unified Fluent Workspace') }}</span>
+                <h2 class="ft-card-title">{{ $t('Fluent Unified UI') }}</h2>
+                <p class="ft-card-sub">{{ $t('Open all your Fluent plugins in one workspace, with a shared sidebar to move between them.') }}</p>
             </header>
 
             <ul class="ft-setting-list">
@@ -43,10 +44,10 @@
                         </svg>
                     </span>
                     <div class="ft-setting-text">
-                        <strong>Enable Unified UI</strong>
-                        <span>{{ unifiedUiStatusLabel }} · Replace the default Fluent admin screens with the unified workspace.</span>
+                        <strong>{{ $t('Enable Unified UI') }}</strong>
+                        <span>{{ unifiedUiStatusLabel }} · {{ $t('Show Fluent plugin screens inside the unified workspace.') }}</span>
                     </div>
-                    <label class="ft-switch" title="Enable Fluent Unified UI">
+                    <label class="ft-switch" :title="$t('Enable Fluent Unified UI')">
                         <input
                             type="checkbox"
                             :checked="unifiedUiEnabled"
@@ -68,10 +69,10 @@
                         </svg>
                     </span>
                     <div class="ft-setting-text">
-                        <strong>Merge admin menus</strong>
-                        <span>Hide each Fluent plugin's top-level WordPress menu so everything opens from the unified workspace.</span>
+                        <strong>{{ $t('Merge admin menus') }}</strong>
+                        <span>{{ $t("Hide each Fluent plugin's top-level WordPress menu so everything opens from the unified workspace.") }}</span>
                     </div>
-                    <label class="ft-switch" :title="unifiedUiEnabled ? 'Merge top-level Fluent menus' : 'Enable Unified UI first'">
+                    <label class="ft-switch" :title="unifiedUiEnabled ? $t('Merge top-level Fluent menus') : $t('Enable Unified UI first')">
                         <input
                             type="checkbox"
                             :checked="mergeAdminMenus"
@@ -92,10 +93,10 @@
                         </svg>
                     </span>
                     <div class="ft-setting-text">
-                        <strong>Hide app headers</strong>
-                        <span>Hide the in-app headers of FluentCRM, Cart, Support, Forms, Booking and similar apps for a cleaner workspace.</span>
+                        <strong>{{ $t('Hide app headers') }}</strong>
+                        <span>{{ $t('Hide the built-in headers of FluentCRM, FluentCart, Fluent Support and other Fluent apps for a cleaner workspace.') }}</span>
                     </div>
-                    <label class="ft-switch" :title="unifiedUiEnabled ? 'Hide native app headers' : 'Enable Unified UI first'">
+                    <label class="ft-switch" :title="unifiedUiEnabled ? $t('Hide built-in app headers') : $t('Enable Unified UI first')">
                         <input
                             type="checkbox"
                             :checked="hideAppHeaders"
@@ -111,28 +112,31 @@
         <section class="ft-hero ft-mcp-hero ft-mcp-dashboard-banner">
             <div class="ft-hero-inner">
                 <div class="ft-mcp-banner-copy">
-                    <div class="ft-hero-eyebrow">MCP for agents</div>
-                    <h1>Connect AI agents to Fluent plugins.</h1>
-                    <p>Enable MCP servers, review the available Fluent plugin surface, and manage connection details for Codex, Claude, Cursor, and other HTTP MCP clients.</p>
+                    <div class="ft-hero-eyebrow">{{ $t('MCP for agents') }}</div>
+                    <h1>{{ $t('Connect AI agents to Fluent plugins') }}</h1>
+                    <p>{{ $t('MCP_Banner_Desc') }}</p>
                 </div>
                 <div class="ft-mcp-banner-actions">
-                    <button class="ft-btn ft-btn-primary" @click="$emit('navigate', 'mcp')">Manage MCP</button>
+                    <button class="ft-btn ft-btn-primary" @click="$emit('navigate', 'mcp')">{{ $t('Manage MCP') }}</button>
                 </div>
             </div>
         </section>
 
         <div class="ft-section-head ft-beta-head">
             <div>
-                <span class="ft-section-kicker">Fluent ecosystem</span>
-                <h2>Plugins &amp; Add-ons</h2>
+                <span class="ft-section-kicker">{{ $t('Fluent ecosystem') }}</span>
+                <h2>{{ $t('Plugins & Add-ons') }}</h2>
             </div>
             <div class="ft-beta-stats">
-                <button class="ft-iconbtn" @click="getBetaPlugins(true)" title="Refresh registry" aria-label="Refresh">
+                <button class="ft-iconbtn" @click="getBetaPlugins(true)" :title="$t('Refresh plugin list')" :aria-label="$t('Refresh plugin list')">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
                 </button>
-                <span>{{ betaPlugins.length }} available</span>
-                <span>{{ installedCount }} installed</span>
-                <span :class="{ 'ft-warn-text': updatesCount > 0 }">{{ updatesCount }} updates</span>
+                <!-- translators: %s is the number of plugins in the list -->
+                <span>{{ $t('Available: %s', betaPlugins.length) }}</span>
+                <!-- translators: %s is the number of plugins installed on this site -->
+                <span>{{ $t('Installed: %s', installedCount) }}</span>
+                <!-- translators: %s is the number of plugins with an update available -->
+                <span :class="{ 'ft-warn-text': updatesCount > 0 }">{{ $t('Updates: %s', updatesCount) }}</span>
             </div>
         </div>
 
@@ -140,9 +144,9 @@
         <div class="ft-list">
             <div v-if="loading" class="ft-plugin-skeleton">
                 <div class="ft-list-head">
-                    <div>Plugin</div>
-                    <div>Status</div>
-                    <div style="text-align:right">Action</div>
+                    <div>{{ $t('Plugin') }}</div>
+                    <div>{{ $t('Status') }}</div>
+                    <div style="text-align:right">{{ $t('Action') }}</div>
                 </div>
                 <div class="ft-row" v-for="i in 6" :key="i">
                     <div class="ft-plugin">
@@ -159,11 +163,11 @@
                     </div>
                 </div>
             </div>
-            <div v-else v-loading="installing" element-loading-text="Installing… Please wait.">
+            <div v-else v-loading="installing" :element-loading-text="$t('Installing… Please wait.')">
                 <div class="ft-list-head">
-                    <div>Plugin</div>
-                    <div>Status</div>
-                    <div style="text-align: right;">Action</div>
+                    <div>{{ $t('Plugin') }}</div>
+                    <div>{{ $t('Status') }}</div>
+                    <div style="text-align: right;">{{ $t('Action') }}</div>
                 </div>
                 <div class="ft-row" v-for="(plugin, index) in filteredPlugins" :key="plugin.slug">
                     <!-- Plugin info -->
@@ -175,28 +179,28 @@
                         <div class="ft-plugin-info">
                             <div class="ft-plugin-name">
                                 {{ plugin.name }}
-                                <span v-if="plugin.has_beta_update || plugin.beta_version" class="ft-tag ft-tag-rc">RC</span>
-                                <span v-if="plugin.is_beta" class="ft-tag ft-tag-beta">Beta</span>
+                                <span v-if="plugin.has_beta_update || plugin.beta_version" class="ft-tag ft-tag-rc">{{ $_x('RC', 'Release candidate badge') }}</span>
+                                <span v-if="plugin.is_beta" class="ft-tag ft-tag-beta">{{ $t('Beta') }}</span>
                             </div>
                             <div class="ft-plugin-desc">{{ plugin.sub_title }}</div>
                             <div class="ft-meta-row">
                                 <template v-if="plugin.installed_version">
-                                    <span>Installed</span>
+                                    <span>{{ $t('Installed') }}</span>
                                     <span class="ft-dot-sep"></span>
                                     <span class="ft-version-installed ft-mono">{{ plugin.installed_version }}</span>
                                     <template v-if="plugin.is_pro">
                                         <span class="ft-dot-sep"></span>
-                                        <span>License: {{ plugin.license_key ? 'Active' : 'n/a' }}</span>
+                                        <span>{{ plugin.license_key ? $t('License key added') : $t('No license key') }}</span>
                                     </template>
                                 </template>
-                                <span v-else>Not installed</span>
+                                <span v-else>{{ $t('Not installed') }}</span>
                                 <template v-if="plugin.changelog_url">
                                     <span class="ft-dot-sep"></span>
-                                    <a :href="plugin.changelog_url" target="_blank" rel="noopener" class="ft-meta-link">Changelog</a>
+                                    <a :href="plugin.changelog_url" target="_blank" rel="noopener" class="ft-meta-link">{{ $t('Changelog') }}</a>
                                 </template>
                                 <template v-if="plugin.dashboard_url">
                                     <span class="ft-dot-sep"></span>
-                                    <a :href="plugin.dashboard_url" class="ft-meta-link">Settings</a>
+                                    <a :href="plugin.dashboard_url" class="ft-meta-link">{{ $t('Settings') }}</a>
                                 </template>
                             </div>
                         </div>
@@ -204,24 +208,26 @@
 
                     <!-- Status -->
                     <div>
-                        <span v-if="!plugin.installed_version" class="ft-status ft-status-notinstalled">Not installed</span>
+                        <span v-if="!plugin.installed_version" class="ft-status ft-status-notinstalled">{{ $t('Not installed') }}</span>
                         <span v-else-if="plugin.is_active === false" class="ft-status ft-status-notinstalled">
-                            <span class="ft-dot"></span>Inactive
+                            <span class="ft-dot"></span>{{ $t('Inactive') }}
                         </span>
                         <span v-else-if="plugin.has_update || plugin.has_beta_update" class="ft-status ft-status-update">
-                            <span class="ft-dot ft-dot-warn"></span>Update available
+                            <span class="ft-dot ft-dot-warn"></span>{{ $t('Update available') }}
                         </span>
                         <span v-else class="ft-status ft-status-ok">
-                            <span class="ft-dot ft-dot-ok"></span>Up to date
+                            <span class="ft-dot ft-dot-ok"></span>{{ $t('Up to date') }}
                         </span>
                     </div>
 
                     <!-- Actions -->
                     <div class="ft-actions">
-                        <button v-if="!plugin.installed_version && caps.install_plugins" @click="installPlugin(plugin)" class="ft-btn ft-btn-primary">Install</button>
-                        <button v-else-if="plugin.is_active === false && caps.activate_plugins" @click="activatePlugin(plugin)" class="ft-btn ft-btn-primary">Activate</button>
-                        <button v-else-if="plugin.has_beta_update && caps.update_plugins" @click="installPlugin(plugin, 'yes')" class="ft-btn ft-btn-accent">Update to {{ plugin.beta_version }}</button>
-                        <button v-else-if="plugin.has_update && caps.update_plugins" @click="installPlugin(plugin)" class="ft-btn ft-btn-accent">Update to {{ plugin.stable_version }}</button>
+                        <button v-if="!plugin.installed_version && caps.install_plugins" @click="installPlugin(plugin)" class="ft-btn ft-btn-primary">{{ $t('Install') }}</button>
+                        <button v-else-if="plugin.is_active === false && caps.activate_plugins" @click="activatePlugin(plugin)" class="ft-btn ft-btn-primary">{{ $t('Activate') }}</button>
+                        <!-- translators: %s is the version number the plugin will be updated to -->
+                        <button v-else-if="plugin.has_beta_update && caps.update_plugins" @click="installPlugin(plugin, 'yes')" class="ft-btn ft-btn-accent">{{ $t('Update to %s', plugin.beta_version) }}</button>
+                        <!-- translators: %s is the version number the plugin will be updated to -->
+                        <button v-else-if="plugin.has_update && caps.update_plugins" @click="installPlugin(plugin)" class="ft-btn ft-btn-accent">{{ $t('Update to %s', plugin.stable_version) }}</button>
                         <span v-else>
                             --
                         </span>
@@ -229,14 +235,14 @@
                 </div>
 
                 <div v-if="filteredPlugins.length === 0" class="ft-empty">
-                    No plugins available right now.
+                    {{ $t('No plugins available right now.') }}
                 </div>
             </div>
         </div>
 
         <!-- Footer -->
         <div class="ft-footer">
-            <div>Registry synced · <span @click="getBetaPlugins(true)" style="cursor: pointer; color: var(--accent);">Refresh now</span></div>
+            <div>{{ $t('Registry synced') }} · <span @click="getBetaPlugins(true)" style="cursor: pointer; color: var(--accent);">{{ $t('Refresh now') }}</span></div>
             <!-- <div>Toggle <a href="#">beta channel</a> in settings to opt in to release candidates</div> -->
         </div>
 
@@ -309,7 +315,15 @@ export default {
             return plugins;
         },
         unifiedUiStatusLabel() {
-            return this.unifiedUiEnabled ? 'Enabled' : 'Disabled';
+            return this.unifiedUiEnabled ? this.$t('Enabled') : this.$t('Disabled');
+        },
+        updateBannerTitle() {
+            if (!this.sourceVersion) {
+                return this.$t('A FluentHub update is available');
+            }
+
+            // translators: %s is the new FluentHub version, for example v2.1.4
+            return this.$t('FluentHub %s is available', 'v' + this.sourceVersion);
         },
     },
     methods: {
@@ -374,9 +388,10 @@ export default {
         installPlugin(plugin, beta = '') {
             let licenseKey = plugin.license_key;
             if (plugin.require_license == 'yes' && !plugin.license_key) {
-                licenseKey = prompt('Please enter your license key for ' + plugin.name + ' to install.');
+                // translators: %s is the plugin name
+                licenseKey = prompt(this.$t('Enter your license key to install %s.', plugin.name));
                 if (!licenseKey) {
-                    this.$notify.error('Please enter a valid license key.');
+                    this.$notify.error(this.$t('Please enter a valid license key.'));
                     return;
                 }
             }

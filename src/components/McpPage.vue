@@ -1,7 +1,7 @@
 <template>
     <TopBar :active-view="activeView" @navigate="$emit('navigate', $event)">
         <template #actions>
-            <button class="ft-iconbtn" @click="getOverview()" title="Refresh MCP status" aria-label="Refresh MCP status">
+            <button class="ft-iconbtn" @click="getOverview()" :title="$t('Refresh MCP status')" :aria-label="$t('Refresh MCP status')">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
             </button>
         </template>
@@ -11,10 +11,10 @@
 
         <div class="ft-mcp-empty" v-if="showEmptyBanner">
             <div>
-                <strong>No Fluent plugins are exposing MCP yet.</strong>
-                <p>Install or update a Fluent plugin with MCP support. Once a plugin registers its MCP endpoint, it will appear here with tools, status, and connection snippets.</p>
+                <strong>{{ $t('No Fluent plugins are exposing MCP yet.') }}</strong>
+                <p>{{ $t('MCP_Empty_Desc') }}</p>
             </div>
-            <button class="ft-btn ft-btn-ghost" @click="getOverview()">Refresh</button>
+            <button class="ft-btn ft-btn-ghost" @click="getOverview()">{{ $t('Refresh') }}</button>
         </div>
 
         <div class="ft-toolbar" v-if="products.length">
@@ -38,7 +38,7 @@
             </div>
         </div>
 
-        <div class="ft-mcp-layout" v-loading="loading" element-loading-text="Loading MCP status…">
+        <div class="ft-mcp-layout" v-loading="loading" :element-loading-text="$t('Loading MCP status…')">
             <section class="ft-panel ft-mcp-status" v-if="activeProduct">
                 <div class="ft-panel-head">
                     <div>
@@ -58,36 +58,37 @@
 
                 <div class="ft-mcp-grid">
                     <div class="ft-mcp-metric">
-                        <span>Endpoint</span>
+                        <span>{{ $t('Endpoint') }}</span>
                         <strong class="ft-mono">{{ activeProduct.endpoint_url }}</strong>
                     </div>
                     <div class="ft-mcp-metric">
-                        <span>Tools available</span>
+                        <span>{{ $t('Tools available') }}</span>
                         <strong>{{ activeProduct.tools_count }}</strong>
                     </div>
                     <div class="ft-mcp-metric">
-                        <span>MCP status</span>
+                        <span>{{ $t('MCP status') }}</span>
                         <strong>{{ statusLabel(activeProduct.status) }}</strong>
                     </div>
                     <div class="ft-mcp-metric">
-                        <span>MCP adapter</span>
+                        <span>{{ $t('MCP adapter') }}</span>
                         <strong>{{ adapterLabel }}</strong>
                     </div>
                 </div>
 
                 <div class="ft-mcp-note" v-if="!canToggle && activeProduct.slug !== 'fluent-crm'">
-                    {{ activeProduct.name }} status is provided by hook. Enable and disable is handled only by Toolkit-supported manual handlers.
+                    <!-- translators: %s is the plugin name, for example Fluent Support -->
+                    {{ $t("%s manages its own MCP setting, so it can't be turned on or off here.", activeProduct.name) }}
                 </div>
                 <div class="ft-mcp-note" v-else-if="!overview.adapter.available">
-                    The WordPress MCP adapter is not available. Activate Fluent Toolkit's bundled adapter or the standalone adapter plugin.
+                    {{ $t('MCP_Adapter_Missing') }}
                 </div>
             </section>
 
             <section class="ft-panel ft-mcp-connect" v-if="activeProduct">
                 <div class="ft-panel-head">
                     <div>
-                        <h2>Connect client</h2>
-                        <p>Each Fluent plugin runs its own MCP server, so your client needs one entry per endpoint. The same Application Password works for all of them.</p>
+                        <h2>{{ $t('Connect client') }}</h2>
+                        <p>{{ $t('MCP_Connect_Desc') }}</p>
                     </div>
                     <div class="ft-connect-actions">
                         <button
@@ -96,21 +97,21 @@
                             :disabled="creatingPassword"
                             @click="createAppPassword()"
                         >
-                            {{ creatingPassword ? 'Creating…' : 'Create Application Password' }}
+                            {{ creatingPassword ? $t('Creating…') : $t('Create application password') }}
                         </button>
                         <a class="ft-btn ft-btn-ghost" :href="appPasswordsUrl" target="_blank" rel="noopener">
-                            {{ canCreateAppPassword ? 'Manage passwords' : 'Create Application Password' }}
+                            {{ canCreateAppPassword ? $t('Manage passwords') : $t('Create application password') }}
                         </a>
                     </div>
                 </div>
 
                 <div class="ft-credential-row">
                     <label>
-                        <span>Username</span>
+                        <span>{{ $t('Username') }}</span>
                         <input type="text" v-model="username" placeholder="wp-user" />
                     </label>
                     <label>
-                        <span>Application password</span>
+                        <span>{{ $t('Application password') }}</span>
                         <div class="ft-input-affix">
                             <input
                                 :type="showPassword ? 'text' : 'password'"
@@ -120,8 +121,8 @@
                             <button
                                 type="button"
                                 class="ft-input-btn"
-                                :title="showPassword ? 'Hide password' : 'Show password'"
-                                :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                                :title="showPassword ? $t('Hide password') : $t('Show password')"
+                                :aria-label="showPassword ? $t('Hide password') : $t('Show password')"
                                 @click="showPassword = !showPassword"
                             >
                                 <svg v-if="showPassword" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 4.24A9.1 9.1 0 0 1 12 4c7 0 10 8 10 8a18.5 18.5 0 0 1-2.16 3.19M6.6 6.6A18.5 18.5 0 0 0 2 12s3 8 10 8a9.7 9.7 0 0 0 5.4-1.6"/><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88"/><path d="m2 2 20 20"/></svg>
@@ -132,7 +133,9 @@
                 </div>
 
                 <div class="ft-mcp-note ft-mcp-note-ok" v-if="generatedName">
-                    Created <strong>{{ generatedName }}</strong> and filled it in above. WordPress shows an application password only once — copy the snippet before you leave this page. You can revoke it any time from your profile.
+                    <!-- translators: %s is the name of the new application password, for example FluentHub MCP -->
+                    {{ $t('Created the application password "%s" and filled it in above.', generatedName) }}
+                    {{ $t('App_Password_Once_Notice') }}
                 </div>
                 <div class="ft-mcp-note" v-else-if="appPasswordNotice">
                     {{ appPasswordNotice }}
@@ -156,14 +159,15 @@
                         :aria-selected="snippetScope === 'single'"
                         @click="snippetScope = 'single'"
                     >
-                        {{ activeProduct.name }} only
+                        <!-- translators: %s is the plugin name, for example FluentCRM -->
+                        {{ $t('%s only', activeProduct.name) }}
                     </button>
                     <button
                         class="ft-channel"
                         :aria-selected="snippetScope === 'all'"
                         @click="snippetScope = 'all'"
                     >
-                        All enabled
+                        {{ $t('All enabled plugins') }}
                         <span class="ft-channel-count">{{ enabledProducts.length }}</span>
                     </button>
                 </div>
@@ -171,13 +175,15 @@
                 <div class="ft-snippet-box">
                     <div class="ft-snippet-head">
                         <div>{{ activeClientInfo.note }}</div>
-                        <button class="ft-btn ft-btn-primary" @click="copySnippet()">Copy</button>
+                        <button class="ft-btn ft-btn-primary" @click="copySnippet()">{{ $t('Copy') }}</button>
                     </div>
                     <pre class="ft-snippet"><code>{{ activeSnippet }}</code></pre>
                 </div>
 
                 <div class="ft-mcp-note" v-if="snippetScope === 'all' && canCombine">
-                    Adds every enabled endpoint in one paste: {{ enabledProducts.map(product => product.name).join(', ') }}. Products that are switched off are left out — enable them and copy again.
+                    <!-- translators: %s is a comma-separated list of plugin names -->
+                    {{ $t('Adds every enabled endpoint in one paste: %s.', enabledProducts.map(product => product.name).join(', ')) }}
+                    {{ $t('Plugins with MCP turned off are left out. Turn MCP on for them and copy again.') }}
                 </div>
             </section>
         </div>
@@ -225,11 +231,11 @@ export default {
             username: window.fluentToolkitVars.current_user_login || '',
             appPassword: '',
             clients: [
-                { key: 'codex', label: 'Codex', note: 'Paste these fields into Codex custom MCP settings.' },
-                { key: 'copilot', label: 'GitHub Copilot', note: 'Paste this JSON into VS Code Copilot MCP configuration.' },
-                { key: 'claude-desktop', label: 'Claude Desktop', note: 'Paste this JSON into claude_desktop_config.json and restart Claude Desktop.' },
-                { key: 'cursor', label: 'Cursor', note: 'Paste this JSON into Cursor MCP settings and restart Cursor.' },
-                { key: 'generic', label: 'Generic', note: 'Use this URL and Basic Auth header with any HTTP MCP client.' },
+                { key: 'codex', label: 'Codex', note: this.$t('Paste these fields into the Codex custom MCP settings.') },
+                { key: 'copilot', label: 'GitHub Copilot', note: this.$t('Paste this JSON into the GitHub Copilot MCP configuration in VS Code.') },
+                { key: 'claude-desktop', label: 'Claude Desktop', note: this.$t('Paste this JSON into claude_desktop_config.json and restart Claude Desktop.') },
+                { key: 'cursor', label: 'Cursor', note: this.$t('Paste this JSON into the Cursor MCP settings and restart Cursor.') },
+                { key: 'generic', label: this.$_x('Generic', 'MCP client type'), note: this.$t('Use this URL and Basic Auth header with any HTTP MCP client.') },
             ],
         };
     },
@@ -262,27 +268,27 @@ export default {
             }
 
             const notices = {
-                site_disabled: 'Application passwords are disabled on this site. WordPress requires HTTPS for them unless the site runs in a local environment.',
-                user_disabled: 'Application passwords are disabled for your user account.',
-                unsupported: 'This WordPress version does not support application passwords.',
+                site_disabled: this.$t('App_Password_Site_Disabled'),
+                user_disabled: this.$t('Application passwords are disabled for your user account.'),
+                unsupported: this.$t('This WordPress version does not support application passwords.'),
             };
 
             return notices[this.appPasswordSupport.reason] || '';
         },
         adapterLabel() {
             if (!this.overview.adapter.available) {
-                return 'Missing';
+                return this.$_x('Missing', 'MCP adapter status');
             }
 
             if (this.overview.adapter.provider === 'plugin') {
-                return 'Standalone plugin';
+                return this.$t('Standalone plugin');
             }
 
             if (this.overview.adapter.provider === 'toolkit') {
-                return 'Toolkit bundled';
+                return this.$t('Bundled with FluentHub');
             }
 
-            return 'Available';
+            return this.$_x('Available', 'MCP adapter status');
         },
         activeClientInfo() {
             return this.clients.find(client => client.key === this.activeClient) || this.clients[0];
@@ -468,28 +474,28 @@ export default {
         },
         copySnippet() {
             if (!window.navigator || !window.navigator.clipboard) {
-                this.$notify.warning('Clipboard is not available in this browser.');
+                this.$notify.warning(this.$t('Copying is not available on this page. Select the snippet and copy it manually.'));
                 return;
             }
 
             window.navigator.clipboard.writeText(this.activeSnippet)
                 .then(() => {
-                    this.$notify.success('Copied.');
+                    this.$notify.success(this.$t('Copied.'));
                 })
                 .catch(() => {
-                    this.$notify.error('Could not copy the connection snippet.');
+                    this.$notify.error(this.$t('Could not copy the connection snippet.'));
                 });
         },
         statusLabel(status) {
             const labels = {
-                ready: 'Ready',
-                disabled: 'Disabled',
-                adapter_required: 'Adapter required',
-                crm_required: 'Product required',
-                plugin_required: 'Product required',
+                ready: this.$_x('Ready', 'MCP status'),
+                disabled: this.$_x('Disabled', 'MCP status'),
+                adapter_required: this.$t('Adapter required'),
+                crm_required: this.$t('Plugin not active'),
+                plugin_required: this.$t('Plugin not active'),
             };
 
-            return labels[status] || 'Unknown';
+            return labels[status] || this.$_x('Unknown', 'MCP status');
         },
         statusClass(status) {
             if (status === 'ready') {

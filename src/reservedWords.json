@@ -1,1 +1,8 @@
-{}
+{
+    "App_Password_Once_Notice": "WordPress shows an application password only once, so copy the snippet before you leave this page. You can revoke it at any time from your profile.",
+    "App_Password_Site_Disabled": "Application passwords are disabled on this site. WordPress requires HTTPS for them unless the site runs in a local environment.",
+    "MCP_Adapter_Missing": "The WordPress MCP adapter is not loaded. MCP needs WordPress 6.9 or later, so update WordPress first. If your site already runs 6.9 or later, install and activate the standalone MCP Adapter plugin.",
+    "MCP_Banner_Desc": "Turn on MCP servers for your Fluent plugins, see which tools each one exposes and get connection settings for Codex, Claude, Cursor and other HTTP MCP clients.",
+    "MCP_Connect_Desc": "Each Fluent plugin runs its own MCP server, so your client needs one entry per endpoint. The same application password works for all of them.",
+    "MCP_Empty_Desc": "Install or update a Fluent plugin that supports MCP. Once it registers an MCP endpoint, it shows up here with its tools, status and connection snippets."
+}

@@ -1,10 +1,10 @@
 <template>
     <header class="ft-topbar">
         <div class="ft-brand">
-            <img class="ft-brand-logo" :src="brandLogoUrl" alt="FluentHub logo" />
+            <img class="ft-brand-logo" :src="brandLogoUrl" :alt="$t('FluentHub logo')" />
             <span class="ft-brand-version">v{{ appVars.version }}</span>
         </div>
-        <nav class="ft-view-tabs" role="tablist" aria-label="FluentHub sections">
+        <nav class="ft-view-tabs" role="tablist" :aria-label="$t('FluentHub sections')">
             <button
                 v-for="tab in tabs"
                 :key="tab.view"
@@ -17,7 +17,7 @@
         <div class="ft-topbar-actions">
             <slot name="actions"></slot>
             <div class="ft-theme-wrap" ref="themeWrap">
-                <button class="ft-iconbtn" @click="toggleThemeDropdown" :title="'Theme: ' + currentTheme" aria-label="Change color theme" :aria-expanded="themeDropdownOpen">
+                <button class="ft-iconbtn" @click="toggleThemeDropdown" :title="themeButtonTitle" :aria-label="$t('Change color theme')" :aria-expanded="themeDropdownOpen">
                     <!-- light -->
                     <svg v-if="resolvedTheme === 'light'" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
@@ -70,13 +70,13 @@ export default {
             _mediaQueryHandler: null,
             _clickOutsideHandler: null,
             tabs: [
-                { view: 'dashboard', label: 'Dashboard' },
-                { view: 'mcp', label: 'MCP' },
+                { view: 'dashboard', label: this.$t('Dashboard') },
+                { view: 'mcp', label: this.$t('MCP') },
             ],
             themeOptions: [
-                { value: 'light', label: 'Light' },
-                { value: 'dark',  label: 'Dark' },
-                { value: 'system', label: 'System' },
+                { value: 'light', label: this.$_x('Light', 'Color theme') },
+                { value: 'dark',  label: this.$_x('Dark', 'Color theme') },
+                { value: 'system', label: this.$_x('System', 'Color theme') },
             ],
         };
     },
@@ -86,6 +86,11 @@ export default {
                 return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
             }
             return this.currentTheme;
+        },
+        themeButtonTitle() {
+            const option = this.themeOptions.find(opt => opt.value === this.currentTheme);
+            // translators: %s is the selected color theme: Light, Dark or System
+            return this.$t('Theme: %s', option ? option.label : this.currentTheme);
         },
         brandLogoUrl() {
             const pluginUrl = (this.appVars && this.appVars.plugin_url) ? this.appVars.plugin_url : '';
