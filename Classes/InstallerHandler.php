@@ -10,7 +10,7 @@ class InstallerHandler
     public static function backgroundInstallerDirect($plugin_to_install, $downloadUrl)
     {
         if (empty($plugin_to_install['repo-slug'])) {
-            return new \WP_Error('invalid_plugin', __('Invalid plugin slug.', 'fluent-beta-testing'));
+            return new \WP_Error('invalid_plugin', __('Invalid plugin slug.', 'fluent-toolkit'));
         }
 
         require_once ABSPATH . 'wp-admin/includes/file.php';

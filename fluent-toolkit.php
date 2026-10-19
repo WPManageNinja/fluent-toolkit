@@ -397,7 +397,9 @@ class FluentToolkitBootstrap
 
         wp_send_json([
             'message' => $enabled
+                /* translators: %s is the plugin name, for example FluentCRM */
                 ? sprintf(__('%s MCP tools are enabled.', 'fluent-toolkit'), $productName)
+                /* translators: %s is the plugin name, for example FluentCRM */
                 : sprintf(__('%s MCP tools are disabled.', 'fluent-toolkit'), $productName),
             'status'  => $status,
         ], 200);

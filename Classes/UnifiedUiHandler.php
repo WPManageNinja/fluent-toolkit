@@ -52,7 +52,7 @@ class UnifiedUiHandler
         $apps = [
             'fluentcrm-admin' => [
                 'disabled'      => !$crmMenu,
-                'title'         => 'CRM',
+                'title'         => __('CRM', 'fluent-toolkit'),
                 'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentcrm_icon.svg',
                 'logo'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentcrm-logo.svg',
                 'items'         => $crmMenu,
@@ -61,7 +61,7 @@ class UnifiedUiHandler
             ],
             'fluent-cart'     => [
                 'disabled'      => !$cartMenu,
-                'title'         => 'Commerce',
+                'title'         => __('Commerce', 'fluent-toolkit'),
                 'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentcart_icon.svg',
                 'logo'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentcart_logo.svg',
                 'items'         => $cartMenu,
@@ -70,7 +70,7 @@ class UnifiedUiHandler
             ],
             'fluent_forms'    => [
                 'disabled'      => !$formsMenu,
-                'title'         => 'Forms',
+                'title'         => __('Forms', 'fluent-toolkit'),
                 'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentforms_icon.svg',
                 'logo'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentforms_logo.svg',
                 'items'         => $formsMenu,
@@ -79,7 +79,7 @@ class UnifiedUiHandler
             ],
             'fluent-support'  => [
                 'disabled'      => !$supportMenu,
-                'title'         => 'Support Tickets',
+                'title'         => __('Support Tickets', 'fluent-toolkit'),
                 'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentsupport_icon.svg',
                 'logo'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentsupport_logo.svg',
                 'items'         => $supportMenu,
@@ -88,7 +88,7 @@ class UnifiedUiHandler
             ],
             'fluent-booking'  => [
                 'disabled'      => !$bookingMenu,
-                'title'         => 'Appointments',
+                'title'         => __('Appointments', 'fluent-toolkit'),
                 'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentbooking_icon.svg',
                 'logo'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentbooking_logo.svg',
                 'items'         => $bookingMenu,
@@ -97,7 +97,7 @@ class UnifiedUiHandler
             ],
             'fluent-boards'   => [
                 'disabled'      => !$boardsMenu,
-                'title'         => 'Projects',
+                'title'         => __('Projects', 'fluent-toolkit'),
                 'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentboards_icon.svg',
                 'logo'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentboards_logo.svg',
                 'items'         => $boardsMenu,
@@ -106,7 +106,7 @@ class UnifiedUiHandler
             ],
             'wppayform.php'   => [
                 'disabled'      => !$paymatticMenu,
-                'title'         => 'Payments & Donations',
+                'title'         => __('Payments & Donations', 'fluent-toolkit'),
                 'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/wppaymentform_icon.png',
                 'items'         => $paymatticMenu,
                 'has_dark_mode' => false,
@@ -114,7 +114,7 @@ class UnifiedUiHandler
             ],
             'ninja_tables'    => [
                 'disabled'      => !$tablesMenu,
-                'title'         => 'Data & Tables',
+                'title'         => __('Data & Tables', 'fluent-toolkit'),
                 'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/ninjatables_icon.svg',
                 'items'         => $tablesMenu,
                 'has_dark_mode' => false,
@@ -122,7 +122,7 @@ class UnifiedUiHandler
             ],
             'fluent-affiliate' => [
                 'disabled'      => !$affiliateMenu,
-                'title'         => 'Affiliates',
+                'title'         => __('Affiliates', 'fluent-toolkit'),
                 'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentaffiliate_icon.svg',
                 'items'         => $affiliateMenu,
                 'has_dark_mode' => false,
@@ -130,7 +130,7 @@ class UnifiedUiHandler
             ],
             'fluent-player'   => [
                 'disabled'      => !$playerMenu,
-                'title'         => 'Media & Player',
+                'title'         => __('Media & Player', 'fluent-toolkit'),
                 'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentplayer_icon.svg',
                 'items'         => $playerMenu,
                 'has_dark_mode' => false,
@@ -139,7 +139,7 @@ class UnifiedUiHandler
             ],
             'fluent-auth'     => [
                 'disabled'      => !$authMenu,
-                'title'         => 'Auth & Security',
+                'title'         => __('Auth & Security', 'fluent-toolkit'),
                 'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentauth_icon.svg',
                 'items'         => $authMenu,
                 'has_dark_mode' => false,
@@ -148,7 +148,7 @@ class UnifiedUiHandler
             ],
             'fluent-mail'     => [
                 'disabled'      => !$smtpMenu,
-                'title'         => 'Email Delivery (SMTP)',
+                'title'         => __('Email Delivery (SMTP)', 'fluent-toolkit'),
                 'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentsmtp_icon.svg',
                 'items'         => $smtpMenu,
                 'has_dark_mode' => false,
@@ -158,7 +158,7 @@ class UnifiedUiHandler
             ],
             'fluent-snippets' => [
                 'disabled'      => !$snippetsMenu,
-                'title'         => 'Code Snippets',
+                'title'         => __('Code Snippets', 'fluent-toolkit'),
                 'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentsnippets_icon.svg',
                 'items'         => $snippetsMenu,
                 'has_dark_mode' => true,
@@ -167,7 +167,7 @@ class UnifiedUiHandler
             ],
             'wpsocialninja.php' => [
                 'disabled'      => !$socialMenu,
-                'title'         => 'Social Reviews',
+                'title'         => __('Social Reviews', 'fluent-toolkit'),
                 'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/wpsocialninja_icon.svg',
                 'items'         => $socialMenu,
                 'has_dark_mode' => false,
@@ -176,7 +176,7 @@ class UnifiedUiHandler
             ],
             'fluent-community' => [
                 'disabled'      => !$communityMenu,
-                'title'         => 'Community',
+                'title'         => __('Community', 'fluent-toolkit'),
                 'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentcommunity_icon.svg',
                 'items'         => $communityMenu,
                 'has_dark_mode' => false,
@@ -185,7 +185,7 @@ class UnifiedUiHandler
             ],
             'fluent-toolkit' => [
                 'disabled'      => !current_user_can('manage_options'),
-                'title'         => 'Addons & AI Settings',
+                'title'         => __('Addons & AI Settings', 'fluent-toolkit'),
                 'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluenthub_icon.svg',
                 'has_dark_mode' => false,
                 'group'         => 'others',
@@ -619,7 +619,7 @@ class UnifiedUiHandler
                     <?php if ($toolkitUpdateVersion): ?>
                         <a class="fui-update-nag"
                            href="<?php echo esc_url(admin_url('admin.php?page=fluent-toolkit')); ?>"
-                           title="<?php echo esc_attr(sprintf(__('FluentHub %1$s is available (you have %2$s)', 'fluent-toolkit'), $toolkitUpdateVersion, FLUENT_TOOLKIT_VERSION)); ?>">
+                           title="<?php /* translators: %1$s is the new FluentHub version, %2$s is the installed version */ echo esc_attr(sprintf(__('FluentHub %1$s is available (you have %2$s)', 'fluent-toolkit'), $toolkitUpdateVersion, FLUENT_TOOLKIT_VERSION)); ?>">
                             <span class="fui-update-nag-dot" aria-hidden="true"></span>
                             <span class="fui-update-nag-text"><?php esc_html_e('Update FluentHub', 'fluent-toolkit'); ?></span>
                             <svg class="fui-update-nag-arrow" aria-hidden="true" viewBox="0 0 16 16" fill="none"

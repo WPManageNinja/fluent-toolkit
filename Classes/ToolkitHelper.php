@@ -7,91 +7,78 @@ class ToolkitHelper
     /**
      * Curated free Fluent plugins surfaced in the FluentHub dashboard.
      * `logo` is a filename in dist/images/; leave empty to fall back to initials.
+     * Descriptions live in freePluginSubTitles() so they can be translated.
      * Versions and download URLs are fetched separately and cached short-term.
      */
     const FREE_PLUGINS = [
         [
             'slug'      => 'fluent-crm',
             'name'      => 'FluentCRM',
-            'sub_title' => 'Self-hosted email marketing — no per-subscriber fees, full data ownership.',
             'logo'      => 'fluentcrm_icon.svg'
         ],
         [
             'slug'      => 'fluent-cart',
             'name'      => 'FluentCart',
-            'sub_title' => 'A modern e-commerce engine for selling digital and physical products.',
             'logo'      => 'fluentcart_icon.svg',
         ],
         [
             'slug'      => 'fluentform',
             'name'      => 'Fluent Forms',
-            'sub_title' => 'Drag-and-drop form builder with conditional logic, payments, and integrations.',
             'logo'      => 'fluentforms_icon.svg',
         ],
         [
             'slug'      => 'fluent-smtp',
             'name'      => 'FluentSMTP',
-            'sub_title' => 'Reliable WP email delivery via SES, SendGrid, Mailgun, Postmark, and more.',
             'logo'      => 'fluentsmtp_icon.svg',
         ],
         [
             'slug'      => 'fluent-community',
             'name'      => 'Fluent Community',
-            'sub_title' => 'Build a private community with spaces, courses, and member discussions.',
             'logo'      => 'fluentcommunity_icon.svg',
         ],
         [
             'slug'      => 'fluent-support',
             'name'      => 'Fluent Support',
-            'sub_title' => 'A complete helpdesk and ticketing system built into your WordPress admin.',
             'logo'      => 'fluentsupport_icon.svg',
         ],
         [
             'slug'      => 'fluent-booking',
             'name'      => 'Fluent Booking',
-            'sub_title' => 'Online appointment scheduling with calendar sync, reminders, and payments.',
             'logo'      => 'fluentbooking_icon.svg',
         ],
         [
             'slug'      => 'fluent-boards',
             'name'      => 'Fluent Boards',
-            'sub_title' => 'Kanban boards for managing tasks and projects inside WordPress.',
             'logo'      => 'fluentboards_icon.svg',
         ],
         [
             'slug'      => 'fluent-security',
             'name'      => 'FluentAuth',
-            'sub_title' => 'Two-factor auth, magic login, social logins, and brute-force protection.',
             'logo'      => 'fluentauth_icon.svg',
         ],
         [
             'slug'      => 'wp-payment-form',
             'name'      => 'Paymattic',
-            'sub_title' => 'Accept one-time and recurring payments with Stripe, PayPal, and more.',
             'logo'      => 'wppaymentform_icon.png',
         ],
         [
             'slug'      => 'ninja-tables',
             'name'      => 'Ninja Tables',
-            'sub_title' => 'Create responsive data tables from CSV, Google Sheets, or your database.',
             'logo'      => 'ninjatables_icon.png',
         ],
         [
             'slug'      => 'wp-social-reviews',
             'name'      => 'WP Social Ninja',
-            'sub_title' => 'Embed reviews, social feeds, testimonials, and chat widgets from Google, Facebook, Yelp, and more.',
             'logo'      => 'wpsocialninja_icon.svg',
         ],
         [
             'slug'      => 'fluent-affiliate',
             'name'      => 'FluentAffiliate',
-            'sub_title' => 'Self-hosted affiliate program management — track clicks, referrals, commissions, and payouts.',
             'logo'      => 'fluentaffiliate_icon.svg',
         ],
         [
             'slug'      => 'fluent-player',
             'name'      => 'FluentPlayer',
-            'sub_title' => 'Video player with lead capture forms, chapters, and playback interactions.',
             'logo'      => 'fluentplayer_icon.svg',
         ],
     ];
@@ -231,6 +218,30 @@ class ToolkitHelper
     }
 
     /**
+     * Translated one-line descriptions for FREE_PLUGINS, keyed by slug. Kept
+     * out of the constant because __() can't run in a constant expression.
+     */
+    private static function freePluginSubTitles()
+    {
+        return [
+            'fluent-crm'        => __('Self-hosted email marketing with no per-subscriber fees and full ownership of your data.', 'fluent-toolkit'),
+            'fluent-cart'       => __('A modern e-commerce engine for selling digital and physical products.', 'fluent-toolkit'),
+            'fluentform'        => __('Drag-and-drop form builder with conditional logic, payments, and integrations.', 'fluent-toolkit'),
+            'fluent-smtp'       => __('Reliable WP email delivery via SES, SendGrid, Mailgun, Postmark, and more.', 'fluent-toolkit'),
+            'fluent-community'  => __('Build a private community with spaces, courses, and member discussions.', 'fluent-toolkit'),
+            'fluent-support'    => __('A complete helpdesk and ticketing system built into your WordPress admin.', 'fluent-toolkit'),
+            'fluent-booking'    => __('Online appointment scheduling with calendar sync, reminders, and payments.', 'fluent-toolkit'),
+            'fluent-boards'     => __('Kanban boards for managing tasks and projects inside WordPress.', 'fluent-toolkit'),
+            'fluent-security'   => __('Two-factor auth, magic login, social logins, and brute-force protection.', 'fluent-toolkit'),
+            'wp-payment-form'   => __('Accept one-time and recurring payments with Stripe, PayPal, and more.', 'fluent-toolkit'),
+            'ninja-tables'      => __('Create responsive data tables from CSV, Google Sheets, or your database.', 'fluent-toolkit'),
+            'wp-social-reviews' => __('Embed reviews, social feeds, testimonials, and chat widgets from Google, Facebook, Yelp, and more.', 'fluent-toolkit'),
+            'fluent-affiliate'  => __('Self-hosted affiliate program management: track clicks, referrals, commissions and payouts.', 'fluent-toolkit'),
+            'fluent-player'     => __('Video player with lead capture forms, chapters, and playback interactions.', 'fluent-toolkit'),
+        ];
+    }
+
+    /**
      * Free Fluent plugins shown in the dashboard. Static metadata (name,
      * description, logo) is bundled; version + download URL is fetched from
      * wordpress.org and cached for 10 minutes.
@@ -238,6 +249,7 @@ class ToolkitHelper
     public static function getFreePlugins($willCache = true)
     {
         $versions = self::getFreePluginVersions($willCache);
+        $subTitles = self::freePluginSubTitles();
 
         $plugins = [];
         foreach (self::FREE_PLUGINS as $meta) {
@@ -249,7 +261,7 @@ class ToolkitHelper
             $plugins[] = [
                 'slug'           => $slug,
                 'name'           => $meta['name'],
-                'sub_title'      => $meta['sub_title'],
+                'sub_title'      => isset($subTitles[$slug]) ? $subTitles[$slug] : '',
                 'logo'           => $meta['logo']
                     ? FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/' . $meta['logo']
                     : '',
