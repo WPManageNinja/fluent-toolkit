@@ -30,6 +30,15 @@ echo "Generating translation map..."
 if ! node i18n.node.js; then echo 'translation map generation failed'; exit 1; fi
 if ! node tests/lint/translation-map.js; then echo 'translation map lint failed'; exit 1; fi
 
+# Refresh the POT with WP-CLI (keeps translators: comments; Loco drops them)
+if command -v wp >/dev/null 2>&1; then
+    echo "Generating language/${PLUGIN_SLUG}.pot..."
+    wp i18n make-pot . "language/${PLUGIN_SLUG}.pot" --domain=fluent-toolkit \
+        --exclude=node_modules,vendor,dist,tests,docs,builds,libs,language
+else
+    echo "Warning: wp-cli not found, shipping the committed language/${PLUGIN_SLUG}.pot as is" >&2
+fi
+
 # Run asset build
 echo "Compiling assets..."
 npx mix --production
@@ -44,6 +53,8 @@ cp index.php          "${BUILD_DIR}/"
 cp -r Classes "${BUILD_DIR}/Classes"
 
 cp -r includes "${BUILD_DIR}/includes"
+
+cp -r language "${BUILD_DIR}/language"
 
 # PHP modules + Composer dependencies
 cp -r libs "${BUILD_DIR}/libs"

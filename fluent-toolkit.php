@@ -5,6 +5,7 @@
  * Version: 2.1.3
  * Author: WPManageNinja
  * Text Domain: fluent-toolkit
+ * Domain Path: /language
  * Requires PHP: 7.4
  */
 
@@ -25,6 +26,10 @@ class FluentToolkitBootstrap
     {
 
         $this->loadClasses();
+
+        add_action('init', function () {
+            load_plugin_textdomain('fluent-toolkit', false, dirname(plugin_basename(__FILE__)) . '/language');
+        });
 
         add_action('admin_menu', array(\FluentToolkit\Classes\AdminMenu::class, 'register'));
 
