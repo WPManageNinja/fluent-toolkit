@@ -935,6 +935,7 @@ body.fui-wp-menu-open .fui-wordpress-menu-link .fui-wp-chevron {
 }
 
 .fui-sidebar-settings-btn,
+.fui-sidebar-collapse-btn,
 .fui-theme-toggle {
     display: inline-flex;
     align-items: center;
@@ -1054,6 +1055,146 @@ body.fui-wp-menu-open .fui-wordpress-menu-link .fui-wp-chevron {
     to   { opacity: 1; }
 }
 
+// Collapse toggle — sidebar-panel glyph whose arrow flips when collapsed.
+.fui-sidebar-collapse-btn {
+    svg {
+        width: 18px;
+        height: 18px;
+        display: block;
+    }
+    .fui-collapse-arrow {
+        transform-origin: 12px 10px;
+        transition: transform .2s ease;
+    }
+}
+
+// Letter fallback for menu items without an icon — only shown in the rail.
+.fui-app-icon--initial {
+    display: none;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+// Hover/focus label for rail items. Lives on <body> so the sidebar's
+// overflow clipping can't cut it off.
+.fui-rail-tip {
+    position: fixed;
+    z-index: 100000;
+    padding: 5px 9px;
+    border-radius: 6px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--fui-text);
+    color: var(--fui-text-inverse);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.3;
+    white-space: nowrap;
+    pointer-events: none;
+    transform: translateY(-50%);
+    box-shadow: 0 4px 12px rgba(15, 15, 15, 0.15);
+
+    &[hidden] {
+        display: none;
+    }
+}
+
+/* ── Collapsed rail (desktop only) ───────────────────────── */
+/* Toggled by `html.fui-sidebar-collapsed` (persisted in localStorage).
+   Shows only icons: workspace avatar, product marks, the current app's
+   items and the footer actions stacked vertically. Dropdowns are pinned
+   with position: fixed by unified-ui.js so the narrow sidebar doesn't
+   clip them. */
+@media (min-width: 783px) {
+    html.fui-sidebar-collapsed {
+        /* Beats the :root breakpoint values on specificity. */
+        --fui-sidebar-width: 64px;
+
+        .fluent_ui_sidebar {
+            padding: 14px 10px 0;
+        }
+
+        .fui-workspace {
+            justify-content: center;
+            padding: 6px;
+        }
+
+        .fui-workspace-info,
+        .fui-workspace-caret,
+        .fui-product-name,
+        .fui-app-title,
+        .fui-item-chevron,
+        .fui-submenu,
+        .fui-update-nag-text,
+        .fui-update-nag-arrow,
+        .fui-wp-chevron {
+            display: none;
+        }
+
+        .fui-product-header,
+        .fui-product-nav .fui-item .fui-apps-menu-item {
+            justify-content: center;
+            padding: 9px 0;
+        }
+
+        .fluent_ui_sidebar .fui-product-nav {
+            padding: 0;
+        }
+
+        /* Other products collapse to their mark (click navigates); the
+           current app's items always stay visible as icons. */
+        .fui-product-section:not(.fui-product-section--current) > .fui-product-nav {
+            display: none;
+        }
+
+        .fui-product-section--current > .fui-product-nav {
+            max-height: none;
+        }
+
+        .fui-product-section--current > .fui-product-header {
+            background: var(--fui-bg);
+        }
+
+        .fui-app-icon--initial {
+            display: inline-flex;
+        }
+
+        .fui-products-subhead {
+            margin: 12px 4px 6px;
+            padding-top: 0;
+            height: 0;
+            overflow: hidden;
+        }
+
+        .fui-sidebar-footer {
+            flex-direction: column;
+            margin: auto -10px 0;
+            padding: 10px 0;
+            gap: 6px;
+        }
+
+        .fui-sidebar-footer--left,
+        .fui-sidebar-footer--right {
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .fui-wordpress-menu-link {
+            padding: 4px;
+        }
+
+        .fui-update-nag {
+            width: auto;
+            padding: 8px;
+            justify-content: center;
+        }
+
+        .fui-collapse-arrow {
+            transform: rotate(180deg);
+        }
+    }
+}
+
 /* ── Responsive ──────────────────────────────────────────── */
 /* Plugin-specific responsive rules live in src/unified-ui/_fluent_*.scss */
 @media (max-width: 1100px) {
@@ -1097,6 +1238,11 @@ body.fui-wp-menu-open .fui-wordpress-menu-link .fui-wp-chevron {
     }
     .fui-mobile-nav {
         display: flex;
+    }
+
+    /* The drawer is already the compact form on mobile. */
+    .fui-sidebar-collapse-btn {
+        display: none;
     }
 
     .fui-mobile-nav .fui-mobile-toggle {

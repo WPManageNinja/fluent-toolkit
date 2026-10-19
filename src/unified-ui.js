@@ -7,6 +7,7 @@
  *  • product section / sub-item expand-collapse via click delegation
  *  • theme (light/dark/system) toggle with localStorage persistence
  *  • workspace switcher dropdown
+ *  • desktop collapse-to-icon-rail toggle with localStorage persistence
  *
  * Wires up against DOM nodes rendered by UnifiedUiHandler::pushUnifiedUiToTop().
  * Per-page flags come in via data attributes on `.fluent_uui` so this file
@@ -21,6 +22,30 @@
         var mobileToggle = document.querySelector('.fui-mobile-toggle');
         var backdrop = document.querySelector('.fui-backdrop');
         var hasDarkMode = !!(uuiRoot && uuiRoot.dataset.hasDarkMode === '1');
+        var htmlEl = document.documentElement;
+        var desktopQuery = window.matchMedia('(min-width: 783px)');
+
+        // True only while the icon rail is actually showing — the class is
+        // ignored by CSS on mobile, so behaviour must ignore it there too.
+        function isCollapsed() {
+            return desktopQuery.matches && htmlEl.classList.contains('fui-sidebar-collapsed');
+        }
+
+        // Dropdowns are absolutely positioned inside the sidebar, which clips
+        // them at rail width. While collapsed, pin them beside their trigger
+        // with position: fixed instead.
+        function placeMenu(menu, anchor, alignBottom) {
+            if (!isCollapsed()) {
+                menu.removeAttribute('style');
+                return;
+            }
+            var r = anchor.getBoundingClientRect();
+            menu.style.position = 'fixed';
+            menu.style.left = (r.right + 8) + 'px';
+            menu.style.right = 'auto';
+            menu.style.top = alignBottom ? 'auto' : r.top + 'px';
+            menu.style.bottom = alignBottom ? (window.innerHeight - r.bottom) + 'px' : 'auto';
+        }
 
         function setMobileOpen(open) {
             if (!uuiRoot) return;
@@ -150,6 +175,14 @@
                     return;
                 }
                 e.preventDefault();
+                // In the rail a product mark is a shortcut to that app.
+                if (isCollapsed()) {
+                    var href = productHeader.getAttribute('data-fui-href');
+                    if (href && !productHeader.closest('.fui-product-section--current')) {
+                        window.location.href = href;
+                    }
+                    return;
+                }
                 var section = productHeader.closest('.fui-product-section');
                 if (section) {
                     var isAlreadyOpen = section.classList.contains('is-open');
@@ -246,6 +279,7 @@
             themeToggle.addEventListener('click', function (e) {
                 e.stopPropagation();
                 var isOpen = !themeDropdown.hidden;
+                if (!isOpen) placeMenu(themeDropdown, themeToggle, true);
                 themeDropdown.hidden = isOpen;
                 themeToggle.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
             });
@@ -285,6 +319,7 @@
             }
 
             function openWs() {
+                placeMenu(wsMenu, wsBtn, false);
                 wsWrap.classList.add('is-open');
                 wsBtn.setAttribute('aria-expanded', 'true');
                 wsMenu.hidden = false;
@@ -307,6 +342,84 @@
                 }
             });
         }
+
+        // Collapse to icon rail (desktop only).
+        var collapseBtn = sidebar.querySelector('.fui-sidebar-collapse-btn');
+        var railTip = document.createElement('div');
+        railTip.className = 'fui-rail-tip';
+        railTip.hidden = true;
+        document.body.appendChild(railTip);
+
+        function hideRailTip() {
+            railTip.hidden = true;
+        }
+
+        function syncCollapseBtn() {
+            if (!collapseBtn) return;
+            var collapsed = htmlEl.classList.contains('fui-sidebar-collapsed');
+            var label = collapsed ? collapseBtn.dataset.labelExpand : collapseBtn.dataset.labelCollapse;
+            collapseBtn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+            collapseBtn.setAttribute('aria-label', label);
+        }
+
+        function setCollapsed(collapsed) {
+            htmlEl.classList.toggle('fui-sidebar-collapsed', collapsed);
+            try {
+                localStorage.setItem('fluent_uui_sidebar_collapsed', collapsed ? '1' : '0');
+            } catch (e) {}
+            syncCollapseBtn();
+            hideRailTip();
+            // Close any open dropdown — its position belongs to the old layout.
+            if (wsWrap && wsWrap.classList.contains('is-open')) {
+                wsWrap.classList.remove('is-open');
+                wsWrap.querySelector('.fui-workspace').setAttribute('aria-expanded', 'false');
+                wsWrap.querySelector('.fui-workspace-menu').hidden = true;
+            }
+            if (themeDropdown && !themeDropdown.hidden) {
+                themeDropdown.hidden = true;
+                themeToggle.setAttribute('aria-expanded', 'false');
+            }
+            // Let app layouts that measure the content width re-measure.
+            window.dispatchEvent(new Event('resize'));
+        }
+
+        syncCollapseBtn();
+
+        if (collapseBtn) {
+            collapseBtn.addEventListener('click', function () {
+                setCollapsed(!htmlEl.classList.contains('fui-sidebar-collapsed'));
+            });
+        }
+
+        // Rail labels: the item text is hidden, so surface it on hover/focus.
+        // Elements with a native title attribute already get a tooltip.
+        var railTipTargets = '.fui-workspace, .fui-product-header, .fui-apps-menu-item, ' +
+            '.fui-wordpress-menu-link, .fui-theme-toggle, .fui-sidebar-settings-btn, .fui-sidebar-collapse-btn';
+
+        function showRailTip(e) {
+            if (!isCollapsed()) return hideRailTip();
+            // Don't cover an open dropdown.
+            if ((wsWrap && wsWrap.classList.contains('is-open')) || (themeDropdown && !themeDropdown.hidden)) {
+                return hideRailTip();
+            }
+            var el = e.target.closest(railTipTargets);
+            if (!el || el.hasAttribute('title')) return hideRailTip();
+            var labelEl = el.querySelector('.fui-workspace-name, .fui-product-name, .fui-app-title');
+            var label = labelEl ? labelEl.textContent.trim() : el.getAttribute('aria-label');
+            if (!label) return hideRailTip();
+            var r = el.getBoundingClientRect();
+            railTip.textContent = label;
+            railTip.style.left = (r.right + 10) + 'px';
+            railTip.style.top = (r.top + r.height / 2) + 'px';
+            railTip.hidden = false;
+        }
+
+        sidebar.addEventListener('mouseover', showRailTip);
+        sidebar.addEventListener('focusin', showRailTip);
+        sidebar.addEventListener('mouseleave', hideRailTip);
+        sidebar.addEventListener('focusout', hideRailTip);
+        sidebar.addEventListener('scroll', hideRailTip);
+        sidebar.addEventListener('click', hideRailTip);
     }
 
     if (document.readyState === 'loading') {

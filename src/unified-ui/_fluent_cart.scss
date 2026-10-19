@@ -94,7 +94,7 @@ div#fct_admin_menu_holder {
   max-width: 600px;
 }
 .fct-save-bar {
-  width: calc(100% - 240px);
+  width: calc(100% - var(--fui-sidebar-width));
   &.is-active {
     transform: translateY(0);
   } 

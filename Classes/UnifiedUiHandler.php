@@ -380,6 +380,15 @@ class UnifiedUiHandler
         ?>
         <script>
             (function () {
+                // Restore the collapsed rail before the sidebar paints. Only
+                // honoured on desktop — CSS ignores the class below 783px.
+                try {
+                    if (localStorage.getItem('fluent_uui_sidebar_collapsed') === '1') {
+                        document.documentElement.classList.add('fui-sidebar-collapsed');
+                    }
+                } catch (e) {}
+            })();
+            (function () {
                 var hasDarkMode = <?php echo !empty($currentApp['has_dark_mode']) ? 'true' : 'false'; ?>;
                 if (!hasDarkMode) {
                     document.body.classList.remove('fluent_theme_dark');
@@ -530,7 +539,8 @@ class UnifiedUiHandler
                                     </a>
                                 <?php else: ?>
                                     <button type="button" class="fui-product-header"
-                                            aria-expanded="<?php echo $isCurrent ? 'true' : 'false'; ?>">
+                                            aria-expanded="<?php echo $isCurrent ? 'true' : 'false'; ?>"
+                                            <?php echo !empty($app['dashboard_url']) ? 'data-fui-href="' . esc_url($app['dashboard_url']) . '"' : ''; ?>>
                                         <?php if (!empty($app['icon'])): ?>
                                             <img class="fui-product-mark" src="<?php echo esc_url($app['icon']); ?>"
                                                  alt=""/>
@@ -563,6 +573,9 @@ class UnifiedUiHandler
                                                     <?php if (!empty($item['icon_svg'])): ?>
                                                         <span
                                                             class="fui-app-icon"><?php echo $item['icon_svg']; ?></span>
+                                                    <?php else: ?>
+                                                        <span class="fui-app-icon fui-app-icon--initial"
+                                                              aria-hidden="true"><?php echo esc_html(mb_strtoupper(mb_substr($item['title'], 0, 1))); ?></span>
                                                     <?php endif; ?>
                                                     <span
                                                         class="fui-app-title"><?php echo esc_html($item['title']); ?></span>
@@ -664,8 +677,8 @@ class UnifiedUiHandler
                             </div>
                         <?php endif; ?>
                     </div>
-                    <?php if (current_user_can('manage_options')) : ?>
-                        <div class="fui-sidebar-footer--right">
+                    <div class="fui-sidebar-footer--right">
+                        <?php if (current_user_can('manage_options')) : ?>
                             <a class="fui-sidebar-settings-btn"
                                href="<?php echo esc_url(admin_url('admin.php?page=fluent-toolkit#/')); ?>"
                                aria-label="<?php echo esc_attr__('FluentToolkit Settings', 'fluent-toolkit'); ?>">
@@ -676,8 +689,20 @@ class UnifiedUiHandler
                                         style="fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;stroke-width:32px"></path>
                                 </svg>
                             </a>
-                        </div>
-                    <?php endif; ?>
+                        <?php endif; ?>
+                        <button type="button" class="fui-sidebar-collapse-btn"
+                                aria-controls="fui-sidebar" aria-expanded="true"
+                                aria-label="<?php echo esc_attr__('Collapse sidebar', 'fluent-toolkit'); ?>"
+                                data-label-collapse="<?php echo esc_attr__('Collapse sidebar', 'fluent-toolkit'); ?>"
+                                data-label-expand="<?php echo esc_attr__('Expand sidebar', 'fluent-toolkit'); ?>">
+                            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"
+                                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect x="2.75" y="3.75" width="14.5" height="12.5" rx="2.25"/>
+                                <path d="M7.75 3.75v12.5"/>
+                                <path class="fui-collapse-arrow" d="m13 8-2 2 2 2"/>
+                            </svg>
+                        </button>
+                    </div>
 
                 </div>
 
