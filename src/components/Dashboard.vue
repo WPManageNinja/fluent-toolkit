@@ -137,6 +137,8 @@
                 <span>{{ $t('Installed: %s', installedCount) }}</span>
                 <!-- translators: %s is the number of plugins with an update available -->
                 <span :class="{ 'ft-warn-text': updatesCount > 0 }">{{ $t('Updates: %s', updatesCount) }}</span>
+                <!-- translators: %s is the number of active plugins that will be updated -->
+                <button v-if="caps.update_plugins && bulkUpdatePlugins.length > 1" class="ft-btn ft-btn-accent" :disabled="installing" @click="updateAllPlugins()">{{ $t('Update all (%s)', bulkUpdatePlugins.length) }}</button>
             </div>
         </div>
 
@@ -163,7 +165,7 @@
                     </div>
                 </div>
             </div>
-            <div v-else v-loading="installing" :element-loading-text="$t('Installing… Please wait.')">
+            <div v-else v-loading="installing" :element-loading-text="installingText">
                 <div class="ft-list-head">
                     <div>{{ $t('Plugin') }}</div>
                     <div>{{ $t('Status') }}</div>
@@ -250,6 +252,7 @@
 </template>
 
 <script type="text/babel">
+import { h } from 'vue';
 import TopBar from './TopBar.vue';
 
 export default {
@@ -270,6 +273,7 @@ export default {
             requireUpdate: !!window.fluentToolkitVars.require_update,
             sourceVersion: window.fluentToolkitVars.source_version || '',
             installing: false,
+            bulkProgress: null,
             loading: false,
             unifiedUiSaving: false,
             unifiedUiEnabled: (window.fluentToolkitVars.settings || {}).uinified_ui === 'yes',
@@ -289,6 +293,26 @@ export default {
         },
         updatesCount() {
             return this.betaPlugins.filter(p => p.has_update || p.has_beta_update).length;
+        },
+        // Active plugins with a stable update only: the installer activates
+        // whatever it installs, so inactive plugins stay on their row button.
+        // Free plugins go before Pro add-ons so a Pro update never lands on an
+        // older free core, FluentHub itself last. Pro plugins without a saved
+        // license key are left for the row button too.
+        bulkUpdatePlugins() {
+            const rank = p => (p.slug === 'fluent-toolkit' ? 2 : (p.is_pro ? 1 : 0));
+            return this.betaPlugins
+                .filter(p => p.installed_version && p.is_active && p.has_update)
+                .filter(p => p.require_license != 'yes' || p.license_key)
+                .sort((a, b) => rank(a) - rank(b));
+        },
+        installingText() {
+            if (!this.bulkProgress) {
+                return this.$t('Installing… Please wait.');
+            }
+
+            // translators: %1$s is the plugin being updated, %2$s its position in the queue, %3$s the number of plugins being updated
+            return this.$t('Updating %1$s (%2$s of %3$s)…', this.bulkProgress.name, this.bulkProgress.current, this.bulkProgress.total);
         },
         betaCount() {
             return this.betaPlugins.filter(p => p.has_beta_update || p.beta_version || p.is_beta).length;
@@ -415,6 +439,56 @@ export default {
                     this.installing = false;
                     this.getBetaPlugins();
                 });
+        },
+        async updateAllPlugins() {
+            const plugins = this.bulkUpdatePlugins.slice();
+            // translators: %s is the number of active plugins that will be updated
+            if (!plugins.length || !window.confirm(this.$t('Update %s active plugins to their latest stable versions?', plugins.length))) {
+                return;
+            }
+
+            const failed = [];
+            let updatedToolkit = false;
+            this.installing = true;
+
+            for (let i = 0; i < plugins.length; i++) {
+                const plugin = plugins[i];
+                this.bulkProgress = { name: plugin.name, current: i + 1, total: plugins.length };
+                try {
+                    await this.$post('fluent-beta-install', {
+                        slug: plugin.slug,
+                        license_key: plugin.license_key
+                    });
+                    if (plugin.slug === 'fluent-toolkit') {
+                        updatedToolkit = true;
+                    }
+                } catch (error) {
+                    failed.push(plugin.name + ': ' + ((error && error.message) || this.$t('Error')));
+                }
+            }
+
+            this.bulkProgress = null;
+            this.installing = false;
+
+            if (failed.length) {
+                this.$notify({
+                    type: 'error',
+                    // translators: %1$s is the number of plugins updated, %2$s the number of plugins attempted
+                    title: this.$t('Updated %1$s of %2$s plugins', plugins.length - failed.length, plugins.length),
+                    message: h('div', failed.map(line => h('div', line))),
+                    duration: 0
+                });
+            } else {
+                this.$notify.success(this.$t('All plugins are up to date.'));
+            }
+
+            // A new FluentHub build ships new dashboard assets, so reload to pick them up.
+            if (updatedToolkit) {
+                window.location.reload();
+                return;
+            }
+
+            this.getBetaPlugins();
         },
         updateToolkit() {
             this.installing = true;

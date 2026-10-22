@@ -25,6 +25,7 @@ class TransStrings
             /* translators: %s is a comma-separated list of plugin names */
             'Adds every enabled endpoint in one paste: %s.' => __('Adds every enabled endpoint in one paste: %s.', 'fluent-toolkit'),
             'All enabled plugins' => __('All enabled plugins', 'fluent-toolkit'),
+            'All plugins are up to date.' => __('All plugins are up to date.', 'fluent-toolkit'),
             'App_Password_Once_Notice' => __('WordPress shows an application password only once, so copy the snippet before you leave this page. You can revoke it at any time from your profile.', 'fluent-toolkit'),
             'App_Password_Site_Disabled' => __('Application passwords are disabled on this site. WordPress requires HTTPS for them unless the site runs in a local environment.', 'fluent-toolkit'),
             'Application password' => __('Application password', 'fluent-toolkit'),
@@ -128,12 +129,20 @@ class TransStrings
             'Tools available' => __('Tools available', 'fluent-toolkit'),
             'Unified Fluent Workspace' => __('Unified Fluent Workspace', 'fluent-toolkit'),
             'Up to date' => __('Up to date', 'fluent-toolkit'),
+            /* translators: %s is the number of active plugins that will be updated */
+            'Update %s active plugins to their latest stable versions?' => __('Update %s active plugins to their latest stable versions?', 'fluent-toolkit'),
+            /* translators: %s is the number of active plugins that will be updated */
+            'Update all (%s)' => __('Update all (%s)', 'fluent-toolkit'),
             'Update available' => __('Update available', 'fluent-toolkit'),
             'Update now' => __('Update now', 'fluent-toolkit'),
             /* translators: %s is the version number the plugin will be updated to */
             'Update to %s' => __('Update to %s', 'fluent-toolkit'),
+            /* translators: %1$s is the number of plugins updated, %2$s the number of plugins attempted */
+            'Updated %1$s of %2$s plugins' => __('Updated %1$s of %2$s plugins', 'fluent-toolkit'),
             /* translators: %s is the number of plugins with an update available */
             'Updates: %s' => __('Updates: %s', 'fluent-toolkit'),
+            /* translators: %1$s is the plugin being updated, %2$s its position in the queue, %3$s the number of plugins being updated */
+            'Updating %1$s (%2$s of %3$s)…' => __('Updating %1$s (%2$s of %3$s)…', 'fluent-toolkit'),
             'Updating…' => __('Updating…', 'fluent-toolkit'),
             'Use this URL and Basic Auth header with any HTTP MCP client.' => __('Use this URL and Basic Auth header with any HTTP MCP client.', 'fluent-toolkit'),
             'Username' => __('Username', 'fluent-toolkit'),
