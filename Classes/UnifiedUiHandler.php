@@ -83,7 +83,7 @@ class UnifiedUiHandler
                 'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentsupport_icon.svg',
                 'logo'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentsupport_logo.svg',
                 'items'         => $supportMenu,
-                'has_dark_mode' => false,
+                'has_dark_mode' => true,
                 'dashboard_url' => admin_url('admin.php?page=fluent-support#/')
             ],
             'fluent-booking'  => [
