@@ -87,7 +87,9 @@ class UnifiedUiHandler
                 'icon'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentsupport_icon.svg',
                 'logo'          => FLUENT_TOOLKIT_PLUGIN_URL . 'dist/images/fluentsupport_logo.svg',
                 'items'         => $supportMenu,
-                'has_dark_mode' => true,
+                // Fluent Support moved to the shared Fluent theme in 2.4.7; older
+                // versions would get a dark sidebar over a light app.
+                'has_dark_mode' => defined('FLUENT_SUPPORT_VERSION') && version_compare(FLUENT_SUPPORT_VERSION, '2.4.7', '>='),
                 'dashboard_url' => admin_url('admin.php?page=fluent-support#/')
             ],
             'fluent-booking'  => [
@@ -647,7 +649,7 @@ class UnifiedUiHandler
                         <?php if (!empty($currentApp['has_dark_mode'])) : ?>
                             <div class="fui-theme-wrap">
                                 <button type="button" class="fui-theme-toggle" id="fui-theme-toggle"
-                                        aria-label="Switch theme" aria-haspopup="true" aria-expanded="false">
+                                        aria-label="<?php esc_attr_e('Switch theme', 'fluent-toolkit'); ?>" aria-haspopup="true" aria-expanded="false">
                             <span class="fui-theme-icon--light">
                                 <?php echo Icons::get('light'); ?>
                             </span>

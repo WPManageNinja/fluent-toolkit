@@ -368,19 +368,38 @@
                 localStorage.setItem('fluent_uui_sidebar_collapsed', collapsed ? '1' : '0');
             } catch (e) {}
             syncCollapseBtn();
-            hideRailTip();
-            // Close any open dropdown — its position belongs to the old layout.
-            if (wsWrap && wsWrap.classList.contains('is-open')) {
-                wsWrap.classList.remove('is-open');
-                wsWrap.querySelector('.fui-workspace').setAttribute('aria-expanded', 'false');
-                wsWrap.querySelector('.fui-workspace-menu').hidden = true;
-            }
-            if (themeDropdown && !themeDropdown.hidden) {
-                themeDropdown.hidden = true;
-                themeToggle.setAttribute('aria-expanded', 'false');
-            }
+            closeLayoutDropdowns();
             // Let app layouts that measure the content width re-measure.
             window.dispatchEvent(new Event('resize'));
+        }
+
+        // Close any open dropdown and drop its pinned position: both belong to
+        // the layout before the sidebar collapsed, expanded or crossed the
+        // mobile breakpoint.
+        function closeLayoutDropdowns() {
+            hideRailTip();
+            if (wsWrap) {
+                var wsMenuEl = wsWrap.querySelector('.fui-workspace-menu');
+                if (wsWrap.classList.contains('is-open')) {
+                    wsWrap.classList.remove('is-open');
+                    wsWrap.querySelector('.fui-workspace').setAttribute('aria-expanded', 'false');
+                    wsMenuEl.hidden = true;
+                }
+                wsMenuEl.removeAttribute('style');
+            }
+            if (themeDropdown) {
+                if (!themeDropdown.hidden) {
+                    themeDropdown.hidden = true;
+                    themeToggle.setAttribute('aria-expanded', 'false');
+                }
+                themeDropdown.removeAttribute('style');
+            }
+        }
+
+        if (desktopQuery.addEventListener) {
+            desktopQuery.addEventListener('change', closeLayoutDropdowns);
+        } else if (desktopQuery.addListener) {
+            desktopQuery.addListener(closeLayoutDropdowns);
         }
 
         syncCollapseBtn();

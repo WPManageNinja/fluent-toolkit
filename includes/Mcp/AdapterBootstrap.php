@@ -316,10 +316,15 @@ class AdapterBootstrap
      *
      * The Fluent plugins check WP_MCP_VERSION before they register their servers,
      * so define it with the version of the classes that actually run.
+     *
+     * Only a class that is already loaded counts. Autoloading here could pull in
+     * an older copy that another plugin registered but never started, where the
+     * bundled copy would otherwise load. A copy that is autoloadable but not yet
+     * loaded is left to the bundled adapter, which detects it and reports it.
      */
     private static function adoptAdapterLoadedElsewhere()
     {
-        if (!function_exists('wp_register_ability') || !class_exists('\WP\MCP\Core\McpAdapter')) {
+        if (!function_exists('wp_register_ability') || !class_exists('\WP\MCP\Core\McpAdapter', false)) {
             return false;
         }
 
@@ -327,6 +332,11 @@ class AdapterBootstrap
             // A copy that predates McpAdapter::VERSION still needs the constant.
             define('WP_MCP_VERSION', self::version() ?: '0.0.0');
         }
+
+        // The other plugin may only have loaded the class. instance() is what hooks
+        // the adapter into `rest_api_init`, and hookDefaultAbilities() skips it
+        // when the default server is filtered off.
+        \WP\MCP\Core\McpAdapter::instance();
 
         return self::available();
     }

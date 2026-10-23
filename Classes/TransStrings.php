@@ -14,6 +14,8 @@ class TransStrings
     public static function getStrings()
     {
         return [
+            /* translators: %1$s is the plugin name, %2$s the reason it was not updated */
+            '%1$s: %2$s' => __('%1$s: %2$s', 'fluent-toolkit'),
             /* translators: %s is the plugin name, for example Fluent Support */
             '%s manages its own MCP setting, so it can\'t be turned on or off here.' => __('%s manages its own MCP setting, so it can\'t be turned on or off here.', 'fluent-toolkit'),
             /* translators: %s is the plugin name, for example FluentCRM */
@@ -124,6 +126,7 @@ class TransStrings
             'Settings' => __('Settings', 'fluent-toolkit'),
             'Show Fluent plugin screens inside the unified workspace.' => __('Show Fluent plugin screens inside the unified workspace.', 'fluent-toolkit'),
             'Show password' => __('Show password', 'fluent-toolkit'),
+            'Skipped because a free plugin update failed' => __('Skipped because a free plugin update failed', 'fluent-toolkit'),
             'Something went wrong. Please try again.' => __('Something went wrong. Please try again.', 'fluent-toolkit'),
             'Standalone plugin' => __('Standalone plugin', 'fluent-toolkit'),
             'Status' => __('Status', 'fluent-toolkit'),
