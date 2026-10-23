@@ -4,7 +4,7 @@ Tags: fluent plugins, toolkit
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.1.3
+Stable tag: 2.1.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -24,6 +24,18 @@ https://github.com/WPManageNinja/fluent-toolkit/releases/latest
 Upload the zip from your WordPress dashboard, activate Fluent Toolkit, then open Dashboard > Fluent Toolkit.
 
 == Changelog ==
+
+= 2.1.4 (Date: 23 Oct, 2026) =
+* New: Update all active Fluent plugins in one click: free plugins first, then Pro add-ons, then FluentHub
+* New: Collapsible icon-rail sidebar on desktop in the Unified UI
+* New: FluentHub is translatable (dashboard, MCP screens and sidebar) and ships a POT file
+* New: FluentComments in the dashboard plugin list
+* New: Dark mode for Fluent Support 2.4.7 and later in the Unified UI
+* Improved: Updated the bundled MCP Adapter to 0.7.1, which includes a security fix for MCP session storage
+* Improved: The MCP page shows which plugin supplies the MCP Adapter, and warns when another plugin bundles an older copy
+* Fixed: FluentHub reported its own MCP Adapter version when another plugin, such as Rank Math, had already loaded an older copy
+* Fixed: Forms and Ninja Tables were missing from the hub menu for non-admin users who have access
+* Fixed: The Unified UI sidebar stayed light in FluentBoards dark mode
 
 = 2.1.3 (Date: 09 Oct, 2026) =
 * New: "Settings" link for active plugins in the FluentHub plugin list

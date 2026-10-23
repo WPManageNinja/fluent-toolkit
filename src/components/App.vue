@@ -1,14 +1,17 @@
 <template>
-    <Dashboard
-        v-if="activeView === 'dashboard'"
-        :active-view="activeView"
-        @navigate="navigate"
-    />
-    <McpPage
-        v-else
-        :active-view="activeView"
-        @navigate="navigate"
-    />
+    <!-- Keep the dashboard alive so a running "Update all" queue survives a tab switch. -->
+    <KeepAlive include="Dashboard">
+        <Dashboard
+            v-if="activeView === 'dashboard'"
+            :active-view="activeView"
+            @navigate="navigate"
+        />
+        <McpPage
+            v-else
+            :active-view="activeView"
+            @navigate="navigate"
+        />
+    </KeepAlive>
 </template>
 
 <script>

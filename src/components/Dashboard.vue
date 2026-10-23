@@ -255,6 +255,8 @@
 import { h } from 'vue';
 import TopBar from './TopBar.vue';
 
+const BULK_SUMMARY_KEY = 'fluent_toolkit_bulk_update_summary';
+
 export default {
     name: 'Dashboard',
     components: {
@@ -448,12 +450,22 @@ export default {
             }
 
             const failed = [];
+            let freeFailed = false;
             let updatedToolkit = false;
             this.installing = true;
 
             for (let i = 0; i < plugins.length; i++) {
                 const plugin = plugins[i];
                 this.bulkProgress = { name: plugin.name, current: i + 1, total: plugins.length };
+
+                // The catalog does not say which free plugin a Pro add-on needs, so
+                // once any free update fails, keep every Pro add-on off the old core.
+                if (plugin.is_pro && freeFailed) {
+                    // translators: %1$s is the plugin name, %2$s the reason it was not updated
+                    failed.push(this.$t('%1$s: %2$s', plugin.name, this.$t('Skipped because a free plugin update failed')));
+                    continue;
+                }
+
                 try {
                     await this.$post('fluent-beta-install', {
                         slug: plugin.slug,
@@ -463,32 +475,60 @@ export default {
                         updatedToolkit = true;
                     }
                 } catch (error) {
-                    failed.push(plugin.name + ': ' + ((error && error.message) || this.$t('Error')));
+                    if (!plugin.is_pro && plugin.slug !== 'fluent-toolkit') {
+                        freeFailed = true;
+                    }
+                    // translators: %1$s is the plugin name, %2$s the reason it was not updated
+                    failed.push(this.$t('%1$s: %2$s', plugin.name, (error && error.message) || this.$t('Error')));
                 }
             }
 
             this.bulkProgress = null;
             this.installing = false;
 
-            if (failed.length) {
-                this.$notify({
-                    type: 'error',
-                    // translators: %1$s is the number of plugins updated, %2$s the number of plugins attempted
-                    title: this.$t('Updated %1$s of %2$s plugins', plugins.length - failed.length, plugins.length),
-                    message: h('div', failed.map(line => h('div', line))),
-                    duration: 0
-                });
-            } else {
-                this.$notify.success(this.$t('All plugins are up to date.'));
-            }
+            const summary = { failed, total: plugins.length };
 
-            // A new FluentHub build ships new dashboard assets, so reload to pick them up.
+            // A new FluentHub build ships new dashboard assets, so reload to pick
+            // them up, and show the summary after the reload instead of losing it.
             if (updatedToolkit) {
+                try {
+                    window.sessionStorage.setItem(BULK_SUMMARY_KEY, JSON.stringify(summary));
+                } catch (e) {
+                    // Storage blocked: the reload still happens, without the summary.
+                }
                 window.location.reload();
                 return;
             }
 
+            this.showBulkSummary(summary);
             this.getBetaPlugins();
+        },
+        showBulkSummary({ failed, total }) {
+            if (!failed.length) {
+                this.$notify.success(this.$t('All plugins are up to date.'));
+                return;
+            }
+
+            this.$notify({
+                type: 'error',
+                // translators: %1$s is the number of plugins updated, %2$s the number of plugins attempted
+                title: this.$t('Updated %1$s of %2$s plugins', total - failed.length, total),
+                message: h('div', failed.map(line => h('div', line))),
+                duration: 0
+            });
+        },
+        restoreBulkSummary() {
+            let summary = null;
+            try {
+                summary = JSON.parse(window.sessionStorage.getItem(BULK_SUMMARY_KEY) || 'null');
+                window.sessionStorage.removeItem(BULK_SUMMARY_KEY);
+            } catch (e) {
+                return;
+            }
+
+            if (summary && Array.isArray(summary.failed)) {
+                this.showBulkSummary(summary);
+            }
         },
         updateToolkit() {
             this.installing = true;
@@ -515,6 +555,7 @@ export default {
     },
     mounted() {
         this.getBetaPlugins();
+        this.restoreBulkSummary();
     },
     created() {
         jQuery('.update-nag,.notice, #wpbody-content > .updated, #wpbody-content > .error').remove();
