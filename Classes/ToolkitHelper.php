@@ -81,6 +81,11 @@ class ToolkitHelper
             'name'      => 'FluentPlayer',
             'logo'      => 'fluentplayer_icon.svg',
         ],
+        [
+            'slug'      => 'fluent-comments',
+            'name'      => 'FluentComments',
+            'logo'      => 'fluentcomments_icon.svg',
+        ],
     ];
 
     const FREE_VERSIONS_CACHE_KEY = '__fluent_toolkit_free_versions_v4';
@@ -238,6 +243,7 @@ class ToolkitHelper
             'wp-social-reviews' => __('Embed reviews, social feeds, testimonials, and chat widgets from Google, Facebook, Yelp, and more.', 'fluent-toolkit'),
             'fluent-affiliate'  => __('Self-hosted affiliate program management: track clicks, referrals, commissions and payouts.', 'fluent-toolkit'),
             'fluent-player'     => __('Video player with lead capture forms, chapters, and playback interactions.', 'fluent-toolkit'),
+            'fluent-comments'   => __('AJAX comments with spam protection that needs no CAPTCHA, plus comment email notifications.', 'fluent-toolkit'),
         ];
     }
 
