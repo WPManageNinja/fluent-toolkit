@@ -33,6 +33,8 @@ class TransStrings
             /* translators: %s is the number of plugins in the list */
             'Available: %s' => __('Available: %s', 'fluent-toolkit'),
             'Beta' => __('Beta', 'fluent-toolkit'),
+            /* translators: %s is the plugin name that bundles the MCP Adapter, for example Rank Math SEO */
+            'Bundled with %s' => __('Bundled with %s', 'fluent-toolkit'),
             'Bundled with FluentHub' => __('Bundled with FluentHub', 'fluent-toolkit'),
             'Change color theme' => __('Change color theme', 'fluent-toolkit'),
             'Changelog' => __('Changelog', 'fluent-toolkit'),
@@ -89,6 +91,8 @@ class TransStrings
             "MCP status\x04Ready" => _x('Ready', 'MCP status', 'fluent-toolkit'),
             "MCP status\x04Unknown" => _x('Unknown', 'MCP status', 'fluent-toolkit'),
             'MCP_Adapter_Missing' => __('The WordPress MCP adapter is not loaded. MCP needs WordPress 6.9 or later, so update WordPress first. If your site already runs 6.9 or later, install and activate the standalone MCP Adapter plugin.', 'fluent-toolkit'),
+            /* translators: 1: plugin name that loads the old MCP Adapter, 2: its MCP Adapter version, 3: the MCP Adapter version FluentHub bundles */
+            'MCP_Adapter_Outdated' => __('%1$s loads an older copy of the MCP Adapter (%2$s). FluentHub bundles %3$s, but WordPress can run only one copy, so these MCP servers use %2$s. Update %1$s, or ask its developer to update the MCP Adapter it bundles.', 'fluent-toolkit'),
             'MCP_Banner_Desc' => __('Turn on MCP servers for your Fluent plugins, see which tools each one exposes and get connection settings for Codex, Claude, Cursor and other HTTP MCP clients.', 'fluent-toolkit'),
             'MCP_Connect_Desc' => __('Each Fluent plugin runs its own MCP server, so your client needs one entry per endpoint. The same application password works for all of them.', 'fluent-toolkit'),
             'MCP_Empty_Desc' => __('Install or update a Fluent plugin that supports MCP. Once it registers an MCP endpoint, it shows up here with its tools, status and connection snippets.', 'fluent-toolkit'),

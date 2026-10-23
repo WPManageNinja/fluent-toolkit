@@ -82,6 +82,10 @@
                 <div class="ft-mcp-note" v-else-if="!overview.adapter.available">
                     {{ $t('MCP_Adapter_Missing') }}
                 </div>
+                <div class="ft-mcp-note" v-else-if="overview.adapter.outdated">
+                    <!-- translators: 1: plugin name that loads the old MCP Adapter, 2: its MCP Adapter version, 3: the MCP Adapter version FluentHub bundles -->
+                    {{ $t('MCP_Adapter_Outdated', overview.adapter.source, overview.adapter.version, overview.adapter.bundled_version) }}
+                </div>
             </section>
 
             <section class="ft-panel ft-mcp-connect" v-if="activeProduct">
@@ -211,6 +215,10 @@ export default {
                 adapter: {
                     available: false,
                     provider: 'missing',
+                    version: '',
+                    bundled_version: '',
+                    source: '',
+                    outdated: false,
                 },
                 products: [],
                 app_password: {
@@ -286,6 +294,11 @@ export default {
 
             if (this.overview.adapter.provider === 'toolkit') {
                 return this.$t('Bundled with FluentHub');
+            }
+
+            if (this.overview.adapter.provider === 'other' && this.overview.adapter.source) {
+                // translators: %s is the plugin name that bundles the MCP Adapter, for example Rank Math SEO
+                return this.$t('Bundled with %s', this.overview.adapter.source);
             }
 
             return this.$_x('Available', 'MCP adapter status');
