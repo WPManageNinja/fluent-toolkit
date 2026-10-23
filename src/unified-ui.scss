@@ -876,7 +876,9 @@
 }
 
 .fluent_theme_dark,
-html.dark body {
+html.dark body,
+body.fluent_boards_theme_dark,
+body.fbs-dark {
     .fui-update-nag {
         color: #fbbf24;
         background: rgba(245, 158, 11, 0.12);
