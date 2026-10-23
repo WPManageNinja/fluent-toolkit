@@ -8,8 +8,8 @@ class AdapterBootstrap
 {
     const STANDALONE_PLUGIN_FILE = 'mcp-adapter/mcp-adapter.php';
 
-    // The bundled adapter (0.6.x) dropped support for the standalone Abilities API
-    // plugin and requires the copy that ships in WordPress core.
+    // The bundled adapter (0.6.x and later) dropped support for the standalone
+    // Abilities API plugin and requires the copy that ships in WordPress core.
     const BUNDLED_ADAPTER_MIN_WP = '6.9';
 
     private static $defaultAbilitiesHooked = false;
@@ -17,6 +17,11 @@ class AdapterBootstrap
     public static function boot()
     {
         if (self::available()) {
+            self::hookDefaultAbilities();
+            return true;
+        }
+
+        if (self::adoptAdapterLoadedElsewhere()) {
             self::hookDefaultAbilities();
             return true;
         }
@@ -63,8 +68,9 @@ class AdapterBootstrap
      * Server creation is deliberately left on `rest_api_init`; only the ability
      * registration is pulled forward.
      *
-     * Still unfixed upstream as of the bundled 0.6.1 — re-check when updating the
-     * library, and drop this if McpAdapter starts adding the listeners itself.
+     * Fixed upstream in 0.7.0: McpAdapter::instance() now adds the listeners
+     * itself, and WordPress dedupes them with these. Keep this for older copies
+     * that another plugin may load in place of the bundled one.
      */
     private static function hookDefaultAbilities()
     {
@@ -105,17 +111,133 @@ class AdapterBootstrap
             && function_exists('wp_register_ability');
     }
 
+    /**
+     * Who supplied the adapter classes that run: `toolkit` (the bundled copy),
+     * `plugin` (the standalone MCP Adapter plugin), `other` (a copy that another
+     * plugin bundles) or `missing`.
+     */
     public static function provider()
     {
-        if (!defined('WP_MCP_VERSION')) {
+        if (!self::available()) {
             return 'missing';
         }
 
-        if (self::usingBundledAdapter()) {
+        $file = self::loadedAdapterFile();
+
+        if (!$file) {
+            return 'other';
+        }
+
+        if (self::pathIsInside($file, dirname(self::bundledAdapterFile()))) {
             return 'toolkit';
         }
 
-        return 'plugin';
+        if (defined('WP_PLUGIN_DIR') && self::pathIsInside($file, WP_PLUGIN_DIR . '/' . dirname(self::STANDALONE_PLUGIN_FILE))) {
+            return 'plugin';
+        }
+
+        return 'other';
+    }
+
+    /**
+     * Version of the adapter classes that run, read from the class rather than
+     * WP_MCP_VERSION: a copy without the constant can run under one that another
+     * copy defined.
+     */
+    public static function version()
+    {
+        if (!class_exists('\WP\MCP\Core\McpAdapter', false)) {
+            return '';
+        }
+
+        if (defined('WP\MCP\Core\McpAdapter::VERSION')) {
+            return (string) \WP\MCP\Core\McpAdapter::VERSION;
+        }
+
+        return defined('WP_MCP_VERSION') ? (string) WP_MCP_VERSION : '';
+    }
+
+    /**
+     * Version of the copy bundled in libs/, read from its source so it stays
+     * right when the library is updated. Only called for the MCP page status.
+     */
+    public static function bundledVersion()
+    {
+        $source = @file_get_contents(dirname(self::bundledAdapterFile()) . '/includes/Core/McpAdapter.php');
+
+        if ($source && preg_match("/const\\s+VERSION\\s*=\\s*'([^']+)'/", $source, $matches)) {
+            return $matches[1];
+        }
+
+        return '';
+    }
+
+    /**
+     * Whether the adapter that runs is a copy another plugin bundles and that is
+     * older than the bundled one. The FluentHub MCP page shows a note when it is.
+     * The standalone MCP Adapter plugin is never reported: it is the official
+     * copy and updates through WordPress.org.
+     */
+    public static function outdated()
+    {
+        if (!self::available() || 'other' !== self::provider()) {
+            return false;
+        }
+
+        $version = self::version();
+        $bundled = self::bundledVersion();
+
+        return $version && $bundled && version_compare($version, $bundled, '<');
+    }
+
+    /**
+     * Display name of whatever loaded the adapter classes: a plugin name when the
+     * class file sits in a plugin, else the path relative to wp-content.
+     *
+     * Reflection returns the resolved path, so each plugin directory is resolved
+     * too; a symlinked plugin would not match WP_PLUGIN_DIR as a plain prefix.
+     */
+    public static function sourceName()
+    {
+        $file = self::loadedAdapterFile();
+
+        if (!$file) {
+            return '';
+        }
+
+        $pluginDirs = defined('WP_PLUGIN_DIR') ? glob(WP_PLUGIN_DIR . '/*', GLOB_ONLYDIR) : [];
+
+        foreach ((array) $pluginDirs as $dir) {
+            if (!self::pathIsInside($file, $dir)) {
+                continue;
+            }
+
+            $slug = basename($dir);
+
+            if (!function_exists('get_plugins') && file_exists(ABSPATH . 'wp-admin/includes/plugin.php')) {
+                require_once ABSPATH . 'wp-admin/includes/plugin.php';
+            }
+
+            if (function_exists('get_plugins')) {
+                foreach (get_plugins('/' . $slug) as $data) {
+                    if (!empty($data['Name'])) {
+                        return $data['Name'];
+                    }
+                }
+            }
+
+            return $slug;
+        }
+
+        $file = wp_normalize_path(realpath($file) ?: $file);
+        $contentDir = defined('WP_CONTENT_DIR') ? realpath(WP_CONTENT_DIR) : '';
+        $contentDir = $contentDir ? trailingslashit(wp_normalize_path($contentDir)) : '';
+
+        if ($contentDir && 0 === strpos($file, $contentDir)) {
+            return substr($file, strlen($contentDir));
+        }
+
+        return $file;
     }
 
     /**
@@ -183,16 +305,53 @@ class AdapterBootstrap
             || defined('WP_MCP_DIR');
     }
 
-    private static function usingBundledAdapter()
+    /**
+     * Use an adapter that another plugin loaded without the plugin constants.
+     *
+     * Some plugins bundle the adapter as a plain Composer library: Rank Math
+     * prepends its autoloader and calls McpAdapter::instance() from its main file.
+     * That copy defines neither WP_MCP_VERSION nor WP_MCP_DIR, so the checks above
+     * miss it. Requiring the bundled copy then would only define our constants over
+     * their classes, because PHP cannot replace a class that is already loaded.
+     *
+     * The Fluent plugins check WP_MCP_VERSION before they register their servers,
+     * so define it with the version of the classes that actually run.
+     */
+    private static function adoptAdapterLoadedElsewhere()
     {
-        if (!defined('WP_MCP_DIR')) {
+        if (!function_exists('wp_register_ability') || !class_exists('\WP\MCP\Core\McpAdapter')) {
             return false;
         }
 
-        $adapterDir = realpath(WP_MCP_DIR);
-        $bundledDir = realpath(dirname(self::bundledAdapterFile()));
+        if (!defined('WP_MCP_VERSION')) {
+            // A copy that predates McpAdapter::VERSION still needs the constant.
+            define('WP_MCP_VERSION', self::version() ?: '0.0.0');
+        }
 
-        return $adapterDir && $bundledDir && $adapterDir === $bundledDir;
+        return self::available();
+    }
+
+    private static function loadedAdapterFile()
+    {
+        if (!class_exists('\WP\MCP\Core\McpAdapter', false)) {
+            return '';
+        }
+
+        try {
+            $file = (new \ReflectionClass('\WP\MCP\Core\McpAdapter'))->getFileName();
+        } catch (\ReflectionException $e) {
+            return '';
+        }
+
+        return $file ?: '';
+    }
+
+    private static function pathIsInside($file, $dir)
+    {
+        $file = realpath($file);
+        $dir = realpath($dir);
+
+        return $file && $dir && 0 === strpos($file, $dir . DIRECTORY_SEPARATOR);
     }
 
     private static function bundledAdapterFile()

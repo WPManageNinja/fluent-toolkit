@@ -19,7 +19,7 @@ WordPress plugin that unifies Fluent plugin admin UIs into one workspace, manage
 - `src/unified-ui.scss` + `src/unified-ui/_utilities.scss` → `dist/unified-ui.css` — sidebar styles.
 - `src/components/Dashboard.vue` + `src/style.scss` — FluentHub admin dashboard (Vue 3 + Element Plus).
 - `i18n.node.js` + `i18n.config.json` → `Classes/TransStrings.php` — generated Vue translation map (see Translations). `src/i18n.js` holds the `$t` / `$_n` / `$_x` runtime.
-- `includes/Mcp/AdapterBootstrap.php` — loads the bundled MCP adapter (`libs/mcp-adapter/`, an unmodified upstream release copy) on `plugins_loaded` @999, unless another plugin already supplies one.
+- `includes/Mcp/AdapterBootstrap.php` — loads the bundled MCP adapter (`libs/mcp-adapter/`, an unmodified upstream release copy) on `plugins_loaded` @999, unless another plugin already supplies one. Reports the provider (`toolkit` / `plugin` / `other` / `missing`), version and source of the copy that actually runs, and flags an older copy that another plugin bundles so the FluentHub MCP page can show a note (no WP admin notice).
 
 ## Settings
 
@@ -38,7 +38,11 @@ Core's Abilities API registry is a lazy singleton — `wp_abilities_api_init` fi
 
 `AdapterBootstrap::hookDefaultAbilities()` adds those same listeners at `plugins_loaded`, before the registry can be built. It reuses the adapter's own callables so WordPress dedupes when `McpAdapter::init()` adds them again — don't wrap them in closures, that double-registers the abilities. Don't "fix" this by hooking `McpAdapter::init()` to `init` early either: that also pulls forward `DefaultServerFactory::create()`, which fires `wp_abilities_api_init` at `init` @1 and breaks every other plugin that registers abilities at `init` @10.
 
-Still unfixed upstream as of adapter 0.6.1 — re-check when bumping the bundled library.
+Fixed upstream in adapter 0.7.0 (`McpAdapter::instance()` now adds the listeners). Keep the workaround: another plugin can still load an older copy in place of ours.
+
+## Gotcha: other plugins bundle the MCP adapter without its constants
+
+Rank Math (1.0.280 ships 0.5.0) loads the adapter as a plain Composer library from its main file: it prepends its autoloader and calls `McpAdapter::instance()`, but defines neither `WP_MCP_VERSION` nor `WP_MCP_DIR`. PHP cannot replace a class that is already loaded, so requiring our copy then only puts our constants over their classes. `AdapterBootstrap::adoptAdapterLoadedElsewhere()` checks for `\WP\MCP\Core\McpAdapter` before loading ours, and defines `WP_MCP_VERSION` from the loaded class's `VERSION`, because the Fluent plugins check that constant before they register their servers. Read the running version and location from the class (`McpAdapter::VERSION`, reflection), never from `WP_MCP_VERSION` / `WP_MCP_DIR`. Only copies that other plugins bundle get the outdated note on the MCP page. The official standalone MCP Adapter plugin never does, because it updates through wp.org.
 
 ## Conventions
 

@@ -16,8 +16,12 @@ class McpManager
     public static function status()
     {
         $adapter = [
-            'available' => self::adapterAvailable(),
-            'provider'  => AdapterBootstrap::provider(),
+            'available'       => self::adapterAvailable(),
+            'provider'        => AdapterBootstrap::provider(),
+            'version'         => AdapterBootstrap::version(),
+            'bundled_version' => AdapterBootstrap::bundledVersion(),
+            'source'          => AdapterBootstrap::sourceName(),
+            'outdated'        => AdapterBootstrap::outdated(),
         ];
         $products = [];
 

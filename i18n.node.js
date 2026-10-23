@@ -417,7 +417,8 @@ function extractCalls(content, file, helpers = DEFAULT_HELPERS) {
         // one; another call on the same line must not inherit it.
         if (kind === 't') {
             const comment = hasPlaceholder(first.value) ? note : null;
-            entries.push({ text: first.value, context: null, comment, file, line });
+            // A reserved key has no placeholder itself; buildRows() checks its text.
+            entries.push({ text: first.value, context: null, comment, note, file, line });
             continue;
         }
 
@@ -486,8 +487,10 @@ function buildRows(entries, reserved, alwaysInclude) {
                 reserved: Object.prototype.hasOwnProperty.call(reserved, key)
             };
         }
-        if (entry.comment && !rows[key].comment) {
-            rows[key].comment = entry.comment;
+        const comment = entry.comment
+            || (rows[key].reserved && entry.note && hasPlaceholder(rows[key].text) ? entry.note : null);
+        if (comment && !rows[key].comment) {
+            rows[key].comment = comment;
         }
     });
 
