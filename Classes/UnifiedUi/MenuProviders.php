@@ -424,12 +424,15 @@ class MenuProviders
             return [];
         }
 
-        $currentUserCapability = \FluentForm\App\Modules\Acl\Acl::getCurrentUserCapability();
-        if (!$currentUserCapability) {
+        $Acl = '\FluentForm\App\Modules\Acl\Acl';
+
+        // getCurrentUserCapability() only covers role-based access (the roles
+        // picked in Fluent Forms' Role Manager). Managers added per user via
+        // Settings -> Managers get the fluentform_* caps on the user instead,
+        // so it returns false for them. hasAnyFormPermission() covers both.
+        if (!$Acl::hasAnyFormPermission()) {
             return [];
         }
-
-        $Acl = '\FluentForm\App\Modules\Acl\Acl';
         $baseUrl = admin_url('admin.php?page=');
 
         $menuItems = [];
