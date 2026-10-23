@@ -2,7 +2,7 @@
 /**
  * Plugin Name: FluentHub
  * Description: Connects all your Fluent plugins under one roof — unified dashboard, AI/MCP support, early-access updates, and seamless cross-plugin data.
- * Version: 2.1.3
+ * Version: 2.1.4
  * Author: WPManageNinja
  * Text Domain: fluent-toolkit
  * Domain Path: /language
