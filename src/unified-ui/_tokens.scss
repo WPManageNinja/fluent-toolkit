@@ -21,7 +21,9 @@
 }
 
 .fluent_theme_dark,
-html.dark body {
+html.dark body,
+body.fluent_boards_theme_dark,
+body.fbs-dark {
   --fui-primary-bg: #151d26;
   --fui-bg:         #11171D;
   --fui-surface:    #2a2926;
