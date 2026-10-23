@@ -12,7 +12,11 @@ class UnifiedUiHandler
 
     public function register()
     {
-        add_action('init', [$this, 'init']);
+        // Late priority: Fluent plugins register their own permission filters
+        // on init @10 (e.g. Ninja Tables Pro's `ninja_table_admin_role`, which
+        // grants the roles picked in its settings). Plugins load alphabetically,
+        // so at @10 we'd run first and the menu providers would see admins only.
+        add_action('init', [$this, 'init'], 99);
     }
 
     public function init()
