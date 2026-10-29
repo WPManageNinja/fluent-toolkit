@@ -16,16 +16,22 @@ class TransStrings
         return [
             /* translators: %1$s is the plugin name, %2$s the reason it was not updated */
             '%1$s: %2$s' => __('%1$s: %2$s', 'fluent-toolkit'),
+            /* translators: %s is the number of MCP actions, for example 28 */
+            '%s action' => __('%s action', 'fluent-toolkit'),
+            /* translators: %s is the number of MCP actions, for example 28 */
+            '%s actions' => __('%s actions', 'fluent-toolkit'),
             /* translators: %s is the plugin name, for example Fluent Support */
             '%s manages its own MCP setting, so it can\'t be turned on or off here.' => __('%s manages its own MCP setting, so it can\'t be turned on or off here.', 'fluent-toolkit'),
             /* translators: %s is the plugin name, for example FluentCRM */
             '%s only' => __('%s only', 'fluent-toolkit'),
             'A FluentHub update is available' => __('A FluentHub update is available', 'fluent-toolkit'),
             'Action' => __('Action', 'fluent-toolkit'),
+            'Actions available' => __('Actions available', 'fluent-toolkit'),
             'Activate' => __('Activate', 'fluent-toolkit'),
             'Adapter required' => __('Adapter required', 'fluent-toolkit'),
             /* translators: %s is a comma-separated list of plugin names */
             'Adds every enabled endpoint in one paste: %s.' => __('Adds every enabled endpoint in one paste: %s.', 'fluent-toolkit'),
+            'All Fluent plugins' => __('All Fluent plugins', 'fluent-toolkit'),
             'All enabled plugins' => __('All enabled plugins', 'fluent-toolkit'),
             'All plugins are up to date.' => __('All plugins are up to date.', 'fluent-toolkit'),
             'App_Password_Once_Notice' => __('WordPress shows an application password only once, so copy the snippet before you leave this page. You can revoke it at any time from your profile.', 'fluent-toolkit'),
@@ -67,6 +73,7 @@ class TransStrings
             'Fluent ecosystem' => __('Fluent ecosystem', 'fluent-toolkit'),
             /* translators: %s is the new FluentHub version, for example v2.1.4 */
             'FluentHub %s is available' => __('FluentHub %s is available', 'fluent-toolkit'),
+            'FluentHub MCP server' => __('FluentHub MCP server', 'fluent-toolkit'),
             'FluentHub logo' => __('FluentHub logo', 'fluent-toolkit'),
             'FluentHub sections' => __('FluentHub sections', 'fluent-toolkit'),
             'Hide app headers' => __('Hide app headers', 'fluent-toolkit'),
@@ -88,6 +95,7 @@ class TransStrings
             "MCP adapter status\x04Missing" => _x('Missing', 'MCP adapter status', 'fluent-toolkit'),
             "MCP client type\x04Generic" => _x('Generic', 'MCP client type', 'fluent-toolkit'),
             'MCP for agents' => __('MCP for agents', 'fluent-toolkit'),
+            'MCP is off for this plugin. Turn it on in its tab to include it.' => __('MCP is off for this plugin. Turn it on in its tab to include it.', 'fluent-toolkit'),
             'MCP status' => __('MCP status', 'fluent-toolkit'),
             "MCP status\x04Disabled" => _x('Disabled', 'MCP status', 'fluent-toolkit'),
             "MCP status\x04Ready" => _x('Ready', 'MCP status', 'fluent-toolkit'),
@@ -98,12 +106,17 @@ class TransStrings
             'MCP_Banner_Desc' => __('Turn on MCP servers for your Fluent plugins, see which tools each one exposes and get connection settings for Codex, Claude, Cursor and other HTTP MCP clients.', 'fluent-toolkit'),
             'MCP_Connect_Desc' => __('Each Fluent plugin runs its own MCP server, so your client needs one entry per endpoint. The same application password works for all of them.', 'fluent-toolkit'),
             'MCP_Empty_Desc' => __('Install or update a Fluent plugin that supports MCP. Once it registers an MCP endpoint, it shows up here with its tools, status and connection snippets.', 'fluent-toolkit'),
+            /* translators: 1: the MCP Adapter version that runs, 2: the minimum MCP Adapter version the FluentHub server needs */
+            'MCP_Hub_Adapter_Outdated' => __('The FluentHub MCP server needs MCP Adapter %2$s or later, and this site runs %1$s. The MCP server of each plugin still works on its own endpoint.', 'fluent-toolkit'),
+            'MCP_Hub_Connect_Desc' => __('Add this one endpoint to your AI client. It serves every plugin ticked above, and one application password works for all of them.', 'fluent-toolkit'),
+            'MCP_Hub_Desc' => __('One MCP server for all your Fluent plugins. AI clients connect once and get two tools per plugin: one that reads data and one that changes it.', 'fluent-toolkit'),
             'Manage MCP' => __('Manage MCP', 'fluent-toolkit'),
             'Manage passwords' => __('Manage passwords', 'fluent-toolkit'),
             'Merge admin menus' => __('Merge admin menus', 'fluent-toolkit'),
             'Merge top-level Fluent menus' => __('Merge top-level Fluent menus', 'fluent-toolkit'),
             'No Fluent plugins are exposing MCP yet.' => __('No Fluent plugins are exposing MCP yet.', 'fluent-toolkit'),
             'No license key' => __('No license key', 'fluent-toolkit'),
+            'No plugins are in the FluentHub server. Turn MCP on for a plugin and tick it above.' => __('No plugins are in the FluentHub server. Turn MCP on for a plugin and tick it above.', 'fluent-toolkit'),
             'No plugins available right now.' => __('No plugins available right now.', 'fluent-toolkit'),
             'Not installed' => __('Not installed', 'fluent-toolkit'),
             'Open all your Fluent plugins in one workspace, with a shared sidebar to move between them.' => __('Open all your Fluent plugins in one workspace, with a shared sidebar to move between them.', 'fluent-toolkit'),
@@ -115,6 +128,7 @@ class TransStrings
             'Plugin' => __('Plugin', 'fluent-toolkit'),
             'Plugin not active' => __('Plugin not active', 'fluent-toolkit'),
             'Plugins & Add-ons' => __('Plugins & Add-ons', 'fluent-toolkit'),
+            'Plugins included' => __('Plugins included', 'fluent-toolkit'),
             'Plugins with MCP turned off are left out. Turn MCP on for them and copy again.' => __('Plugins with MCP turned off are left out. Turn MCP on for them and copy again.', 'fluent-toolkit'),
             'Refresh' => __('Refresh', 'fluent-toolkit'),
             'Refresh MCP status' => __('Refresh MCP status', 'fluent-toolkit'),

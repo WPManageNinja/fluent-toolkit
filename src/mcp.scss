@@ -122,6 +122,37 @@
     }
   }
 
+  .ft-mcp-hub-products {
+    border-top: 1px solid var(--border);
+    display: grid;
+    gap: 2px;
+    padding: 14px 24px;
+  }
+
+  .ft-mcp-hub-product {
+    align-items: center;
+    cursor: pointer;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 6px 0;
+
+    strong {
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    span {
+      color: var(--text-soft);
+      font-size: 13px;
+    }
+
+    input:disabled {
+      cursor: not-allowed;
+    }
+  }
+
   .ft-connect-actions {
     display: flex;
     flex-shrink: 0;

@@ -20,6 +20,15 @@
         <div class="ft-toolbar" v-if="products.length">
             <div class="ft-channels" role="tablist">
                 <button
+                    v-if="hubProduct"
+                    class="ft-channel"
+                    :aria-selected="activeProductSlug === hubProduct.slug"
+                    @click="activeProductSlug = hubProduct.slug"
+                >
+                    {{ hubProduct.name }}
+                    <span class="ft-channel-count">{{ hubProduct.tools_count }}</span>
+                </button>
+                <button
                     v-for="product in products"
                     :key="product.slug"
                     class="ft-channel"
@@ -39,7 +48,61 @@
         </div>
 
         <div class="ft-mcp-layout" v-loading="loading" :element-loading-text="$t('Loading MCP status…')">
-            <section class="ft-panel ft-mcp-status" v-if="activeProduct">
+            <section class="ft-panel ft-mcp-status" v-if="activeProduct && activeProduct.is_hub">
+                <div class="ft-panel-head">
+                    <div>
+                        <h2>{{ $t('FluentHub MCP server') }}</h2>
+                        <p>{{ $t('MCP_Hub_Desc') }}</p>
+                    </div>
+                </div>
+
+                <div class="ft-mcp-grid">
+                    <div class="ft-mcp-metric">
+                        <span>{{ $t('Endpoint') }}</span>
+                        <strong class="ft-mono">{{ hub.endpoint_url }}</strong>
+                    </div>
+                    <div class="ft-mcp-metric">
+                        <span>{{ $t('Actions available') }}</span>
+                        <strong>{{ hub.actions_count }}</strong>
+                    </div>
+                    <div class="ft-mcp-metric">
+                        <span>{{ $t('Plugins included') }}</span>
+                        <strong>{{ hubServedProducts.length }}</strong>
+                    </div>
+                    <div class="ft-mcp-metric">
+                        <span>{{ $t('MCP adapter') }}</span>
+                        <strong>{{ adapterLabel }}</strong>
+                    </div>
+                </div>
+
+                <div class="ft-mcp-hub-products">
+                    <label class="ft-mcp-hub-product" v-for="product in hub.products" :key="product.slug">
+                        <input
+                            type="checkbox"
+                            :checked="product.included"
+                            :disabled="saving || !hub.available"
+                            @change="toggleHubProduct(product.slug, $event.target.checked)"
+                        />
+                        <strong>{{ product.name }}</strong>
+                        <!-- translators: %s is the number of MCP actions, for example 28 -->
+                        <span v-if="product.mcp_enabled">{{ $_n('%s action', '%s actions', product.tools_count) }}</span>
+                        <span v-else>{{ $t('MCP is off for this plugin. Turn it on in its tab to include it.') }}</span>
+                    </label>
+                </div>
+
+                <div class="ft-mcp-note" v-if="hub.reason === 'adapter_outdated'">
+                    <!-- translators: 1: the MCP Adapter version that runs, 2: the minimum MCP Adapter version the FluentHub server needs -->
+                    {{ $t('MCP_Hub_Adapter_Outdated', overview.adapter.version, hub.min_adapter) }}
+                </div>
+                <div class="ft-mcp-note" v-else-if="!overview.adapter.available">
+                    {{ $t('MCP_Adapter_Missing') }}
+                </div>
+                <div class="ft-mcp-note" v-else-if="!hubServedProducts.length">
+                    {{ $t('No plugins are in the FluentHub server. Turn MCP on for a plugin and tick it above.') }}
+                </div>
+            </section>
+
+            <section class="ft-panel ft-mcp-status" v-else-if="activeProduct">
                 <div class="ft-panel-head">
                     <div>
                         <h2>{{ activeProduct.name }}</h2>
@@ -92,7 +155,7 @@
                 <div class="ft-panel-head">
                     <div>
                         <h2>{{ $t('Connect client') }}</h2>
-                        <p>{{ $t('MCP_Connect_Desc') }}</p>
+                        <p>{{ activeProduct.is_hub ? $t('MCP_Hub_Connect_Desc') : $t('MCP_Connect_Desc') }}</p>
                     </div>
                     <div class="ft-connect-actions">
                         <button
@@ -220,6 +283,14 @@ export default {
                     source: '',
                     outdated: false,
                 },
+                hub: {
+                    available: false,
+                    reason: '',
+                    min_adapter: '',
+                    endpoint_url: '',
+                    products: [],
+                    actions_count: 0,
+                },
                 products: [],
                 app_password: {
                     available: false,
@@ -228,7 +299,7 @@ export default {
                     manage_url: '',
                 },
             },
-            activeProductSlug: 'fluent-crm',
+            activeProductSlug: 'fluent-hub',
             activeClient: 'codex',
             snippetScope: 'single',
             loading: false,
@@ -254,8 +325,38 @@ export default {
         showEmptyBanner() {
             return !this.loading && !this.products.length;
         },
+        hub() {
+            return this.overview.hub || { products: [] };
+        },
+        // Products the FluentHub server serves right now: ticked here and with
+        // their own MCP on. A plugin with MCP off registers no server to serve.
+        hubServedProducts() {
+            return (this.hub.products || []).filter(product => product.included && product.mcp_enabled);
+        },
+        // The FluentHub server, shaped like a product so the tab bar and the
+        // connection snippets treat it the same way.
+        hubProduct() {
+            if (!this.hub.endpoint_url || !(this.hub.products || []).length) {
+                return null;
+            }
+
+            return {
+                slug: 'fluent-hub',
+                name: this.$t('All Fluent plugins'),
+                endpoint_url: this.hub.endpoint_url,
+                tools_count: this.hub.actions_count,
+                mcp_enabled: this.hub.available && this.hubServedProducts.length > 0,
+                status: this.hub.available ? (this.hubServedProducts.length ? 'ready' : 'disabled') : 'adapter_required',
+                toggleable: false,
+                is_hub: true,
+            };
+        },
         activeProduct() {
-            return this.products.find(product => product.slug === this.activeProductSlug) || this.products[0] || null;
+            if (this.hubProduct && this.activeProductSlug === this.hubProduct.slug) {
+                return this.hubProduct;
+            }
+
+            return this.products.find(product => product.slug === this.activeProductSlug) || this.hubProduct || this.products[0] || null;
         },
         appPasswordSupport() {
             return this.overview.app_password || {};
@@ -312,7 +413,7 @@ export default {
             return this.products.filter(product => product.mcp_enabled && product.endpoint_url);
         },
         canCombine() {
-            return this.activeProduct && this.enabledProducts.length > 1;
+            return this.activeProduct && !this.activeProduct.is_hub && this.enabledProducts.length > 1;
         },
         snippetEntries() {
             if (this.snippetScope === 'all' && this.canCombine) {
@@ -451,6 +552,28 @@ export default {
             this.$post('fluent_toolkit_mcp_toggle', {
                 slug: this.activeProduct.slug,
                 enabled: enabled ? 'yes' : 'no',
+            })
+                .then(response => {
+                    this.$notify.success(response.message);
+                    this.overview = response.status;
+                })
+                .catch(error => {
+                    this.$handleError(error);
+                    this.getOverview();
+                })
+                .finally(() => {
+                    this.saving = false;
+                });
+        },
+        toggleHubProduct(slug, included) {
+            const slugs = (this.hub.products || [])
+                .filter(product => (product.slug === slug ? included : product.included))
+                .map(product => product.slug);
+
+            this.saving = true;
+
+            this.$post('fluent_toolkit_mcp_hub_products', {
+                included: slugs,
             })
                 .then(response => {
                     this.$notify.success(response.message);

@@ -42,6 +42,7 @@ class FluentToolkitBootstrap
         add_action('wp_ajax_fluent_toolkit_mcp_overview', array($this, 'fetchMcpOverview'));
         add_action('wp_ajax_fluent_toolkit_mcp_toggle', array($this, 'toggleMcpAccess'));
         add_action('wp_ajax_fluent_toolkit_mcp_create_app_password', array($this, 'createMcpAppPassword'));
+        add_action('wp_ajax_fluent_toolkit_mcp_hub_products', array($this, 'saveMcpHubProducts'));
 
         // add plugin menu link to plugins page
         add_filter('plugin_action_links_' . plugin_basename(__FILE__), function ($links) {
@@ -83,7 +84,9 @@ class FluentToolkitBootstrap
 
             }, 10, 2);
 
-            \FluentToolkit\Mcp\AdapterBootstrap::boot();
+            if (\FluentToolkit\Mcp\AdapterBootstrap::boot()) {
+                \FluentToolkit\Mcp\HubServer::register();
+            }
         }, 999);
 
 
@@ -334,6 +337,21 @@ class FluentToolkitBootstrap
         ), 200);
     }
 
+    public function saveMcpHubProducts()
+    {
+        $this->verifySettingsAjaxRequest();
+
+        $included = isset($_POST['included']) && is_array($_POST['included']) ? array_map('sanitize_key', wp_unslash($_POST['included'])) : [];
+        $known = array_keys(\FluentToolkit\Mcp\HubServer::products());
+
+        \FluentToolkit\Mcp\HubServer::setExcludedProducts(array_diff($known, $included));
+
+        wp_send_json([
+            'message' => __('FluentHub MCP server updated.', 'fluent-toolkit'),
+            'status'  => \FluentToolkit\Classes\McpManager::status(),
+        ], 200);
+    }
+
     public function saveDashboardSettings()
     {
         $this->verifySettingsAjaxRequest();
@@ -451,6 +469,7 @@ class FluentToolkitBootstrap
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/TransStrings.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/AdminBarMenu.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'includes/Mcp/AdapterBootstrap.php';
+        require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'includes/Mcp/HubServer.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/ToolkitHelper.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/McpManager.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/UnifiedUi/Icons.php';
