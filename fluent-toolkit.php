@@ -27,6 +27,12 @@ class FluentToolkitBootstrap
 
         $this->loadClasses();
 
+        // Keeps FluentHub's OAuth application passwords to the MCP endpoint.
+        // Hooked here, not in OAuthServer::register(): that one waits for the
+        // MCP adapter, and without this hook the passwords would work on the
+        // whole REST API and XML-RPC.
+        add_action('wp_authenticate_application_password_errors', array(\FluentToolkit\Mcp\OAuth\OAuthServer::class, 'restrictPasswords'), 10, 3);
+
         add_action('init', function () {
             load_plugin_textdomain('fluent-toolkit', false, dirname(plugin_basename(__FILE__)) . '/language');
         });
@@ -43,6 +49,8 @@ class FluentToolkitBootstrap
         add_action('wp_ajax_fluent_toolkit_mcp_toggle', array($this, 'toggleMcpAccess'));
         add_action('wp_ajax_fluent_toolkit_mcp_create_app_password', array($this, 'createMcpAppPassword'));
         add_action('wp_ajax_fluent_toolkit_mcp_hub_products', array($this, 'saveMcpHubProducts'));
+        add_action('wp_ajax_fluent_toolkit_mcp_oauth_toggle', array($this, 'toggleMcpOAuth'));
+        add_action('wp_ajax_fluent_toolkit_mcp_oauth_revoke', array($this, 'revokeMcpOAuthApp'));
 
         // add plugin menu link to plugins page
         add_filter('plugin_action_links_' . plugin_basename(__FILE__), function ($links) {
@@ -86,6 +94,7 @@ class FluentToolkitBootstrap
 
             if (\FluentToolkit\Mcp\AdapterBootstrap::boot()) {
                 \FluentToolkit\Mcp\HubServer::register();
+                \FluentToolkit\Mcp\OAuth\OAuthServer::register();
             }
         }, 999);
 
@@ -352,6 +361,44 @@ class FluentToolkitBootstrap
         ], 200);
     }
 
+    public function toggleMcpOAuth()
+    {
+        $this->verifySettingsAjaxRequest();
+
+        $enabled = isset($_POST['enabled']) ? sanitize_text_field(wp_unslash($_POST['enabled'])) : '';
+        $enabled = in_array($enabled, ['yes', 'true', '1', 'on'], true);
+
+        \FluentToolkit\Mcp\OAuth\OAuthServer::setEnabled($enabled);
+
+        wp_send_json([
+            'message' => $enabled
+                ? __('Sign-in with OAuth is on.', 'fluent-toolkit')
+                : __('Sign-in with OAuth is off. Connected apps stop working until you turn it on again.', 'fluent-toolkit'),
+            'status'  => \FluentToolkit\Classes\McpManager::status(),
+        ], 200);
+    }
+
+    public function revokeMcpOAuthApp()
+    {
+        $this->verifySettingsAjaxRequest();
+
+        $userId = isset($_POST['user_id']) ? absint($_POST['user_id']) : 0;
+        $uuid = isset($_POST['id']) ? sanitize_text_field(wp_unslash($_POST['id'])) : '';
+
+        if (!$userId || !current_user_can('edit_user', $userId)) {
+            wp_send_json(['message' => __('You cannot disconnect apps of this user.', 'fluent-toolkit')], 403);
+        }
+
+        if (!$uuid || !\FluentToolkit\Mcp\OAuth\Store::deleteToken($userId, $uuid)) {
+            wp_send_json(['message' => __('This app is already disconnected.', 'fluent-toolkit')], 404);
+        }
+
+        wp_send_json([
+            'message' => __('App disconnected.', 'fluent-toolkit'),
+            'status'  => \FluentToolkit\Classes\McpManager::status(),
+        ], 200);
+    }
+
     public function saveDashboardSettings()
     {
         $this->verifySettingsAjaxRequest();
@@ -470,6 +517,9 @@ class FluentToolkitBootstrap
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/AdminBarMenu.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'includes/Mcp/AdapterBootstrap.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'includes/Mcp/HubServer.php';
+        require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'includes/Mcp/OAuth/Store.php';
+        require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'includes/Mcp/OAuth/OAuthServer.php';
+        require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'includes/Mcp/OAuth/AuthorizePage.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/ToolkitHelper.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/McpManager.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/UnifiedUi/Icons.php';

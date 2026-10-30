@@ -8,5 +8,12 @@
     "MCP_Empty_Desc": "Install or update a Fluent plugin that supports MCP. Once it registers an MCP endpoint, it shows up here with its tools, status and connection snippets.",
     "MCP_Hub_Adapter_Outdated": "The FluentHub MCP server needs MCP Adapter %2$s or later, and this site runs %1$s. The MCP server of each plugin still works on its own endpoint.",
     "MCP_Hub_Connect_Desc": "Add this one endpoint to your AI client. It serves every plugin ticked above, and one application password works for all of them.",
-    "MCP_Hub_Desc": "One MCP server for all your Fluent plugins. AI clients connect once and get two tools per plugin: one that reads data and one that changes it."
+    "MCP_Hub_Desc": "One MCP server for all your Fluent plugins. AI clients connect once and get two tools per plugin: one that reads data and one that changes it.",
+    "MCP_OAuth_App_Passwords_Off": "Sign-in gives each connected app its own application password, and application passwords are off on this site. WordPress turns them off on sites without HTTPS, and security plugins can turn them off too.",
+    "MCP_OAuth_Check_Challenge_Fail": "The MCP endpoint does not ask clients to sign in. A security or caching plugin may strip the WWW-Authenticate header or change the response.",
+    "MCP_OAuth_Check_Root_Redirect": "This site redirects /.well-known/ addresses at the site root. Some clients look there first and can fail to sign in. Clients that go on to the REST address still work.",
+    "MCP_OAuth_Connect_Desc": "Add this endpoint to your AI client. The client opens a WordPress sign-in page; approve the app there. WordPress then creates an application password for the app, and nobody copies it by hand.",
+    "MCP_OAuth_Desc": "Clients connect with the endpoint URL alone. The user signs in to WordPress and approves the app, and each app gets its own application password that works only for this endpoint. Needs HTTPS and a site that AI services can reach.",
+    "MCP_OAuth_No_Https": "This site does not use HTTPS. Most AI clients refuse to sign in over plain HTTP, except on localhost.",
+    "MCP_OAuth_Plain_Permalinks": "Sign-in needs pretty permalinks, because an OAuth address cannot contain a query string. Choose any setting other than Plain in Settings > Permalinks, or use an application password."
 }

@@ -54,6 +54,7 @@ class McpManager
         return [
             'adapter'      => $adapter,
             'hub'          => \FluentToolkit\Mcp\HubServer::status($products),
+            'oauth'        => \FluentToolkit\Mcp\OAuth\OAuthServer::status(),
             'products'     => $products,
             'app_password' => self::appPasswordSupport(),
         ];

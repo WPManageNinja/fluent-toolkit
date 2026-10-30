@@ -90,6 +90,72 @@
                     </label>
                 </div>
 
+                <div class="ft-mcp-oauth" v-if="hub.available">
+                    <div class="ft-mcp-oauth-head">
+                        <div>
+                            <strong>{{ $t('Sign in with OAuth') }}</strong>
+                            <p>{{ $t('MCP_OAuth_Desc') }}</p>
+                        </div>
+                        <label class="ft-switch">
+                            <input
+                                type="checkbox"
+                                :checked="oauth.enabled"
+                                :disabled="saving || !oauth.available"
+                                @change="toggleOAuth($event.target.checked)"
+                            />
+                            <span></span>
+                        </label>
+                    </div>
+
+                    <p class="ft-mcp-oauth-warn" v-if="oauth.reason === 'plain_permalinks'">{{ $t('MCP_OAuth_Plain_Permalinks') }}</p>
+                    <p class="ft-mcp-oauth-warn" v-else-if="oauth.reason === 'app_passwords_off'">{{ $t('MCP_OAuth_App_Passwords_Off') }}</p>
+                    <p class="ft-mcp-oauth-warn" v-else-if="oauthReady && !oauth.https">{{ $t('MCP_OAuth_No_Https') }}</p>
+
+                    <template v-if="oauthReady">
+                        <div class="ft-mcp-oauth-check">
+                            <button class="ft-btn ft-btn-ghost" :disabled="oauthCheck.running" @click="runOAuthCheck()">
+                                {{ oauthCheck.running ? $t('Checking…') : $t('Check sign-in setup') }}
+                            </button>
+                            <ul v-if="oauthCheck.results.length">
+                                <li v-for="result in oauthCheck.results" :key="result.key" :class="'is-' + result.state">
+                                    <span class="ft-dot" :class="result.state === 'ok' ? 'ft-dot-ok' : 'ft-dot-warn'"></span>
+                                    {{ result.label }}
+                                </li>
+                            </ul>
+                        </div>
+                    </template>
+
+                    <div class="ft-mcp-oauth-apps" v-if="oauthReady || oauth.apps.length">
+                        <strong>{{ $t('Connected apps') }}</strong>
+                        <p v-if="!oauth.apps.length">{{ $t('No apps are connected yet.') }}</p>
+                        <table v-else>
+                            <thead>
+                                <tr>
+                                    <th>{{ $t('App') }}</th>
+                                    <th>{{ $t('User') }}</th>
+                                    <th>{{ $t('Last used') }}</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="app in oauth.apps" :key="app.id">
+                                    <td>
+                                        <strong>{{ app.name || $t('Unnamed app') }}</strong>
+                                    </td>
+                                    <td>
+                                        {{ app.user }}
+                                        <em v-if="app.user_login">{{ app.user_login }}</em>
+                                    </td>
+                                    <td>{{ app.last_used_at ? formatDate(app.last_used_at) : $t('Not used yet') }}</td>
+                                    <td>
+                                        <button class="ft-btn ft-btn-ghost" :disabled="saving" @click="revokeOAuthApp(app)">{{ $t('Disconnect') }}</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <div class="ft-mcp-note" v-if="hub.reason === 'adapter_outdated'">
                     <!-- translators: 1: the MCP Adapter version that runs, 2: the minimum MCP Adapter version the FluentHub server needs -->
                     {{ $t('MCP_Hub_Adapter_Outdated', overview.adapter.version, hub.min_adapter) }}
@@ -155,9 +221,9 @@
                 <div class="ft-panel-head">
                     <div>
                         <h2>{{ $t('Connect client') }}</h2>
-                        <p>{{ activeProduct.is_hub ? $t('MCP_Hub_Connect_Desc') : $t('MCP_Connect_Desc') }}</p>
+                        <p>{{ useOAuth ? $t('MCP_OAuth_Connect_Desc') : (activeProduct.is_hub ? $t('MCP_Hub_Connect_Desc') : $t('MCP_Connect_Desc')) }}</p>
                     </div>
-                    <div class="ft-connect-actions">
+                    <div class="ft-connect-actions" v-if="!useOAuth">
                         <button
                             v-if="canCreateAppPassword"
                             class="ft-btn ft-btn-primary"
@@ -172,7 +238,16 @@
                     </div>
                 </div>
 
-                <div class="ft-credential-row">
+                <div class="ft-channels ft-client-tabs" role="tablist" v-if="oauthReady">
+                    <button class="ft-channel" :aria-selected="connectMode === 'oauth'" @click="connectMode = 'oauth'">
+                        {{ $t('Sign in with OAuth') }}
+                    </button>
+                    <button class="ft-channel" :aria-selected="connectMode === 'password'" @click="connectMode = 'password'">
+                        {{ $t('Application password') }}
+                    </button>
+                </div>
+
+                <div class="ft-credential-row" v-if="!useOAuth">
                     <label>
                         <span>{{ $t('Username') }}</span>
                         <input type="text" v-model="username" placeholder="wp-user" />
@@ -199,21 +274,21 @@
                     </label>
                 </div>
 
-                <div class="ft-mcp-note ft-mcp-note-ok" v-if="generatedName">
+                <div class="ft-mcp-note ft-mcp-note-ok" v-if="!useOAuth && generatedName">
                     <!-- translators: %s is the name of the new application password, for example FluentHub MCP -->
                     {{ $t('Created the application password "%s" and filled it in above.', generatedName) }}
                     {{ $t('App_Password_Once_Notice') }}
                 </div>
-                <div class="ft-mcp-note" v-else-if="appPasswordNotice">
+                <div class="ft-mcp-note" v-else-if="!useOAuth && appPasswordNotice">
                     {{ appPasswordNotice }}
                 </div>
 
                 <div class="ft-channels ft-client-tabs" role="tablist">
                     <button
-                        v-for="client in clients"
+                        v-for="client in visibleClients"
                         :key="client.key"
                         class="ft-channel"
-                        :aria-selected="activeClient === client.key"
+                        :aria-selected="activeClientInfo.key === client.key"
                         @click="activeClient = client.key"
                     >
                         {{ client.label }}
@@ -291,6 +366,15 @@ export default {
                     products: [],
                     actions_count: 0,
                 },
+                oauth: {
+                    enabled: false,
+                    available: false,
+                    reason: '',
+                    https: true,
+                    resource_metadata_url: '',
+                    server_metadata_url: '',
+                    apps: [],
+                },
                 products: [],
                 app_password: {
                     available: false,
@@ -301,6 +385,11 @@ export default {
             },
             activeProductSlug: 'fluent-hub',
             activeClient: 'codex',
+            connectMode: 'oauth',
+            oauthCheck: {
+                running: false,
+                results: [],
+            },
             snippetScope: 'single',
             loading: false,
             saving: false,
@@ -315,6 +404,14 @@ export default {
                 { key: 'claude-desktop', label: 'Claude Desktop', note: this.$t('Paste this JSON into claude_desktop_config.json and restart Claude Desktop.') },
                 { key: 'cursor', label: 'Cursor', note: this.$t('Paste this JSON into the Cursor MCP settings and restart Cursor.') },
                 { key: 'generic', label: this.$_x('Generic', 'MCP client type'), note: this.$t('Use this URL and Basic Auth header with any HTTP MCP client.') },
+            ],
+            oauthClients: [
+                { key: 'claude', label: 'Claude', note: this.$t('In Claude, open Settings > Connectors, add a custom connector and paste this URL.') },
+                { key: 'claude-code', label: 'Claude Code', note: this.$t('Run this, then run /mcp in Claude Code and pick fluent-hub to sign in.') },
+                { key: 'codex', label: 'Codex', note: this.$t('Run these commands. The second one opens the sign-in page.') },
+                { key: 'copilot', label: 'GitHub Copilot', note: this.$t('Paste this JSON into .vscode/mcp.json. VS Code asks you to sign in.') },
+                { key: 'cursor', label: 'Cursor', note: this.$t('Paste this JSON into the Cursor MCP settings. Cursor asks you to sign in.') },
+                { key: 'generic', label: this.$_x('Generic', 'MCP client type'), note: this.$t('Add this URL to any MCP client that supports OAuth, then sign in.') },
             ],
         };
     },
@@ -350,6 +447,20 @@ export default {
                 toggleable: false,
                 is_hub: true,
             };
+        },
+        oauth() {
+            return this.overview.oauth || { apps: [] };
+        },
+        oauthReady() {
+            return !!(this.hub.available && this.oauth.enabled && this.oauth.available);
+        },
+        // Sign-in works on the FluentHub endpoint only; plugin endpoints keep
+        // using application passwords.
+        useOAuth() {
+            return !!(this.activeProduct && this.activeProduct.is_hub && this.oauthReady && this.connectMode === 'oauth');
+        },
+        visibleClients() {
+            return this.useOAuth ? this.oauthClients : this.clients;
         },
         activeProduct() {
             if (this.hubProduct && this.activeProductSlug === this.hubProduct.slug) {
@@ -405,7 +516,7 @@ export default {
             return this.$_x('Available', 'MCP adapter status');
         },
         activeClientInfo() {
-            return this.clients.find(client => client.key === this.activeClient) || this.clients[0];
+            return this.visibleClients.find(client => client.key === this.activeClient) || this.visibleClients[0];
         },
         // Only enabled products get an entry in the combined snippet — a disabled
         // server's route isn't registered, so pasting it would just 404.
@@ -442,10 +553,16 @@ export default {
                 return '';
             }
 
+            const client = this.activeClientInfo ? this.activeClientInfo.key : '';
+
+            if (this.useOAuth) {
+                return this.oauthSnippet(entries[0].endpoint_url);
+            }
+
             const user = this.username || '<your-username>';
             const password = this.appPassword || '<your-application-password>';
 
-            if (this.activeClient === 'codex') {
+            if (client === 'codex') {
                 const blocks = entries.map(product => [
                     `Name: ${product.slug}`,
                     'Transport: Streamable HTTP',
@@ -461,7 +578,7 @@ export default {
                 return [heading, ''].concat(blocks.join('\n\n')).join('\n');
             }
 
-            if (this.activeClient === 'copilot') {
+            if (client === 'copilot') {
                 return JSON.stringify({
                     servers: this.keyBySlug(entries, product => ({
                         type: 'http',
@@ -473,7 +590,7 @@ export default {
                 }, null, 2);
             }
 
-            if (this.activeClient === 'claude-desktop') {
+            if (client === 'claude-desktop') {
                 return JSON.stringify({
                     mcpServers: this.keyBySlug(entries, product => ({
                         command: 'npx',
@@ -489,7 +606,7 @@ export default {
                 }, null, 2);
             }
 
-            if (this.activeClient === 'cursor') {
+            if (client === 'cursor') {
                 return JSON.stringify({
                     mcpServers: this.keyBySlug(entries, product => ({
                         url: product.endpoint_url,
@@ -501,7 +618,7 @@ export default {
                 }, null, 2);
             }
 
-            if (this.activeClient === 'generic') {
+            if (client === 'generic') {
                 return entries.map(product => [
                     `# ${product.name}`,
                     `URL: ${product.endpoint_url}`,
@@ -528,6 +645,123 @@ export default {
                 servers[product.slug] = build(product);
                 return servers;
             }, {});
+        },
+        oauthSnippet(url) {
+            const client = this.activeClientInfo.key;
+
+            if (client === 'claude-code') {
+                return `claude mcp add --transport http fluent-hub ${url}`;
+            }
+
+            if (client === 'codex') {
+                return [`codex mcp add fluent-hub --url ${url}`, 'codex mcp login fluent-hub'].join('\n');
+            }
+
+            if (client === 'copilot') {
+                return JSON.stringify({ servers: { 'fluent-hub': { type: 'http', url } } }, null, 2);
+            }
+
+            if (client === 'cursor') {
+                return JSON.stringify({ mcpServers: { 'fluent-hub': { url } } }, null, 2);
+            }
+
+            return url;
+        },
+        formatDate(timestamp) {
+            return new Date(timestamp * 1000).toLocaleString();
+        },
+        toggleOAuth(enabled) {
+            this.saving = true;
+
+            this.$post('fluent_toolkit_mcp_oauth_toggle', {
+                enabled: enabled ? 'yes' : 'no',
+            })
+                .then(response => {
+                    this.$notify.success(response.message);
+                    this.overview = response.status;
+                    this.oauthCheck.results = [];
+                })
+                .catch(error => {
+                    this.$handleError(error);
+                    this.getOverview();
+                })
+                .finally(() => {
+                    this.saving = false;
+                });
+        },
+        revokeOAuthApp(app) {
+            this.saving = true;
+
+            this.$post('fluent_toolkit_mcp_oauth_revoke', {
+                id: app.id,
+                user_id: app.user_id,
+            })
+                .then(response => {
+                    this.$notify.success(response.message);
+                    this.overview = response.status;
+                })
+                .catch(error => {
+                    this.$handleError(error);
+                    this.getOverview();
+                })
+                .finally(() => {
+                    this.saving = false;
+                });
+        },
+        // Runs the first steps an MCP client takes, from this browser and
+        // without the login cookie. It cannot tell whether the site is
+        // reachable from the internet.
+        async runOAuthCheck() {
+            const results = [];
+            const fetchJson = url => fetch(url, { credentials: 'omit' })
+                .then(response => (response.ok ? response.json() : Promise.reject(response.status)));
+
+            this.oauthCheck.running = true;
+
+            try {
+                const response = await fetch(this.hub.endpoint_url, {
+                    method: 'POST',
+                    credentials: 'omit',
+                    headers: { 'Content-Type': 'application/json', Accept: 'application/json, text/event-stream' },
+                    body: '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}',
+                });
+                const challenge = response.headers.get('WWW-Authenticate') || '';
+                const ok = response.status === 401 && challenge.indexOf('resource_metadata=') !== -1;
+                results.push({ key: 'challenge', state: ok ? 'ok' : 'fail', label: ok ? this.$t('The MCP endpoint asks clients to sign in.') : this.$t('MCP_OAuth_Check_Challenge_Fail') });
+            } catch (e) {
+                results.push({ key: 'challenge', state: 'fail', label: this.$t('MCP_OAuth_Check_Challenge_Fail') });
+            }
+
+            try {
+                const metadata = await fetchJson(this.oauth.resource_metadata_url);
+                const ok = Array.isArray(metadata.authorization_servers) && metadata.authorization_servers.length > 0;
+                results.push({ key: 'resource', state: ok ? 'ok' : 'fail', label: ok ? this.$t('Resource metadata loads.') : this.$t('Resource metadata does not load.') });
+            } catch (e) {
+                results.push({ key: 'resource', state: 'fail', label: this.$t('Resource metadata does not load.') });
+            }
+
+            try {
+                const metadata = await fetchJson(this.oauth.server_metadata_url);
+                const ok = !!(metadata.token_endpoint && metadata.authorization_endpoint);
+                results.push({ key: 'server', state: ok ? 'ok' : 'fail', label: ok ? this.$t('Sign-in server metadata loads.') : this.$t('Sign-in server metadata does not load.') });
+            } catch (e) {
+                results.push({ key: 'server', state: 'fail', label: this.$t('Sign-in server metadata does not load.') });
+            }
+
+            // Many clients look at the site root before the REST URL. WordPress
+            // can redirect that path to a page, and some clients then fail.
+            try {
+                const issuer = new URL(this.oauth.server_metadata_url.replace(/\/\.well-known\/openid-configuration$/, ''));
+                const response = await fetch(issuer.origin + '/.well-known/oauth-authorization-server' + issuer.pathname, { credentials: 'omit', redirect: 'manual' });
+                if (response.type === 'opaqueredirect' || (response.status >= 300 && response.status < 400)) {
+                    results.push({ key: 'root', state: 'warn', label: this.$t('MCP_OAuth_Check_Root_Redirect') });
+                }
+            } catch (e) {
+                // A network error here says nothing about the REST URLs.
+            }
+
+            this.oauthCheck.results = results;
+            this.oauthCheck.running = false;
         },
         getOverview() {
             this.loading = true;

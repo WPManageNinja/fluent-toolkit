@@ -153,6 +153,102 @@
     }
   }
 
+  .ft-mcp-oauth {
+    border-top: 1px solid var(--border);
+    display: grid;
+    gap: 14px;
+    padding: 16px 24px;
+
+    p {
+      color: var(--text-soft);
+      font-size: 13px;
+      margin: 4px 0 0;
+    }
+
+    strong {
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    em {
+      color: var(--text-soft);
+      display: block;
+      font-size: 12px;
+      font-style: normal;
+    }
+  }
+
+  .ft-mcp-oauth-head {
+    align-items: flex-start;
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+  }
+
+  .ft-mcp-oauth-warn {
+    color: oklch(42% 0.13 70) !important;
+  }
+
+  .ft-mcp-oauth-check {
+    display: grid;
+    gap: 10px;
+    justify-items: start;
+
+    ul {
+      display: grid;
+      gap: 6px;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    li {
+      align-items: center;
+      color: var(--text-muted);
+      display: flex;
+      font-size: 13px;
+      gap: 8px;
+      margin: 0;
+    }
+  }
+
+  .ft-mcp-oauth-apps {
+    display: grid;
+    gap: 8px;
+    overflow-x: auto;
+
+    table {
+      border-collapse: collapse;
+      font-size: 13px;
+      min-width: 560px;
+      width: 100%;
+    }
+
+    th {
+      color: var(--text-soft);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 8px 6px 0;
+      text-align: left;
+    }
+
+    td {
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 10px 8px 10px 0;
+      vertical-align: top;
+
+      strong {
+        font-size: 13px;
+      }
+
+      &:last-child {
+        text-align: right;
+      }
+    }
+  }
+
   .ft-connect-actions {
     display: flex;
     flex-shrink: 0;
