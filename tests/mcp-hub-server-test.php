@@ -9,7 +9,8 @@
  * - an action works by its short name and by the product's full tool name;
  * - an action called on the wrong router tool names the right one;
  * - the product tool's own permission check runs before it executes;
- * - help returns the product's instructions and only the asked-for actions;
+ * - help returns the product's instructions and one line per action of the
+ *   tool; with action names it returns the full definition of those actions;
  * - a product whose transport gate the user fails is hidden from tools/list;
  * - a product left out on the MCP page is not served.
  */
@@ -100,6 +101,36 @@ namespace {
     function wp_json_encode($data, $flags = 0)
     {
         return json_encode($data, $flags);
+    }
+
+    $GLOBALS['user_roles'] = ['administrator'];
+    $GLOBALS['user_id'] = 1;
+
+    class WP_User
+    {
+        public $ID;
+        public $roles;
+
+        public function __construct($id, $roles)
+        {
+            $this->ID = $id;
+            $this->roles = $roles;
+        }
+
+        public function exists()
+        {
+            return $this->ID > 0;
+        }
+    }
+
+    function wp_get_current_user()
+    {
+        return new WP_User($GLOBALS['user_id'], $GLOBALS['user_roles']);
+    }
+
+    function is_multisite()
+    {
+        return false;
     }
 
     function current_user_can($cap)
@@ -384,9 +415,96 @@ namespace {
         fail('Unexpected help entry: ' . json_encode($action));
     }
 
-    $fullHelp = call_router($tools, 'fluent-crm-read', ['action' => 'help']);
-    if (count($fullHelp['actions']) !== 3) {
-        fail('Expected help without a filter to list every CRM action.');
+    // An action without input has "properties": {} on the product server.
+    // Help must send the same, not [].
+    $adapter->servers['fluent-crm']->tools['fluent-crm-list-tags']->record['inputSchema'] = ['type' => 'object', 'properties' => new \stdClass()];
+    $noInput = call_router($tools, 'fluent-crm-read', ['action' => 'help', 'arguments' => ['actions' => ['list-tags']]]);
+    if (false === strpos(json_encode($noInput), '"properties":{}')) {
+        fail('Expected help to keep an empty properties object: ' . json_encode($noInput['actions'][0]['inputSchema']));
+    }
+
+    // Input beside "action", or "arguments" that is not an object, must not
+    // run the action without its input.
+    $listTags = $adapter->servers['fluent-crm']->tools['fluent-crm-list-tags'];
+    $before = count($listTags->calls);
+    $envelope = function ($result) {
+        $decoded = is_wp_error($result) ? json_decode($result->get_error_message(), true) : null;
+
+        return isset($decoded['error']) ? $decoded['error'] : [];
+    };
+
+    $misplaced = call_router($tools, 'fluent-crm-read', ['action' => 'list-tags', 'id' => 5]);
+    if ('fluent_hub_misplaced_arguments' !== $misplaced->get_error_code() || 'unknown_param' !== ($envelope($misplaced)['code'] ?? '') || $envelope($misplaced)['fields'] !== ['id'] || $envelope($misplaced)['allowed'] !== ['action', 'arguments'] || count($listTags->calls) !== $before) {
+        fail('Expected input beside "action" to be refused without running the action.');
+    }
+
+    foreach (['x', 5, ['a', 'b']] as $notAnObject) {
+        $refused = call_router($tools, 'fluent-crm-read', ['action' => 'list-tags', 'arguments' => $notAnObject]);
+        if ('fluent_hub_invalid_arguments' !== $refused->get_error_code() || 'invalid_param' !== ($envelope($refused)['code'] ?? '') || $envelope($refused)['fields'] !== ['arguments'] || count($listTags->calls) !== $before) {
+            fail('Expected "arguments" that is not an object to be refused: ' . json_encode($notAnObject));
+        }
+    }
+
+    // A JSON object sent as a string is read.
+    $asString = call_router($tools, 'fluent-crm-read', ['action' => 'list-tags', 'arguments' => '{"id": 7}']);
+    if (is_wp_error($asString) || $asString['args'] !== ['id' => 7]) {
+        fail('Expected a JSON object sent as a string to be read as the arguments.');
+    }
+
+    // The router's own errors use the products' envelope.
+    $wrongTool = call_router($tools, 'fluent-crm-read', ['action' => 'delete-contact']);
+    if ('fluent_hub_wrong_tool' !== $wrongTool->get_error_code() || 'invalid_param' !== $envelope($wrongTool)['code'] || 'fluent-crm-write' !== $envelope($wrongTool)['tool'] || false !== $envelope($wrongTool)['retryable']) {
+        fail('Expected a structured error that names the right tool.');
+    }
+
+    // The router uses the two input codes every Fluent MCP server shares.
+    $unknown = call_router($tools, 'fluent-crm-read', ['action' => 'nope']);
+    $noAction = call_router($tools, 'fluent-crm-read', []);
+    if ('invalid_param' !== $envelope($unknown)['code'] || $envelope($unknown)['fields'] !== ['action'] || 'invalid_param' !== $envelope($noAction)['code']) {
+        fail('Expected an unknown or missing action to be invalid_param on the action field.');
+    }
+
+    // Help without arguments is light: the rules, and one line per action of
+    // this tool only. No schemas, and no actions of the other tool.
+    $index = call_router($tools, 'fluent-crm-read', ['action' => 'help']);
+    $indexNames = array_column($index['actions'], 'action');
+    sort($indexNames);
+    if ($index['instructions'] !== 'Instructions for fluent-crm' || $indexNames !== ['get-crm-context', 'list-tags']) {
+        fail('Expected help on the read tool to list the read actions with the rules: ' . json_encode($index));
+    }
+
+    if (array_keys($index['actions'][0]) !== ['action', 'description'] || false !== strpos(json_encode($index['actions']), 'inputSchema')) {
+        fail('Expected the action list to carry no schemas: ' . json_encode($index['actions'][0]));
+    }
+
+    if (false === strpos($index['other_tool'], 'fluent-crm-write') || empty($index['schemas'])) {
+        fail('Expected the light help to point to the write tool and to the schema call.');
+    }
+
+    $writeIndex = call_router($tools, 'fluent-crm-write', ['action' => 'help']);
+    if (array_column($writeIndex['actions'], 'action') !== ['delete-contact']) {
+        fail('Expected help on the write tool to list write actions only.');
+    }
+
+    // {"actions": ["all"]} gives the full definition of every action of this tool.
+    $all = call_router($tools, 'fluent-crm-read', ['action' => 'help', 'arguments' => ['actions' => ['all']]]);
+    if (count($all['actions']) !== 2 || empty($all['actions'][0]['inputSchema']) || $all['instructions'] !== 'Instructions for fluent-crm') {
+        fail('Expected "all" to return the full read actions with the rules.');
+    }
+
+    // An action asked for by name comes back from either tool, with the tool
+    // that runs it. A name that does not exist is reported.
+    $cross = call_router($tools, 'fluent-crm-read', ['action' => 'help', 'arguments' => ['actions' => ['fluent-crm-delete-contact', 'nope']]]);
+    if (count($cross['actions']) !== 1 || 'fluent-crm-write' !== $cross['actions'][0]['tool'] || $cross['unknown_actions'] !== ['nope']) {
+        fail('Expected a named write action from the read tool, and the unknown name reported: ' . json_encode($cross));
+    }
+
+    // Output schemas are left out unless asked for.
+    $adapter->servers['fluent-crm']->tools['fluent-crm-list-tags']->record['outputSchema'] = ['type' => 'object'];
+    $withoutOutput = call_router($tools, 'fluent-crm-read', ['action' => 'help', 'arguments' => ['actions' => ['list-tags']]]);
+    $withOutput = call_router($tools, 'fluent-crm-read', ['action' => 'help', 'arguments' => ['actions' => ['list-tags'], 'output_schema' => true]]);
+    if (isset($withoutOutput['actions'][0]['outputSchema']) || !isset($withOutput['actions'][0]['outputSchema'])) {
+        fail('Expected the output schema only when help is asked for it.');
     }
 
     // A subscriber passes the CRM default ('read') but not the Support gate.
@@ -426,6 +544,35 @@ namespace {
     if ($names !== ['fluent-crm-read', 'fluent-crm-write']) {
         fail('Expected an excluded product to drop out of the hub: ' . implode(', ', $names));
     }
+
+    // Who may connect: administrators always, other roles when the admin
+    // ticks them. The check comes before the product gates.
+    $GLOBALS['user_caps'] = ['read' => true];
+    if (HubServer::allowedRoles() !== ['administrator'] || true !== HubServer::transportPermission(null)) {
+        fail('Expected an administrator to connect by default.');
+    }
+
+    $GLOBALS['user_roles'] = ['editor'];
+    if (false !== HubServer::transportPermission(null)) {
+        fail('Expected a role that is not ticked to be refused, although it passes a product gate.');
+    }
+
+    HubServer::setAllowedRoles(['editor']);
+    if (HubServer::allowedRoles() !== ['administrator', 'editor'] || true !== HubServer::transportPermission(null)) {
+        fail('Expected a ticked role to connect, and administrator to stay in the list.');
+    }
+
+    HubServer::setAllowedRoles([]);
+    if (HubServer::allowedRoles() !== ['administrator']) {
+        fail('Expected the administrator role to stay when every role is unticked.');
+    }
+
+    $GLOBALS['user_id'] = 0;
+    if (HubServer::userCanConnect()) {
+        fail('Expected a visitor who is not logged in to be refused.');
+    }
+    $GLOBALS['user_id'] = 1;
+    $GLOBALS['user_roles'] = ['administrator'];
 
     // The server is off until the admin turns it on. The first time, sign-in
     // comes on with it; after that the admin's own choice for sign-in stays.

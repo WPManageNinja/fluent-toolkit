@@ -216,6 +216,25 @@
     }
   }
 
+  .ft-mcp-roles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 22px;
+
+    label {
+      align-items: center;
+      color: var(--text);
+      cursor: pointer;
+      display: inline-flex;
+      font-size: 13px;
+      gap: 7px;
+    }
+
+    input:disabled {
+      cursor: not-allowed;
+    }
+  }
+
   .ft-mcp-blank {
     color: var(--text-soft);
     font-size: 13px;

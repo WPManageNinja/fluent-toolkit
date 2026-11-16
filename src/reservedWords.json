@@ -15,5 +15,6 @@
     "MCP_OAuth_Check_Root_Redirect": "This site redirects /.well-known/ addresses at the site root. Some clients look there first and can fail to sign in. Clients that go on to the REST address still work.",
     "MCP_OAuth_Desc": "When this is on, an AI app connects with the server address only: it opens the WordPress login, the user approves the app, and WordPress gives the app its own password. When this is off, apps connect with an application password that you copy by hand.",
     "MCP_OAuth_No_Https": "This site does not use HTTPS. Most AI clients refuse to sign in over plain HTTP, except on localhost.",
-    "MCP_OAuth_Plain_Permalinks": "Sign-in needs pretty permalinks, because an OAuth address cannot contain a query string. Choose any setting other than Plain in Settings > Permalinks, or use an application password."
+    "MCP_OAuth_Plain_Permalinks": "Sign-in needs pretty permalinks, because an OAuth address cannot contain a query string. Choose any setting other than Plain in Settings > Permalinks, or use an application password.",
+    "MCP_Roles_Desc": "Only users with a ticked role can connect an AI app to the FluentHub MCP server, with sign-in or with an application password. Administrators can always connect. Each plugin still applies its own permissions to what a connected user can do."
 }

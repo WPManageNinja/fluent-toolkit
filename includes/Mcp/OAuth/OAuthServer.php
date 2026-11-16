@@ -465,6 +465,10 @@ class OAuthServer
             return self::error('invalid_grant', 'This user cannot use application passwords.');
         }
 
+        if (!HubServer::userCanConnect($user)) {
+            return self::error('invalid_grant', 'This user is not allowed to connect apps to this site.');
+        }
+
         $token = Store::createToken($user->ID, $row['name']);
 
         if (is_wp_error($token)) {

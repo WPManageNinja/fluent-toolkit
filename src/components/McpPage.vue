@@ -262,6 +262,22 @@
                     </div>
                 </div>
 
+                <div class="ft-mcp-advanced-block" v-if="hub.enabled && (hub.roles || []).length">
+                    <strong>{{ $t('Who can connect apps') }}</strong>
+                    <p>{{ $t('MCP_Roles_Desc') }}</p>
+                    <div class="ft-mcp-roles">
+                        <label v-for="role in hub.roles" :key="role.slug">
+                            <input
+                                type="checkbox"
+                                :checked="role.allowed"
+                                :disabled="saving || role.locked"
+                                @change="toggleRole(role.slug, $event.target.checked)"
+                            />
+                            {{ role.name }}
+                        </label>
+                    </div>
+                </div>
+
                 <div class="ft-mcp-advanced-block">
                     <strong>{{ $t('Endpoints') }}</strong>
                     <p>{{ hub.enabled ? $t('MCP_Endpoints_Desc') : $t('Each plugin has its own endpoint.') }}</p>
@@ -358,6 +374,7 @@ export default {
                     products: [],
                     actions_count: 0,
                     enabled: false,
+                    roles: [],
                 },
                 oauth: {
                     enabled: false,
@@ -734,6 +751,26 @@ export default {
                     this.overview = response.status;
                     this.connectMode = '';
                     this.oauthCheck.results = [];
+                })
+                .catch(error => {
+                    this.$handleError(error);
+                    this.getOverview();
+                })
+                .finally(() => {
+                    this.saving = false;
+                });
+        },
+        toggleRole(slug, allowed) {
+            const roles = (this.hub.roles || [])
+                .filter(role => (role.slug === slug ? allowed : role.allowed))
+                .map(role => role.slug);
+
+            this.saving = true;
+
+            this.$post('fluent_toolkit_mcp_hub_roles', { roles })
+                .then(response => {
+                    this.$notify.success(response.message);
+                    this.overview = response.status;
                 })
                 .catch(error => {
                     this.$handleError(error);
