@@ -130,14 +130,22 @@ namespace {
         'https://claude.ai/api/mcp/auth_callback/',
         'https://evil.example/api/mcp/auth_callback',
         'https://127.0.0.1:33418/callback',
+        // A host without a scheme: no match, and no PHP warning either.
+        '//127.0.0.1:9999/callback',
         '',
     ];
+
+    set_error_handler(function ($severity, $message) {
+        fail('Unexpected PHP notice: ' . $message);
+    });
 
     foreach ($misses as $uri) {
         if (OAuthServer::redirectUriMatches($registered, $uri)) {
             fail('Expected a redirect URI that does not match: ' . $uri);
         }
     }
+
+    restore_error_handler();
 
     // PKCE: the RFC 7636 appendix B example pair.
     $verifier = 'dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk';
@@ -232,6 +240,34 @@ namespace {
         fail('Expected the site check to follow the current blog.');
     }
     $GLOBALS['test_blog_id'] = 1;
+
+    // A new sign-in cleans up older connections of the same app: those unused
+    // for 90 days go, and at 10 the one used longest ago makes room.
+    $now = 1800000000;
+    $day = 86400;
+
+    $recent = [];
+    for ($i = 1; $i <= 9; $i++) {
+        $recent['u' . $i] = $now - $i * $day;
+    }
+
+    if (Store::tokensToPrune($recent, $now) !== []) {
+        fail('Expected nine recent connections to stay.');
+    }
+
+    if (Store::tokensToPrune($recent + ['u10' => $now - 10 * $day], $now) !== ['u10']) {
+        fail('Expected the tenth connection, used longest ago, to make room.');
+    }
+
+    if (Store::tokensToPrune(['fresh' => $now - $day, 'stale' => $now - 91 * $day, 'edge' => $now - 89 * $day], $now) !== ['stale']) {
+        fail('Expected only the connection unused for more than 90 days to go.');
+    }
+
+    $pruned = Store::tokensToPrune($recent + ['u10' => $now - 10 * $day, 'old' => $now - 200 * $day], $now);
+    sort($pruned);
+    if ($pruned !== ['old', 'u10']) {
+        fail('Expected the stale connection to go first and the limit to apply to the rest: ' . implode(',', $pruned));
+    }
 
     echo 'MCP OAuth server test passed.' . PHP_EOL;
 }

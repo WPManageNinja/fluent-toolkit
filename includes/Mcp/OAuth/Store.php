@@ -29,6 +29,13 @@ class Store
     const CODE_PREFIX = 'fh_oauth_code_';
     const MAX_CLIENT_ID_LENGTH = 4000;
 
+    // Tokens do not expire, so an app that signs in again leaves its old one
+    // behind. A new sign-in cleans up: one user keeps at most this many
+    // connections per app name on this site, and none that went unused for
+    // STALE_TOKEN_DAYS.
+    const MAX_TOKENS_PER_APP = 10;
+    const STALE_TOKEN_DAYS = 90;
+
     /*
      * Clients
      */
@@ -138,6 +145,8 @@ class Store
         $base = sprintf(__('%s (FluentHub MCP)', 'fluent-toolkit'), $base);
         $name = $base;
 
+        self::pruneTokens($userId, $base);
+
         // Core refuses a second password with the same name for one user, and
         // the same app can connect from several computers.
         for ($i = 2; \WP_Application_Passwords::application_name_exists_for_user($userId, $name); $i++) {
@@ -154,6 +163,50 @@ class Store
         }
 
         return 'fhp_' . (int) $userId . '_' . $created[0];
+    }
+
+    /**
+     * Clean up the user's older connections of this app before a new one is
+     * added: delete those not used for STALE_TOKEN_DAYS, then, at the limit,
+     * those used longest ago. A connection that was never used counts from the
+     * day it was created.
+     */
+    private static function pruneTokens($userId, $base)
+    {
+        $lastUsed = [];
+
+        foreach (\WP_Application_Passwords::get_user_application_passwords((int) $userId) as $item) {
+            $itemName = isset($item['name']) ? (string) $item['name'] : '';
+
+            if (self::isSitePassword($item) && ($itemName === $base || preg_match('/^' . preg_quote($base, '/') . ' \d+$/', $itemName))) {
+                $lastUsed[(string) $item['uuid']] = !empty($item['last_used']) ? (int) $item['last_used'] : (int) $item['created'];
+            }
+        }
+
+        foreach (self::tokensToPrune($lastUsed, time()) as $uuid) {
+            \WP_Application_Passwords::delete_application_password((int) $userId, $uuid);
+        }
+    }
+
+    /**
+     * Which connections to delete so that one more fits.
+     *
+     * @param array<string, int> $lastUsed uuid => time of last use.
+     * @return string[] uuids.
+     */
+    public static function tokensToPrune($lastUsed, $now)
+    {
+        asort($lastUsed);
+
+        $staleBefore = $now - self::STALE_TOKEN_DAYS * 86400;
+        $delete = array_keys(array_filter($lastUsed, function ($used) use ($staleBefore) {
+            return $used < $staleBefore;
+        }));
+
+        $kept = array_keys(array_diff_key($lastUsed, array_flip($delete)));
+        $over = count($kept) - self::MAX_TOKENS_PER_APP + 1;
+
+        return $over > 0 ? array_merge($delete, array_slice($kept, 0, $over)) : $delete;
     }
 
     /**

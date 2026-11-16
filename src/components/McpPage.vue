@@ -17,198 +17,73 @@
             <button class="ft-btn ft-btn-ghost" @click="getOverview()">{{ $t('Refresh') }}</button>
         </div>
 
-        <div class="ft-toolbar" v-if="products.length">
-            <div class="ft-channels" role="tablist">
-                <button
-                    v-if="hubProduct"
-                    class="ft-channel"
-                    :aria-selected="activeProductSlug === hubProduct.slug"
-                    @click="activeProductSlug = hubProduct.slug"
-                >
-                    {{ hubProduct.name }}
-                    <span class="ft-channel-count">{{ hubProduct.tools_count }}</span>
-                </button>
-                <button
-                    v-for="product in products"
-                    :key="product.slug"
-                    class="ft-channel"
-                    :aria-selected="activeProductSlug === product.slug"
-                    @click="activeProductSlug = product.slug"
-                >
-                    {{ product.name }}
-                    <span class="ft-channel-count">{{ product.tools_count }}</span>
-                </button>
-            </div>
-            <div class="ft-toolbar-right" v-if="activeProduct">
-                <span class="ft-status" :class="statusClass(activeProduct.status)">
-                    <span class="ft-dot" :class="activeProduct.status === 'ready' ? 'ft-dot-ok' : 'ft-dot-warn'"></span>
-                    {{ statusLabel(activeProduct.status) }}
-                </span>
-            </div>
-        </div>
-
         <div class="ft-mcp-layout" v-loading="loading" :element-loading-text="$t('Loading MCP status…')">
-            <section class="ft-panel ft-mcp-status" v-if="activeProduct && activeProduct.is_hub">
+            <section class="ft-panel ft-mcp-hub" v-if="hubProduct">
                 <div class="ft-panel-head">
                     <div>
                         <h2>{{ $t('FluentHub MCP server') }}</h2>
                         <p>{{ $t('MCP_Hub_Desc') }}</p>
                     </div>
-                </div>
-
-                <div class="ft-mcp-grid">
-                    <div class="ft-mcp-metric">
-                        <span>{{ $t('Endpoint') }}</span>
-                        <strong class="ft-mono">{{ hub.endpoint_url }}</strong>
-                    </div>
-                    <div class="ft-mcp-metric">
-                        <span>{{ $t('Actions available') }}</span>
-                        <strong>{{ hub.actions_count }}</strong>
-                    </div>
-                    <div class="ft-mcp-metric">
-                        <span>{{ $t('Plugins included') }}</span>
-                        <strong>{{ hubServedProducts.length }}</strong>
-                    </div>
-                    <div class="ft-mcp-metric">
-                        <span>{{ $t('MCP adapter') }}</span>
-                        <strong>{{ adapterLabel }}</strong>
-                    </div>
-                </div>
-
-                <div class="ft-mcp-hub-products">
-                    <label class="ft-mcp-hub-product" v-for="product in hub.products" :key="product.slug">
-                        <input
-                            type="checkbox"
-                            :checked="product.included"
-                            :disabled="saving || !hub.available"
-                            @change="toggleHubProduct(product.slug, $event.target.checked)"
-                        />
-                        <strong>{{ product.name }}</strong>
-                        <!-- translators: %s is the number of MCP actions, for example 28 -->
-                        <span v-if="product.mcp_enabled">{{ $_n('%s action', '%s actions', product.tools_count) }}</span>
-                        <span v-else>{{ $t('MCP is off for this plugin. Turn it on in its tab to include it.') }}</span>
-                    </label>
-                </div>
-
-                <div class="ft-mcp-oauth" v-if="hub.available">
-                    <div class="ft-mcp-oauth-head">
-                        <div>
-                            <strong>{{ $t('Sign in with OAuth') }}</strong>
-                            <p>{{ $t('MCP_OAuth_Desc') }}</p>
-                        </div>
-                        <label class="ft-switch">
-                            <input
-                                type="checkbox"
-                                :checked="oauth.enabled"
-                                :disabled="saving || !oauth.available"
-                                @change="toggleOAuth($event.target.checked)"
-                            />
-                            <span></span>
-                        </label>
-                    </div>
-
-                    <p class="ft-mcp-oauth-warn" v-if="oauth.reason === 'plain_permalinks'">{{ $t('MCP_OAuth_Plain_Permalinks') }}</p>
-                    <p class="ft-mcp-oauth-warn" v-else-if="oauth.reason === 'app_passwords_off'">{{ $t('MCP_OAuth_App_Passwords_Off') }}</p>
-                    <p class="ft-mcp-oauth-warn" v-else-if="oauthReady && !oauth.https">{{ $t('MCP_OAuth_No_Https') }}</p>
-
-                    <template v-if="oauthReady">
-                        <div class="ft-mcp-oauth-check">
-                            <button class="ft-btn ft-btn-ghost" :disabled="oauthCheck.running" @click="runOAuthCheck()">
-                                {{ oauthCheck.running ? $t('Checking…') : $t('Check sign-in setup') }}
-                            </button>
-                            <ul v-if="oauthCheck.results.length">
-                                <li v-for="result in oauthCheck.results" :key="result.key" :class="'is-' + result.state">
-                                    <span class="ft-dot" :class="result.state === 'ok' ? 'ft-dot-ok' : 'ft-dot-warn'"></span>
-                                    {{ result.label }}
-                                </li>
-                            </ul>
-                        </div>
-                    </template>
-
-                    <div class="ft-mcp-oauth-apps" v-if="oauthReady || oauth.apps.length">
-                        <strong>{{ $t('Connected apps') }}</strong>
-                        <p v-if="!oauth.apps.length">{{ $t('No apps are connected yet.') }}</p>
-                        <table v-else>
-                            <thead>
-                                <tr>
-                                    <th>{{ $t('App') }}</th>
-                                    <th>{{ $t('User') }}</th>
-                                    <th>{{ $t('Last used') }}</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="app in oauth.apps" :key="app.id">
-                                    <td>
-                                        <strong>{{ app.name || $t('Unnamed app') }}</strong>
-                                    </td>
-                                    <td>
-                                        {{ app.user }}
-                                        <em v-if="app.user_login">{{ app.user_login }}</em>
-                                    </td>
-                                    <td>{{ app.last_used_at ? formatDate(app.last_used_at) : $t('Not used yet') }}</td>
-                                    <td>
-                                        <button class="ft-btn ft-btn-ghost" :disabled="saving" @click="revokeOAuthApp(app)">{{ $t('Disconnect') }}</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="ft-mcp-note" v-if="hub.reason === 'adapter_outdated'">
-                    <!-- translators: 1: the MCP Adapter version that runs, 2: the minimum MCP Adapter version the FluentHub server needs -->
-                    {{ $t('MCP_Hub_Adapter_Outdated', overview.adapter.version, hub.min_adapter) }}
-                </div>
-                <div class="ft-mcp-note" v-else-if="!overview.adapter.available">
-                    {{ $t('MCP_Adapter_Missing') }}
-                </div>
-                <div class="ft-mcp-note" v-else-if="!hubServedProducts.length">
-                    {{ $t('No plugins are in the FluentHub server. Turn MCP on for a plugin and tick it above.') }}
-                </div>
-            </section>
-
-            <section class="ft-panel ft-mcp-status" v-else-if="activeProduct">
-                <div class="ft-panel-head">
-                    <div>
-                        <h2>{{ activeProduct.name }}</h2>
-                        <p>{{ activeProduct.endpoint_url }}</p>
-                    </div>
                     <label class="ft-switch">
                         <input
                             type="checkbox"
-                            :checked="activeProduct.mcp_enabled"
-                            :disabled="saving || !canToggle"
-                            @change="toggleProduct($event.target.checked)"
+                            :checked="hub.enabled"
+                            :disabled="saving || (!hub.available && !hub.enabled)"
+                            :aria-label="$t('FluentHub MCP server')"
+                            @change="toggleHub($event.target.checked)"
                         />
                         <span></span>
                     </label>
                 </div>
 
-                <div class="ft-mcp-grid">
-                    <div class="ft-mcp-metric">
-                        <span>{{ $t('Endpoint') }}</span>
-                        <strong class="ft-mono">{{ activeProduct.endpoint_url }}</strong>
-                    </div>
-                    <div class="ft-mcp-metric">
-                        <span>{{ $t('Tools available') }}</span>
-                        <strong>{{ activeProduct.tools_count }}</strong>
-                    </div>
-                    <div class="ft-mcp-metric">
-                        <span>{{ $t('MCP status') }}</span>
-                        <strong>{{ statusLabel(activeProduct.status) }}</strong>
-                    </div>
-                    <div class="ft-mcp-metric">
-                        <span>{{ $t('MCP adapter') }}</span>
-                        <strong>{{ adapterLabel }}</strong>
+                <div class="ft-mcp-note" v-if="!overview.adapter.available">
+                    {{ $t('MCP_Adapter_Missing') }}
+                </div>
+                <div class="ft-mcp-note" v-else-if="hub.reason === 'adapter_outdated'">
+                    <!-- translators: 1: the MCP Adapter version that runs, 2: the minimum MCP Adapter version the FluentHub server needs -->
+                    {{ $t('MCP_Hub_Adapter_Outdated', overview.adapter.version, hub.min_adapter) }}
+                </div>
+                <div class="ft-mcp-note" v-else-if="hub.enabled && !hubServedProducts.length">
+                    {{ $t('No plugin is on yet. Turn on at least one plugin below.') }}
+                </div>
+                <div class="ft-mcp-note" v-else-if="signInBlockedNote">
+                    {{ signInBlockedNote }}
+                </div>
+            </section>
+
+            <section class="ft-panel ft-mcp-plugins" v-if="products.length">
+                <div class="ft-panel-head">
+                    <div>
+                        <h2>{{ $t('Plugins') }}</h2>
+                        <p>{{ hub.enabled ? $t('The FluentHub MCP server reaches every plugin that is on here.') : $t('Turn MCP on for each plugin your AI apps may use.') }}</p>
                     </div>
                 </div>
 
-                <div class="ft-mcp-note" v-if="!canToggle && activeProduct.slug !== 'fluent-crm'">
-                    <!-- translators: %s is the plugin name, for example Fluent Support -->
-                    {{ $t("%s manages its own MCP setting, so it can't be turned on or off here.", activeProduct.name) }}
+                <div class="ft-mcp-rows">
+                    <div class="ft-mcp-row" v-for="product in products" :key="product.slug">
+                        <div class="ft-mcp-row-text">
+                            <strong>{{ product.name }}</strong>
+                            <!-- translators: %s is the number of MCP actions, for example 28 -->
+                            <span v-if="product.mcp_enabled">{{ $_n('%s action', '%s actions', product.tools_count) }}</span>
+                            <span v-else-if="product.status === 'disabled'">{{ $t('MCP is off') }}</span>
+                            <span v-else>{{ statusLabel(product.status) }}</span>
+                            <span v-if="hub.enabled && product.mcp_enabled && leftOutOfHub(product)">{{ $t('Left out of the FluentHub server (see Advanced)') }}</span>
+                            <span v-if="!product.toggleable && product.slug !== 'fluent-crm'">{{ $t('Turned on and off in the plugin settings') }}</span>
+                        </div>
+                        <label class="ft-switch">
+                            <input
+                                type="checkbox"
+                                :checked="product.mcp_enabled"
+                                :disabled="saving || !product.toggleable"
+                                :aria-label="product.name"
+                                @change="toggleProduct(product, $event.target.checked)"
+                            />
+                            <span></span>
+                        </label>
+                    </div>
                 </div>
-                <div class="ft-mcp-note" v-else-if="!overview.adapter.available">
+
+                <div class="ft-mcp-note" v-if="!hubProduct && !overview.adapter.available">
                     {{ $t('MCP_Adapter_Missing') }}
                 </div>
                 <div class="ft-mcp-note" v-else-if="overview.adapter.outdated">
@@ -217,117 +92,234 @@
                 </div>
             </section>
 
-            <section class="ft-panel ft-mcp-connect" v-if="activeProduct">
+            <section class="ft-panel ft-mcp-connect" v-if="products.length">
                 <div class="ft-panel-head">
                     <div>
-                        <h2>{{ $t('Connect client') }}</h2>
-                        <p>{{ useOAuth ? $t('MCP_OAuth_Connect_Desc') : (activeProduct.is_hub ? $t('MCP_Hub_Connect_Desc') : $t('MCP_Connect_Desc')) }}</p>
-                    </div>
-                    <div class="ft-connect-actions" v-if="!useOAuth">
-                        <button
-                            v-if="canCreateAppPassword"
-                            class="ft-btn ft-btn-primary"
-                            :disabled="creatingPassword"
-                            @click="createAppPassword()"
-                        >
-                            {{ creatingPassword ? $t('Creating…') : $t('Create application password') }}
-                        </button>
-                        <a class="ft-btn ft-btn-ghost" :href="appPasswordsUrl" target="_blank" rel="noopener">
-                            {{ canCreateAppPassword ? $t('Manage passwords') : $t('Create application password') }}
-                        </a>
+                        <h2>{{ $t('Connect an AI app') }}</h2>
+                        <p>{{ mode === 'oauth' ? $t('Choose your app and copy the line into it. The app opens your WordPress login, and you approve it there.') : $t('Choose what to connect to, add an application password, choose your app, then copy the details.') }}</p>
                     </div>
                 </div>
 
-                <div class="ft-channels ft-client-tabs" role="tablist" v-if="oauthReady">
-                    <button class="ft-channel" :aria-selected="connectMode === 'oauth'" @click="connectMode = 'oauth'">
-                        {{ $t('Sign in with OAuth') }}
-                    </button>
-                    <button class="ft-channel" :aria-selected="connectMode === 'password'" @click="connectMode = 'password'">
-                        {{ $t('Application password') }}
-                    </button>
-                </div>
+                <template v-if="mode === 'password' && targets.length">
+                    <div class="ft-mcp-field">
+                        <label class="ft-mcp-field-label" for="ft-mcp-target">{{ $t('Connect to') }}</label>
+                        <div>
+                            <select id="ft-mcp-target" class="ft-mcp-select" :value="target" @change="targetSlug = $event.target.value">
+                                <option v-for="option in targets" :key="option.key" :value="option.key">{{ option.label }}</option>
+                            </select>
+                            <div class="ft-mcp-help"><p>{{ targetNote }}</p></div>
+                        </div>
+                    </div>
 
-                <div class="ft-credential-row" v-if="!useOAuth">
-                    <label>
-                        <span>{{ $t('Username') }}</span>
-                        <input type="text" v-model="username" placeholder="wp-user" />
-                    </label>
-                    <label>
-                        <span>{{ $t('Application password') }}</span>
-                        <div class="ft-input-affix">
-                            <input
-                                :type="showPassword ? 'text' : 'password'"
-                                v-model="appPassword"
-                                placeholder="xxxx xxxx xxxx xxxx xxxx xxxx"
-                            />
+                    <div class="ft-mcp-field">
+                        <span class="ft-mcp-field-label">{{ $t('Credentials') }}</span>
+                        <div>
+                            <div class="ft-credential-row">
+                                <label>
+                                    <span>{{ $t('Username') }}</span>
+                                    <input type="text" v-model="username" placeholder="wp-user" />
+                                </label>
+                                <label>
+                                    <span>{{ $t('Application password') }}</span>
+                                    <div class="ft-input-affix">
+                                        <input
+                                            :type="showPassword ? 'text' : 'password'"
+                                            v-model="appPassword"
+                                            placeholder="xxxx xxxx xxxx xxxx xxxx xxxx"
+                                        />
+                                        <button
+                                            type="button"
+                                            class="ft-input-btn"
+                                            :title="showPassword ? $t('Hide password') : $t('Show password')"
+                                            :aria-label="showPassword ? $t('Hide password') : $t('Show password')"
+                                            @click="showPassword = !showPassword"
+                                        >
+                                            <svg v-if="showPassword" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 4.24A9.1 9.1 0 0 1 12 4c7 0 10 8 10 8a18.5 18.5 0 0 1-2.16 3.19M6.6 6.6A18.5 18.5 0 0 0 2 12s3 8 10 8a9.7 9.7 0 0 0 5.4-1.6"/><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88"/><path d="m2 2 20 20"/></svg>
+                                            <svg v-else width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-8 10-8 10 8 10 8-3 8-10 8-10-8-10-8Z"/><circle cx="12" cy="12" r="3"/></svg>
+                                        </button>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="ft-connect-actions">
+                                <button
+                                    v-if="canCreateAppPassword"
+                                    class="ft-btn ft-btn-primary"
+                                    :disabled="creatingPassword"
+                                    @click="createAppPassword()"
+                                >
+                                    {{ creatingPassword ? $t('Creating…') : $t('Create application password') }}
+                                </button>
+                                <a class="ft-btn ft-btn-ghost" :href="appPasswordsUrl" target="_blank" rel="noopener">
+                                    {{ canCreateAppPassword ? $t('Manage passwords') : $t('Create application password') }}
+                                </a>
+                            </div>
+                            <div class="ft-mcp-help ft-mcp-help-ok" v-if="generatedName">
+                                <p>
+                                    <!-- translators: %s is the name of the new application password, for example FluentHub MCP -->
+                                    {{ $t('Created the application password "%s" and filled it in above.', generatedName) }}
+                                    {{ $t('App_Password_Once_Notice') }}
+                                </p>
+                            </div>
+                            <div class="ft-mcp-help" v-else-if="appPasswordNotice">
+                                <p class="ft-mcp-oauth-warn">{{ appPasswordNotice }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <template v-if="canShowSnippet">
+                    <div class="ft-mcp-field">
+                        <span class="ft-mcp-field-label">{{ $t('AI app') }}</span>
+                        <div class="ft-channels" role="tablist">
                             <button
-                                type="button"
-                                class="ft-input-btn"
-                                :title="showPassword ? $t('Hide password') : $t('Show password')"
-                                :aria-label="showPassword ? $t('Hide password') : $t('Show password')"
-                                @click="showPassword = !showPassword"
+                                v-for="client in visibleClients"
+                                :key="client.key"
+                                class="ft-channel"
+                                :aria-selected="activeClientInfo.key === client.key"
+                                @click="activeClient = client.key"
                             >
-                                <svg v-if="showPassword" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 4.24A9.1 9.1 0 0 1 12 4c7 0 10 8 10 8a18.5 18.5 0 0 1-2.16 3.19M6.6 6.6A18.5 18.5 0 0 0 2 12s3 8 10 8a9.7 9.7 0 0 0 5.4-1.6"/><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88"/><path d="m2 2 20 20"/></svg>
-                                <svg v-else width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-8 10-8 10 8 10 8-3 8-10 8-10-8-10-8Z"/><circle cx="12" cy="12" r="3"/></svg>
+                                {{ client.label }}
                             </button>
                         </div>
-                    </label>
-                </div>
-
-                <div class="ft-mcp-note ft-mcp-note-ok" v-if="!useOAuth && generatedName">
-                    <!-- translators: %s is the name of the new application password, for example FluentHub MCP -->
-                    {{ $t('Created the application password "%s" and filled it in above.', generatedName) }}
-                    {{ $t('App_Password_Once_Notice') }}
-                </div>
-                <div class="ft-mcp-note" v-else-if="!useOAuth && appPasswordNotice">
-                    {{ appPasswordNotice }}
-                </div>
-
-                <div class="ft-channels ft-client-tabs" role="tablist">
-                    <button
-                        v-for="client in visibleClients"
-                        :key="client.key"
-                        class="ft-channel"
-                        :aria-selected="activeClientInfo.key === client.key"
-                        @click="activeClient = client.key"
-                    >
-                        {{ client.label }}
-                    </button>
-                </div>
-
-                <div class="ft-channels ft-client-tabs" role="tablist" v-if="canCombine">
-                    <button
-                        class="ft-channel"
-                        :aria-selected="snippetScope === 'single'"
-                        @click="snippetScope = 'single'"
-                    >
-                        <!-- translators: %s is the plugin name, for example FluentCRM -->
-                        {{ $t('%s only', activeProduct.name) }}
-                    </button>
-                    <button
-                        class="ft-channel"
-                        :aria-selected="snippetScope === 'all'"
-                        @click="snippetScope = 'all'"
-                    >
-                        {{ $t('All enabled plugins') }}
-                        <span class="ft-channel-count">{{ enabledProducts.length }}</span>
-                    </button>
-                </div>
-
-                <div class="ft-snippet-box">
-                    <div class="ft-snippet-head">
-                        <div>{{ activeClientInfo.note }}</div>
-                        <button class="ft-btn ft-btn-primary" @click="copySnippet()">{{ $t('Copy') }}</button>
                     </div>
-                    <pre class="ft-snippet"><code>{{ activeSnippet }}</code></pre>
+
+                    <div class="ft-snippet-box">
+                        <div class="ft-snippet-head">
+                            <div>{{ activeClientInfo.note }}</div>
+                            <button class="ft-btn ft-btn-primary" @click="copySnippet()">{{ $t('Copy') }}</button>
+                        </div>
+                        <pre class="ft-snippet"><code>{{ activeSnippet }}</code></pre>
+                    </div>
+                </template>
+                <div class="ft-mcp-note" v-else>
+                    {{ $t('Turn MCP on for a plugin above to get the connection details.') }}
                 </div>
 
-                <div class="ft-mcp-note" v-if="snippetScope === 'all' && canCombine">
-                    <!-- translators: %s is a comma-separated list of plugin names -->
-                    {{ $t('Adds every enabled endpoint in one paste: %s.', enabledProducts.map(product => product.name).join(', ')) }}
-                    {{ $t('Plugins with MCP turned off are left out. Turn MCP on for them and copy again.') }}
+                <div class="ft-mcp-switchmode" v-if="signInUsable">
+                    <button type="button" class="ft-mcp-link" @click="connectMode = mode === 'oauth' ? 'password' : 'oauth'">
+                        {{ mode === 'oauth' ? $t('Connect with an application password instead') : $t('Back to sign in with WordPress') }}
+                    </button>
                 </div>
             </section>
+
+            <section class="ft-panel ft-mcp-apps" v-if="(hub.enabled && oauth.enabled) || oauth.apps.length">
+                <div class="ft-panel-head">
+                    <div>
+                        <h2>{{ $t('Connected apps') }}</h2>
+                        <p>{{ $t('Apps that people approved on the WordPress login. Disconnect an app to end its access.') }}</p>
+                    </div>
+                </div>
+
+                <p class="ft-mcp-blank" v-if="!oauth.apps.length">{{ $t('No apps are connected yet.') }}</p>
+                <div class="ft-mcp-table" v-else>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>{{ $t('App') }}</th>
+                                <th>{{ $t('User') }}</th>
+                                <th>{{ $t('Last used') }}</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="app in oauth.apps" :key="app.id">
+                                <td>
+                                    <strong>{{ app.name || $t('Unnamed app') }}</strong>
+                                </td>
+                                <td>
+                                    {{ app.user }}
+                                    <em v-if="app.user_login">{{ app.user_login }}</em>
+                                </td>
+                                <td>{{ app.last_used_at ? formatDate(app.last_used_at) : $t('Not used yet') }}</td>
+                                <td>
+                                    <button class="ft-btn ft-btn-ghost" :disabled="saving" @click="revokeOAuthApp(app)">{{ $t('Disconnect') }}</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <details class="ft-panel ft-mcp-advanced" v-if="products.length">
+                <summary>{{ $t('Advanced') }}</summary>
+
+                <div class="ft-mcp-advanced-block" v-if="hub.enabled">
+                    <div class="ft-mcp-advanced-switch">
+                        <div>
+                            <strong>{{ $t('Sign in with WordPress') }}</strong>
+                            <p>{{ $t('MCP_OAuth_Desc') }}</p>
+                        </div>
+                        <label class="ft-switch">
+                            <input
+                                type="checkbox"
+                                :checked="oauth.enabled"
+                                :disabled="saving || (!oauth.available && !oauth.enabled)"
+                                :aria-label="$t('Sign in with WordPress')"
+                                @change="toggleOAuth($event.target.checked)"
+                            />
+                            <span></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="ft-mcp-advanced-block">
+                    <strong>{{ $t('Endpoints') }}</strong>
+                    <p>{{ hub.enabled ? $t('MCP_Endpoints_Desc') : $t('Each plugin has its own endpoint.') }}</p>
+                    <div class="ft-mcp-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>{{ $t('Server') }}</th>
+                                    <th>{{ $t('Endpoint') }}</th>
+                                    <th v-if="hub.enabled">{{ $t('In the FluentHub server') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-if="hubProduct && hub.enabled">
+                                    <td><strong>{{ $t('FluentHub MCP server') }}</strong></td>
+                                    <td class="ft-mono">{{ hub.endpoint_url }}</td>
+                                    <td></td>
+                                </tr>
+                                <tr v-for="product in products" :key="product.slug">
+                                    <td><strong>{{ product.name }}</strong></td>
+                                    <td class="ft-mono">{{ product.endpoint_url }}</td>
+                                    <td v-if="hub.enabled">
+                                        <input
+                                            v-if="hubEntry(product)"
+                                            type="checkbox"
+                                            :checked="hubEntry(product).included"
+                                            :disabled="saving || !hub.available"
+                                            :aria-label="product.name"
+                                            @change="toggleHubProduct(product.slug, $event.target.checked)"
+                                        />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="ft-mcp-advanced-block">
+                    <strong>{{ $t('MCP adapter') }}</strong>
+                    <p>{{ adapterLabel }}<template v-if="overview.adapter.version"> · {{ overview.adapter.version }}</template></p>
+                </div>
+
+                <div class="ft-mcp-advanced-block" v-if="oauthReady">
+                    <strong>{{ $t('Sign-in setup') }}</strong>
+                    <p>{{ $t('Runs the first steps an AI app takes to sign in, from this browser.') }}</p>
+                    <div class="ft-mcp-oauth-check">
+                        <button class="ft-btn ft-btn-ghost" :disabled="oauthCheck.running" @click="runOAuthCheck()">
+                            {{ oauthCheck.running ? $t('Checking…') : $t('Check sign-in setup') }}
+                        </button>
+                        <ul v-if="oauthCheck.results.length">
+                            <li v-for="result in oauthCheck.results" :key="result.key" :class="'is-' + result.state">
+                                <span class="ft-dot" :class="result.state === 'ok' ? 'ft-dot-ok' : 'ft-dot-warn'"></span>
+                                {{ result.label }}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </details>
         </div>
     </div>
 </template>
@@ -365,6 +357,7 @@ export default {
                     endpoint_url: '',
                     products: [],
                     actions_count: 0,
+                    enabled: false,
                 },
                 oauth: {
                     enabled: false,
@@ -383,14 +376,15 @@ export default {
                     manage_url: '',
                 },
             },
-            activeProductSlug: 'fluent-hub',
-            activeClient: 'codex',
-            connectMode: 'oauth',
+            // '' shows the first app of the list for the chosen sign-in method.
+            activeClient: '',
+            // 'password' once the admin asks for that way; see the `mode` computed.
+            connectMode: '',
+            targetSlug: '',
             oauthCheck: {
                 running: false,
                 results: [],
             },
-            snippetScope: 'single',
             loading: false,
             saving: false,
             creatingPassword: false,
@@ -442,8 +436,8 @@ export default {
                 name: this.$t('All Fluent plugins'),
                 endpoint_url: this.hub.endpoint_url,
                 tools_count: this.hub.actions_count,
-                mcp_enabled: this.hub.available && this.hubServedProducts.length > 0,
-                status: this.hub.available ? (this.hubServedProducts.length ? 'ready' : 'disabled') : 'adapter_required',
+                mcp_enabled: !!(this.hub.enabled && this.hub.available && this.hubServedProducts.length > 0),
+                status: this.hub.available ? (this.hub.enabled && this.hubServedProducts.length ? 'ready' : 'disabled') : 'adapter_required',
                 toggleable: false,
                 is_hub: true,
             };
@@ -452,22 +446,83 @@ export default {
             return this.overview.oauth || { apps: [] };
         },
         oauthReady() {
-            return !!(this.hub.available && this.oauth.enabled && this.oauth.available);
+            return !!(this.hub.enabled && this.hub.available && this.oauth.enabled && this.oauth.available);
         },
-        // Sign-in works on the FluentHub endpoint only; plugin endpoints keep
-        // using application passwords.
+        // An app can sign in with WordPress: the server is on, serves a plugin,
+        // and sign-in can run.
+        signInUsable() {
+            return this.oauthReady && this.hubServes;
+        },
+        // Sign in with WordPress whenever it can be used, unless the admin
+        // asked for the application password way.
+        mode() {
+            return this.signInUsable && this.connectMode !== 'password' ? 'oauth' : 'password';
+        },
         useOAuth() {
-            return !!(this.activeProduct && this.activeProduct.is_hub && this.oauthReady && this.connectMode === 'oauth');
+            return this.mode === 'oauth';
+        },
+        // Why apps cannot sign in with WordPress although the server is on.
+        signInBlockedNote() {
+            if (!this.hub.enabled || !this.oauth.enabled) {
+                return '';
+            }
+
+            if (this.oauth.reason === 'plain_permalinks') {
+                return this.$t('MCP_OAuth_Plain_Permalinks');
+            }
+
+            if (this.oauth.reason === 'app_passwords_off') {
+                return this.$t('MCP_OAuth_App_Passwords_Off');
+            }
+
+            return this.oauthReady && !this.oauth.https ? this.$t('MCP_OAuth_No_Https') : '';
         },
         visibleClients() {
             return this.useOAuth ? this.oauthClients : this.clients;
         },
-        activeProduct() {
-            if (this.hubProduct && this.activeProductSlug === this.hubProduct.slug) {
-                return this.hubProduct;
+        hubServes() {
+            return !!(this.hubProduct && this.hubProduct.mcp_enabled);
+        },
+        // What an application password connection can point at: the FluentHub
+        // server, one plugin, or every plugin as its own entry.
+        targets() {
+            const list = [];
+
+            if (this.hubServes) {
+                list.push({ key: 'fluent-hub', label: this.$t('All plugins through one endpoint (recommended)') });
             }
 
-            return this.products.find(product => product.slug === this.activeProductSlug) || this.hubProduct || this.products[0] || null;
+            this.enabledProducts.forEach(product => {
+                // translators: %s is the plugin name, for example FluentCRM
+                list.push({ key: product.slug, label: this.$t('%s only', product.name) });
+            });
+
+            if (this.enabledProducts.length > 1) {
+                list.push({ key: '__each', label: this.$t('Every plugin as its own entry') });
+            }
+
+            return list;
+        },
+        target() {
+            if (this.targets.some(option => option.key === this.targetSlug)) {
+                return this.targetSlug;
+            }
+
+            return this.targets.length ? this.targets[0].key : '';
+        },
+        targetNote() {
+            if (this.target === 'fluent-hub') {
+                return this.$t('MCP_Hub_Connect_Desc');
+            }
+
+            if (this.target === '__each') {
+                return this.$t('MCP_Connect_Desc');
+            }
+
+            return this.$t('Connects to this plugin only, on its own endpoint.');
+        },
+        canShowSnippet() {
+            return this.mode === 'oauth' || this.targets.length > 0;
         },
         appPasswordSupport() {
             return this.overview.app_password || {};
@@ -477,7 +532,7 @@ export default {
         },
         appPasswordsUrl() {
             return this.appPasswordSupport.manage_url
-                || (this.activeProduct && this.activeProduct.app_passwords_url)
+                || (this.products[0] && this.products[0].app_passwords_url)
                 || '';
         },
         // Only explain why the inline button is missing; when it works the button
@@ -523,18 +578,16 @@ export default {
         enabledProducts() {
             return this.products.filter(product => product.mcp_enabled && product.endpoint_url);
         },
-        canCombine() {
-            return this.activeProduct && !this.activeProduct.is_hub && this.enabledProducts.length > 1;
-        },
         snippetEntries() {
-            if (this.snippetScope === 'all' && this.canCombine) {
+            if (this.useOAuth || this.target === 'fluent-hub') {
+                return this.hubProduct ? [this.hubProduct] : [];
+            }
+
+            if (this.target === '__each') {
                 return this.enabledProducts;
             }
 
-            return this.activeProduct ? [this.activeProduct] : [];
-        },
-        canToggle() {
-            return this.activeProduct && this.activeProduct.toggleable;
+            return this.enabledProducts.filter(product => product.slug === this.target);
         },
         authHeader() {
             const user = this.username || '<your-username>';
@@ -670,6 +723,26 @@ export default {
         formatDate(timestamp) {
             return new Date(timestamp * 1000).toLocaleString();
         },
+        toggleHub(enabled) {
+            this.saving = true;
+
+            this.$post('fluent_toolkit_mcp_hub_toggle', {
+                enabled: enabled ? 'yes' : 'no',
+            })
+                .then(response => {
+                    this.$notify.success(response.message);
+                    this.overview = response.status;
+                    this.connectMode = '';
+                    this.oauthCheck.results = [];
+                })
+                .catch(error => {
+                    this.$handleError(error);
+                    this.getOverview();
+                })
+                .finally(() => {
+                    this.saving = false;
+                });
+        },
         toggleOAuth(enabled) {
             this.saving = true;
 
@@ -769,9 +842,6 @@ export default {
             this.$get('fluent_toolkit_mcp_overview')
                 .then(response => {
                     this.overview = response;
-                    if (this.products.length && !this.activeProduct) {
-                        this.activeProductSlug = this.products[0].slug;
-                    }
                 })
                 .catch(error => {
                     this.$handleError(error);
@@ -780,13 +850,35 @@ export default {
                     this.loading = false;
                 });
         },
-        toggleProduct(enabled) {
+        // The FluentHub server's record of a plugin, or undefined for a plugin
+        // it does not know.
+        hubEntry(product) {
+            return (this.hub.products || []).find(entry => entry.slug === product.slug);
+        },
+        leftOutOfHub(product) {
+            const entry = this.hubEntry(product);
+
+            return !!(this.hub.available && entry && !entry.included);
+        },
+        // One switch per plugin. Turning a plugin on also puts it back in the
+        // FluentHub server, so "on" always means an AI app can reach it.
+        toggleProduct(product, enabled) {
+            const putBack = enabled && this.leftOutOfHub(product);
+
             this.saving = true;
 
             this.$post('fluent_toolkit_mcp_toggle', {
-                slug: this.activeProduct.slug,
+                slug: product.slug,
                 enabled: enabled ? 'yes' : 'no',
             })
+                .then(response => {
+                    if (!putBack) {
+                        return response;
+                    }
+
+                    return this.$post('fluent_toolkit_mcp_hub_products', { slug: product.slug, included: 'yes' })
+                        .then(hubResponse => ({ message: response.message, status: hubResponse.status }));
+                })
                 .then(response => {
                     this.$notify.success(response.message);
                     this.overview = response.status;
@@ -800,14 +892,11 @@ export default {
                 });
         },
         toggleHubProduct(slug, included) {
-            const slugs = (this.hub.products || [])
-                .filter(product => (product.slug === slug ? included : product.included))
-                .map(product => product.slug);
-
             this.saving = true;
 
             this.$post('fluent_toolkit_mcp_hub_products', {
-                included: slugs,
+                slug,
+                included: included ? 'yes' : 'no',
             })
                 .then(response => {
                     this.$notify.success(response.message);

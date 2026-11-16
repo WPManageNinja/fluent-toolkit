@@ -28,8 +28,10 @@ class AuthorizePage
         $params = self::readParams();
         $client = Store::getClient($params['client_id']);
 
-        // Until the client and its redirect URI check out, errors stay on this
-        // page. Redirecting them would make this an open redirect.
+        // Errors stay on this page until the user decides on the consent
+        // screen. Anyone can register a client with any https redirect URI, so
+        // a redirect before that would make this an open redirect: a link to
+        // this site that lands on a host the attacker chose.
         if (!$client) {
             self::fail(__('This app is not registered with this site. Remove the connection in your AI app and add it again.', 'fluent-toolkit'));
         }
@@ -44,18 +46,16 @@ class AuthorizePage
             self::fail(__('The app asked to return to an address it did not register. The request was stopped.', 'fluent-toolkit'));
         }
 
-        $state = $params['state'];
-
-        if ('code' !== $params['response_type']) {
-            self::redirectError($redirect, 'unsupported_response_type', 'Only response_type=code is supported.', $state);
-        }
-
-        if ('S256' !== $params['code_challenge_method'] || !preg_match('/^[A-Za-z0-9\-_]{43,128}$/', $params['code_challenge'])) {
-            self::redirectError($redirect, 'invalid_request', 'PKCE with code_challenge_method=S256 is required.', $state);
+        // A working client never sends these, so the user sees them here.
+        if ('code' !== $params['response_type']
+            || 'S256' !== $params['code_challenge_method']
+            || !preg_match('/^[A-Za-z0-9\-_]{43,128}$/', $params['code_challenge'])
+        ) {
+            self::fail(__('The app sent a sign-in request this site does not support. Update the app, then connect again.', 'fluent-toolkit'));
         }
 
         if ('' !== $params['resource'] && !OAuthServer::isOwnResource($params['resource'])) {
-            self::redirectError($redirect, 'invalid_target', 'This server only issues tokens for ' . OAuthServer::resource() . '.', $state);
+            self::fail(__('The app asked for access to a different server. The request was stopped.', 'fluent-toolkit'));
         }
 
         if (!is_user_logged_in()) {

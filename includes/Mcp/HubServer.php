@@ -15,9 +15,10 @@ defined('ABSPATH') || exit;
  *   fluent-crm-read   { action, arguments }  read-only actions
  *   fluent-crm-write  { action, arguments }  everything that changes data
  *
- * A router tool runs the product's own McpTool (check_permission(), then
- * execute()), the same calls the adapter's ToolsHandler makes on the product's
- * own server, so results, errors and permission checks match it. The action
+ * A router tool runs the product's own McpTool (check_permission(), the
+ * adapter's tool-call filters, then execute()), the same steps the adapter's
+ * ToolsHandler takes on the product's own server, so results, errors and
+ * permission checks match it. The action
  * `help` returns the product's server instructions and the full description and
  * input schema of each action, so the agent gets what the product's own
  * tools/list and initialize would have given it.
@@ -57,7 +58,7 @@ class HubServer
 
     public static function register()
     {
-        if (self::$registered || !self::supported()) {
+        if (self::$registered || !self::supported() || !self::enabled()) {
             return;
         }
 
@@ -67,6 +68,7 @@ class HubServer
         add_action('mcp_adapter_init', [__CLASS__, 'createServer'], 1000);
         add_filter('mcp_adapter_tools_list', [__CLASS__, 'filterToolsList'], 10, 2);
         add_filter('mcp_adapter_prompts_list', [__CLASS__, 'filterPromptsList'], 10, 2);
+        add_filter('mcp_adapter_pre_prompt_get', [__CLASS__, 'gatePrompt'], 10, 4);
     }
 
     public static function supported()
@@ -78,6 +80,39 @@ class HubServer
         $version = AdapterBootstrap::version();
 
         return $version && version_compare($version, self::MIN_ADAPTER_VERSION, '>=');
+    }
+
+    /**
+     * Off until a site admin turns the FluentHub MCP server on on the MCP
+     * page. An update must not add an endpoint, nor the sign-in that comes
+     * with it, on its own.
+     */
+    public static function enabled()
+    {
+        $settings = get_option('_fluent_kit_settings', []);
+
+        return is_array($settings) && isset($settings['mcp_hub']) && 'yes' === $settings['mcp_hub'];
+    }
+
+    /**
+     * Turning the server on for the first time turns sign-in on with it: an
+     * app then connects with the endpoint URL alone. A later choice the admin
+     * made for sign-in (the Advanced switch) is kept.
+     */
+    public static function setEnabled($enabled)
+    {
+        $settings = get_option('_fluent_kit_settings', []);
+        if (!is_array($settings)) {
+            $settings = [];
+        }
+
+        $settings['mcp_hub'] = $enabled ? 'yes' : 'no';
+
+        if ($enabled && !isset($settings['mcp_oauth'])) {
+            $settings['mcp_oauth'] = 'yes';
+        }
+
+        update_option('_fluent_kit_settings', $settings);
     }
 
     public static function endpointUrl()
@@ -169,6 +204,22 @@ class HubServer
     }
 
     /**
+     * Include or leave out one product. The other products keep their state,
+     * also those whose plugin is not active now.
+     */
+    public static function setProductIncluded($slug, $included)
+    {
+        $slug = sanitize_key($slug);
+        $excluded = array_values(array_diff(self::excludedProducts(), [$slug]));
+
+        if (!$included) {
+            $excluded[] = $slug;
+        }
+
+        return self::setExcludedProducts($excluded);
+    }
+
+    /**
      * @param \WP\MCP\Core\McpAdapter $adapter
      */
     public static function createServer($adapter)
@@ -199,10 +250,19 @@ class HubServer
                 }
             }
 
-            foreach ($product['prompts'] as $prompt) {
-                $prompts[] = $prompt;
+            // One server, one list of prompt names: the first product keeps a
+            // name that two products use.
+            foreach ($product['prompts'] as $promptName => $prompt) {
+                if (isset($prompts[$promptName])) {
+                    unset(self::$catalog[$slug]['prompts'][$promptName]);
+                    continue;
+                }
+
+                $prompts[$promptName] = $prompt;
             }
         }
+
+        $prompts = array_values($prompts);
 
         if (!$tools) {
             return;
@@ -444,7 +504,21 @@ class HubServer
             return new \WP_Error('fluent_hub_permission_denied', 'Permission denied');
         }
 
-        return $mcpTool->execute($arguments);
+        // The adapter runs these two filters for the router tool only. Run them
+        // for the product's tool and server too, so a site rule that blocks or
+        // redacts a product tool by name also holds here.
+        $arguments = apply_filters('mcp_adapter_pre_tool_call', $arguments, $toolName, $mcpTool, $product['server']);
+
+        if (is_wp_error($arguments)) {
+            return new \WP_Error($arguments->get_error_code(), $arguments->get_error_message());
+        }
+
+        // Like the adapter: only a direct tool, not one backed by an ability,
+        // takes the call context.
+        $direct = method_exists($mcpTool, 'is_ability_backed') && !$mcpTool->is_ability_backed();
+        $result = $direct ? $mcpTool->execute($arguments, $callContext) : $mcpTool->execute($arguments);
+
+        return apply_filters('mcp_adapter_tool_call_result', $result, $arguments, $toolName, $mcpTool, $product['server']);
     }
 
     /**
@@ -627,6 +701,27 @@ class HubServer
         }));
     }
 
+    /**
+     * prompts/get takes a name, so hiding a prompt from the list is not
+     * enough: stop the prompt of a product whose gate the user fails.
+     */
+    public static function gatePrompt($arguments, $promptName, $prompt = null, $server = null)
+    {
+        if (!self::isHubServer($server) || is_wp_error($arguments)) {
+            return $arguments;
+        }
+
+        foreach (self::$catalog as $slug => $product) {
+            if (isset($product['prompts'][$promptName])) {
+                return true === self::productAllowed($slug)
+                    ? $arguments
+                    : new \WP_Error('fluent_hub_permission_denied', 'Permission denied');
+            }
+        }
+
+        return $arguments;
+    }
+
     private static function allowedProducts()
     {
         return array_values(array_filter(array_keys(self::$catalog), function ($slug) {
@@ -691,6 +786,7 @@ class HubServer
         }
 
         return [
+            'enabled'            => self::enabled(),
             'available'          => '' === $reason,
             'reason'             => $reason,
             'min_adapter'        => self::MIN_ADAPTER_VERSION,

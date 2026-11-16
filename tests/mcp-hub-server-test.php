@@ -70,8 +70,14 @@ namespace {
         return true;
     }
 
-    function apply_filters($hook, $value)
+    function apply_filters($hook, $value, ...$args)
     {
+        $GLOBALS['applied_filters'][] = [$hook, isset($args[0]) ? $args[0] : null, isset($args[1]) ? $args[1] : null];
+
+        if (isset($GLOBALS['filter_overrides'][$hook])) {
+            return call_user_func($GLOBALS['filter_overrides'][$hook], $value, ...$args);
+        }
+
         return $value;
     }
 
@@ -419,6 +425,87 @@ namespace {
     sort($names);
     if ($names !== ['fluent-crm-read', 'fluent-crm-write']) {
         fail('Expected an excluded product to drop out of the hub: ' . implode(', ', $names));
+    }
+
+    // The server is off until the admin turns it on. The first time, sign-in
+    // comes on with it; after that the admin's own choice for sign-in stays.
+    if (HubServer::enabled()) {
+        fail('Expected the FluentHub MCP server to be off by default.');
+    }
+
+    HubServer::setEnabled(true);
+    if (!HubServer::enabled() || 'yes' !== $GLOBALS['options']['_fluent_kit_settings']['mcp_oauth']) {
+        fail('Expected turning the server on to turn sign-in on with it.');
+    }
+
+    $GLOBALS['options']['_fluent_kit_settings']['mcp_oauth'] = 'no';
+    HubServer::setEnabled(false);
+    HubServer::setEnabled(true);
+    if ('no' !== $GLOBALS['options']['_fluent_kit_settings']['mcp_oauth']) {
+        fail('Expected the admin\'s choice to keep sign-in off to stay.');
+    }
+
+    // The MCP page changes one product per request. A product whose plugin is
+    // not active keeps its state: it is neither excluded nor included by it.
+    HubServer::setExcludedProducts([]);
+    HubServer::setProductIncluded('fluent-crm', false);
+    if (HubServer::excludedProducts() !== ['fluent-crm']) {
+        fail('Expected only the unticked product in the exclude list: ' . implode(', ', HubServer::excludedProducts()));
+    }
+
+    HubServer::setProductIncluded('fluent-support', false);
+    HubServer::setProductIncluded('fluent-crm', true);
+    if (HubServer::excludedProducts() !== ['fluent-support']) {
+        fail('Expected ticking a product to leave the other exclusions alone.');
+    }
+    HubServer::setExcludedProducts([]);
+
+    // The adapter's tool-call filters run for the product's tool, by its name
+    // and with its server, so a site rule on that tool also holds on the hub.
+    $GLOBALS['created_servers'] = [];
+    $GLOBALS['user_caps'] = ['read' => true];
+    $adapter = build_adapter();
+    HubServer::createServer($adapter);
+    $tools = router_tools();
+
+    $GLOBALS['applied_filters'] = [];
+    call_router($tools, 'fluent-crm-write', ['action' => 'delete-contact', 'arguments' => ['id' => 7]]);
+    $seen = [];
+    foreach ($GLOBALS['applied_filters'] as $applied) {
+        if (0 === strpos($applied[0], 'mcp_adapter_')) {
+            $seen[$applied[0]] = true;
+        }
+    }
+    if (empty($seen['mcp_adapter_pre_tool_call']) || empty($seen['mcp_adapter_tool_call_result'])) {
+        fail('Expected the adapter tool-call filters to run for the product tool.');
+    }
+
+    $deleteTool = $adapter->servers['fluent-crm']->tools['fluent-crm-delete-contact'];
+    $callsBefore = count($deleteTool->calls);
+    $GLOBALS['filter_overrides']['mcp_adapter_pre_tool_call'] = function ($args, $toolName) {
+        return 'fluent-crm-delete-contact' === $toolName ? new \WP_Error('blocked', 'Deletes are blocked on this site.') : $args;
+    };
+    $blocked = call_router($tools, 'fluent-crm-write', ['action' => 'delete-contact', 'arguments' => ['id' => 7]]);
+    if (!is_wp_error($blocked) || 'blocked' !== $blocked->get_error_code() || count($deleteTool->calls) !== $callsBefore) {
+        fail('Expected a pre-tool-call filter on the product tool name to stop the call.');
+    }
+    unset($GLOBALS['filter_overrides']['mcp_adapter_pre_tool_call']);
+
+    $GLOBALS['filter_overrides']['mcp_adapter_tool_call_result'] = function ($result) {
+        return ['redacted' => true];
+    };
+    if (call_router($tools, 'fluent-crm-read', ['action' => 'list-tags']) !== ['redacted' => true]) {
+        fail('Expected a tool-call-result filter to change the result.');
+    }
+    unset($GLOBALS['filter_overrides']['mcp_adapter_tool_call_result']);
+
+    // prompts/get: a prompt of another server passes; nothing here is gated
+    // when no product owns the name.
+    $hub = new StubServer('fluent-hub', []);
+    if (HubServer::gatePrompt(['a' => 1], 'unknown-prompt', null, $hub) !== ['a' => 1]
+        || HubServer::gatePrompt(['a' => 1], 'unknown-prompt', null, new StubServer('fluent-crm', [])) !== ['a' => 1]
+    ) {
+        fail('Expected gatePrompt to pass prompts it does not own.');
     }
 
     echo 'MCP hub server test passed.' . PHP_EOL;

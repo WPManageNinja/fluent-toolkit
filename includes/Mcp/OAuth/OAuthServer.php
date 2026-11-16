@@ -80,8 +80,10 @@ class OAuthServer
     }
 
     /**
-     * Off until a site admin turns it on on the MCP page: it opens client
-     * registration and a consent page, so an update must not do that alone.
+     * Off until a site admin turns the FluentHub MCP server on on the MCP page
+     * (see HubServer::setEnabled()): it opens client registration and a
+     * consent page, so an update must not do that alone. The admin can turn
+     * sign-in off alone under Advanced.
      */
     public static function enabled()
     {
@@ -113,6 +115,11 @@ class OAuthServer
     {
         if (!HubServer::supported()) {
             return 'hub_unavailable';
+        }
+
+        // Sign-in is for the FluentHub MCP server only.
+        if (!HubServer::enabled()) {
+            return 'hub_off';
         }
 
         // An OAuth issuer URL cannot have a query string, and with plain
@@ -385,7 +392,7 @@ class OAuthServer
             $a = wp_parse_url($uri);
             $b = wp_parse_url($given);
 
-            if (!$a || !$b || empty($a['host']) || empty($b['host'])) {
+            if (!$a || !$b || empty($a['host']) || empty($b['host']) || empty($a['scheme']) || empty($b['scheme'])) {
                 continue;
             }
 
@@ -565,8 +572,8 @@ class OAuthServer
 
     /**
      * Runs first on rest_authentication_errors, before the MCP route's
-     * permission check. A valid access token sets the current user; a bad one
-     * ends the request with 401.
+     * permission check. A valid access token sets the current user and passes
+     * the request; a bad one ends it with 401.
      */
     public static function authenticate($result)
     {
@@ -590,7 +597,10 @@ class OAuthServer
 
         wp_set_current_user($checked[0]->ID);
 
-        return $result;
+        // True, not the untouched null: it ends the chain. Core's cookie check
+        // (priority 100) would otherwise set the user back to 0 when the
+        // request also carries a login cookie without a nonce.
+        return true;
     }
 
     /**

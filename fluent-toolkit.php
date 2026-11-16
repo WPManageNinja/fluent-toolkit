@@ -48,6 +48,7 @@ class FluentToolkitBootstrap
         add_action('wp_ajax_fluent_toolkit_mcp_overview', array($this, 'fetchMcpOverview'));
         add_action('wp_ajax_fluent_toolkit_mcp_toggle', array($this, 'toggleMcpAccess'));
         add_action('wp_ajax_fluent_toolkit_mcp_create_app_password', array($this, 'createMcpAppPassword'));
+        add_action('wp_ajax_fluent_toolkit_mcp_hub_toggle', array($this, 'toggleMcpHub'));
         add_action('wp_ajax_fluent_toolkit_mcp_hub_products', array($this, 'saveMcpHubProducts'));
         add_action('wp_ajax_fluent_toolkit_mcp_oauth_toggle', array($this, 'toggleMcpOAuth'));
         add_action('wp_ajax_fluent_toolkit_mcp_oauth_revoke', array($this, 'revokeMcpOAuthApp'));
@@ -346,14 +347,38 @@ class FluentToolkitBootstrap
         ), 200);
     }
 
+    public function toggleMcpHub()
+    {
+        $this->verifySettingsAjaxRequest();
+
+        $enabled = isset($_POST['enabled']) ? sanitize_text_field(wp_unslash($_POST['enabled'])) : '';
+        $enabled = in_array($enabled, ['yes', 'true', '1', 'on'], true);
+
+        \FluentToolkit\Mcp\HubServer::setEnabled($enabled);
+
+        wp_send_json([
+            'message' => $enabled
+                ? __('The FluentHub MCP server is on.', 'fluent-toolkit')
+                : __('The FluentHub MCP server is off. Apps connected to it stop working until you turn it on again.', 'fluent-toolkit'),
+            'status'  => \FluentToolkit\Classes\McpManager::status(),
+        ], 200);
+    }
+
     public function saveMcpHubProducts()
     {
         $this->verifySettingsAjaxRequest();
 
-        $included = isset($_POST['included']) && is_array($_POST['included']) ? array_map('sanitize_key', wp_unslash($_POST['included'])) : [];
-        $known = array_keys(\FluentToolkit\Mcp\HubServer::products());
+        // One product per request. The page lists active plugins only, so a
+        // full list from it would exclude every plugin that is not installed.
+        $slug = isset($_POST['slug']) ? sanitize_key(wp_unslash($_POST['slug'])) : '';
+        $included = isset($_POST['included']) ? sanitize_text_field(wp_unslash($_POST['included'])) : '';
+        $included = in_array($included, ['yes', 'true', '1', 'on'], true);
 
-        \FluentToolkit\Mcp\HubServer::setExcludedProducts(array_diff($known, $included));
+        if (!$slug || !array_key_exists($slug, \FluentToolkit\Mcp\HubServer::products())) {
+            wp_send_json(['message' => __('This plugin is not part of the FluentHub MCP server.', 'fluent-toolkit')], 422);
+        }
+
+        \FluentToolkit\Mcp\HubServer::setProductIncluded($slug, $included);
 
         wp_send_json([
             'message' => __('FluentHub MCP server updated.', 'fluent-toolkit'),
@@ -385,8 +410,12 @@ class FluentToolkitBootstrap
         $userId = isset($_POST['user_id']) ? absint($_POST['user_id']) : 0;
         $uuid = isset($_POST['id']) ? sanitize_text_field(wp_unslash($_POST['id'])) : '';
 
-        if (!$userId || !current_user_can('edit_user', $userId)) {
-            wp_send_json(['message' => __('You cannot disconnect apps of this user.', 'fluent-toolkit')], 403);
+        // Not edit_user: on multisite only a network admin has it for other
+        // users. A token opens this site only, and Store::deleteToken() removes
+        // nothing but this site's FluentHub passwords, so the site admin
+        // (checked above) decides.
+        if (!$userId) {
+            wp_send_json(['message' => __('This app is already disconnected.', 'fluent-toolkit')], 404);
         }
 
         if (!$uuid || !\FluentToolkit\Mcp\OAuth\Store::deleteToken($userId, $uuid)) {
