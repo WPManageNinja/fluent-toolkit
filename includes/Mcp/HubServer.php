@@ -70,6 +70,7 @@ class HubServer
         add_filter('mcp_adapter_tools_list', [__CLASS__, 'filterToolsList'], 10, 2);
         add_filter('mcp_adapter_prompts_list', [__CLASS__, 'filterPromptsList'], 10, 2);
         add_filter('mcp_adapter_pre_prompt_get', [__CLASS__, 'gatePrompt'], 10, 4);
+        add_filter('rest_post_dispatch', [__CLASS__, 'sendResultOnce'], 20, 3);
     }
 
     public static function supported()
@@ -841,6 +842,75 @@ class HubServer
          * @param string $instructions Plain-text instructions.
          */
         return (string) apply_filters('fluent_kit/mcp_hub_instructions', implode("\n", $lines));
+    }
+
+    /**
+     * Send a tool result once.
+     *
+     * The adapter puts every result in the response twice: as JSON text in
+     * `content` and again as `structuredContent`. Some clients give the model
+     * both copies (Codex does; Claude Code gives only structuredContent), so
+     * the model pays for every result twice. The router tools declare no
+     * output schema, so `structuredContent` is optional for them: drop it and
+     * keep the text block, which every client reads.
+     *
+     * Done on the REST response, not in the adapter, so it holds for whichever
+     * adapter copy runs.
+     *
+     * @param \WP_HTTP_Response|mixed $response
+     * @param \WP_REST_Server|mixed   $server
+     * @param \WP_REST_Request|mixed  $request
+     */
+    public static function sendResultOnce($response, $server = null, $request = null)
+    {
+        if (!is_object($response) || !method_exists($response, 'get_data') || !is_object($request) || !method_exists($request, 'get_route')
+            || '/' . self::ROUTE_NAMESPACE . '/' . self::ROUTE !== untrailingslashit((string) $request->get_route())
+        ) {
+            return $response;
+        }
+
+        /**
+         * Filter whether the FluentHub MCP server sends a tool result once
+         * (text only) instead of the adapter's two copies.
+         *
+         * @since 2.2.0
+         *
+         * @param bool $once Default true.
+         */
+        if (!apply_filters('fluent_kit/mcp_hub_single_result_copy', true)) {
+            return $response;
+        }
+
+        $data = $response->get_data();
+
+        if (!$data) {
+            return $response;
+        }
+
+        // As objects, so an empty JSON object stays {}.
+        $decoded = json_decode(wp_json_encode($data));
+        $changed = false;
+
+        foreach (is_array($decoded) ? $decoded : [$decoded] as $message) {
+            $result = is_object($message) && isset($message->result) && is_object($message->result) ? $message->result : null;
+
+            if (!$result || !isset($result->structuredContent) || empty($result->content) || !is_array($result->content)) {
+                continue;
+            }
+
+            $first = $result->content[0];
+
+            if (is_object($first) && isset($first->type, $first->text) && 'text' === $first->type && '' !== $first->text) {
+                unset($result->structuredContent);
+                $changed = true;
+            }
+        }
+
+        if ($changed) {
+            $response->set_data($decoded);
+        }
+
+        return $response;
     }
 
     /**

@@ -148,6 +148,46 @@ namespace {
         return rtrim($value, '/') . '/';
     }
 
+    function untrailingslashit($value)
+    {
+        return rtrim($value, '/');
+    }
+
+    class StubRestRequest
+    {
+        private $route;
+
+        public function __construct($route)
+        {
+            $this->route = $route;
+        }
+
+        public function get_route()
+        {
+            return $this->route;
+        }
+    }
+
+    class StubRestResponse
+    {
+        private $data;
+
+        public function __construct($data)
+        {
+            $this->data = $data;
+        }
+
+        public function get_data()
+        {
+            return $this->data;
+        }
+
+        public function set_data($data)
+        {
+            $this->data = $data;
+        }
+    }
+
     function fail($message)
     {
         fwrite(STDERR, $message . PHP_EOL);
@@ -575,6 +615,35 @@ namespace {
     }
     $GLOBALS['user_id'] = 1;
     $GLOBALS['user_roles'] = ['administrator'];
+
+    // A tool result goes out once: the adapter's structuredContent copy is
+    // dropped on the hub route and the text block stays.
+    $payload = ['jsonrpc' => '2.0', 'id' => 7, 'result' => [
+        'content'           => [['type' => 'text', 'text' => '{"summary":"x","data":{}}']],
+        'structuredContent' => ['summary' => 'x', 'data' => new \stdClass()],
+        'isError'           => false,
+    ]];
+    $sent = json_encode(HubServer::sendResultOnce(new StubRestResponse($payload), null, new StubRestRequest('/fluent-hub/mcp'))->get_data());
+    if (false !== strpos($sent, 'structuredContent') || false === strpos($sent, '"text":"{\\"summary\\":\\"x\\",\\"data\\":{}}"') || false === strpos($sent, '"isError":false')) {
+        fail('Expected the hub to send the text block only: ' . $sent);
+    }
+
+    // Other routes, and results without a text block, are left alone.
+    $other = json_encode(HubServer::sendResultOnce(new StubRestResponse($payload), null, new StubRestRequest('/fluent-crm/mcp'))->get_data());
+    $noText = ['jsonrpc' => '2.0', 'id' => 8, 'result' => ['content' => [], 'structuredContent' => ['a' => 1]]];
+    $kept = json_encode(HubServer::sendResultOnce(new StubRestResponse($noText), null, new StubRestRequest('/fluent-hub/mcp'))->get_data());
+    if (false === strpos($other, 'structuredContent') || false === strpos($kept, 'structuredContent')) {
+        fail('Expected other routes and results without text to keep structuredContent.');
+    }
+
+    $GLOBALS['filter_overrides']['fluent_kit/mcp_hub_single_result_copy'] = function () {
+        return false;
+    };
+    $both = json_encode(HubServer::sendResultOnce(new StubRestResponse($payload), null, new StubRestRequest('/fluent-hub/mcp'))->get_data());
+    unset($GLOBALS['filter_overrides']['fluent_kit/mcp_hub_single_result_copy']);
+    if (false === strpos($both, 'structuredContent')) {
+        fail('Expected the filter to keep both copies.');
+    }
 
     // The server is off until the admin turns it on. The first time, sign-in
     // comes on with it; after that the admin's own choice for sign-in stays.
