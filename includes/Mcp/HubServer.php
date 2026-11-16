@@ -561,7 +561,12 @@ class HubServer
         }
 
         if (!isset($product['aliases'][$action])) {
-            return self::error('unknown_action', sprintf('"%s" is not a %s action. Call %s with action "help" to list them.', $action, $product['title'], $tool), ['fields' => ['action']]);
+            // The valid names come with the error, so the agent can correct the
+            // call without a help call in between.
+            return self::error('unknown_action', sprintf('"%s" is not a %s action. Use an action in allowed, or call %s with action "help" for what each one does.', $action, $product['title'], $tool), [
+                'fields'  => ['action'],
+                'allowed' => array_merge(['help'], $product['groups'][$access]),
+            ]);
         }
 
         $toolName = $product['aliases'][$action];

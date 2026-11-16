@@ -460,7 +460,9 @@ namespace {
     // The router uses the two input codes every Fluent MCP server shares.
     $unknown = call_router($tools, 'fluent-crm-read', ['action' => 'nope']);
     $noAction = call_router($tools, 'fluent-crm-read', []);
-    if ('invalid_param' !== $envelope($unknown)['code'] || $envelope($unknown)['fields'] !== ['action'] || 'invalid_param' !== $envelope($noAction)['code']) {
+    $allowedActions = $envelope($unknown)['allowed'];
+    sort($allowedActions);
+    if ('invalid_param' !== $envelope($unknown)['code'] || $envelope($unknown)['fields'] !== ['action'] || $allowedActions !== ['get-crm-context', 'help', 'list-tags'] || 'invalid_param' !== $envelope($noAction)['code']) {
         fail('Expected an unknown or missing action to be invalid_param on the action field.');
     }
 
