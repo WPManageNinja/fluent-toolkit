@@ -309,6 +309,47 @@ class HubServer
     }
 
     /**
+     * Turn the FluentHub MCP server on from a product's own settings screen.
+     *
+     * It does what the switch on the FluentHub MCP page does: the hub goes
+     * on, and sign-in goes on with it the first time. It never turns
+     * anything off, and it never turns sign-in back on after an admin turned
+     * it off under Advanced: that choice stays on the FluentHub page.
+     *
+     * The caller must be a POST request it has checked a nonce on; this
+     * method checks the user's capability, not the request.
+     *
+     * @param string $slug The calling product's server id, for the state.
+     * @return array{status: string, reason: string, state: array} status is
+     *         "done", "forbidden" (the user cannot manage the site) or
+     *         "unavailable" (no adapter, or one too old for the hub).
+     */
+    public static function enableFromProduct($slug = '')
+    {
+        $result = function ($status, $reason = '') use ($slug) {
+            return ['status' => $status, 'reason' => $reason, 'state' => self::connectState($slug)];
+        };
+
+        if (!current_user_can('manage_options')) {
+            return $result('forbidden', 'capability');
+        }
+
+        if (!AdapterBootstrap::available()) {
+            return $result('unavailable', 'adapter_missing');
+        }
+
+        if (!self::supported()) {
+            return $result('unavailable', 'adapter_outdated');
+        }
+
+        if (!self::enabled()) {
+            self::setEnabled(true);
+        }
+
+        return $result('done');
+    }
+
+    /**
      * The name an AI app gives this site's connection, for example
      * "fluent-community-lab". An app keeps its connections by name, and a
      * name must be unique in the app: with one fixed name, the owner of two

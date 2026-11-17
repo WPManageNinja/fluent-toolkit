@@ -42,17 +42,39 @@ $state = apply_filters('fluent_kit/mcp_hub_state', null, 'fluent-community');
    Then the URL with a copy button, the app tabs from `clients`, and a link "Manage connections
    in FluentHub" to `manage_url`. Below, collapsed: the product's own endpoint with an
    application password.
-2. **FluentHub is active, the hub or sign-in is off** (`hub.reason` is `off`, or
-   `sign_in.reason` is `off`). A short explanation and one link to `manage_url`, shown only
-   when `can_manage` is true. A product does not turn the hub on itself: that switch opens app
-   registration and sign-in for the whole site, and the page that holds it also shows who can
-   connect and which plugins are served. Then the collapsed application-password section.
+2. **FluentHub is active and the hub is off** (`hub.reason` is `off`). When `can_manage` is
+   true, a primary button "Turn on FluentHub sign-in" with one line that says what it does for
+   the whole site: every Fluent plugin on the site becomes reachable through one URL, for the
+   users FluentHub allows. See "Turning the hub on" below. Then the collapsed
+   application-password section.
+
+   **The hub is on and sign-in is off** (`sign_in.reason` is `off`): an admin turned sign-in
+   off under Advanced. Show a link to `manage_url`, not a button; that choice stays on the
+   FluentHub page.
 3. **FluentHub is active, sign-in cannot run** (any other reason, or `product.included` is
    false). Say why in one line, link to `manage_url`, and open the application-password section.
 4. **`null`.** As the product does today.
 
 When `user_can_connect` is false, do not show the one URL as usable: say that the site admin
 decides who can connect, with the link to `manage_url` for an admin.
+
+## Turning the hub on
+
+```php
+$result = apply_filters('fluent_kit/mcp_hub_enable', null, 'fluent-community');
+```
+
+- Call it only from a POST route of your own that has checked a nonce. The hook checks the
+  user's capability (`manage_options`), not the request.
+- `null`: FluentHub is not active.
+- `status`: `done` (the hub is on; also when it was on already), `forbidden` (the user cannot
+  manage the site) or `unavailable` (`reason` is `adapter_missing` or `adapter_outdated`).
+- `state`: the fresh state, in the same shape as `fluent_kit/mcp_hub_state`, to redraw the card
+  from one response.
+- It does what the switch on the FluentHub page does: the hub goes on, and sign-in goes on with
+  it the first time. It never turns anything off, and it does not turn sign-in back on after an
+  admin turned it off.
+- A product does not offer "turn off". The link to `manage_url` is for that.
 
 ## Letting a product's own managers connect
 

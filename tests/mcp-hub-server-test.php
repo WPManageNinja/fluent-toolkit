@@ -145,6 +145,21 @@ namespace {
         return !empty($GLOBALS['user_caps'][$cap]);
     }
 
+    function __($text, $domain = 'default')
+    {
+        return $text;
+    }
+
+    function _x($text, $context, $domain = 'default')
+    {
+        return $text;
+    }
+
+    function admin_url($path = '')
+    {
+        return 'https://example.test/wp-admin/' . $path;
+    }
+
     function wp_parse_url($url, $component = -1)
     {
         return parse_url($url, $component);
@@ -354,6 +369,7 @@ namespace WP\MCP\Domain\Tools {
 namespace {
     require_once $root . '/includes/Mcp/AdapterBootstrap.php';
     require_once $root . '/includes/Mcp/HubServer.php';
+    require_once $root . '/includes/Mcp/OAuth/OAuthServer.php';
 
     use FluentToolkit\Mcp\HubServer;
     use WP\MCP\Core\StubServer;
@@ -761,6 +777,22 @@ namespace {
     if ('no' !== $GLOBALS['options']['_fluent_kit_settings']['mcp_oauth']) {
         fail('Expected the admin\'s choice to keep sign-in off to stay.');
     }
+
+    // A product screen can turn the hub on for a user who manages the site.
+    // It never turns sign-in back on after the admin turned it off.
+    $GLOBALS['options']['_fluent_kit_settings'] = ['mcp_hub' => 'no', 'mcp_oauth' => 'no'];
+    $GLOBALS['user_caps'] = ['read' => true];
+    $refused = HubServer::enableFromProduct('fluent-crm');
+    if ('forbidden' !== $refused['status'] || HubServer::enabled()) {
+        fail('Expected a user who cannot manage the site to be refused.');
+    }
+
+    $GLOBALS['user_caps'] = ['read' => true, 'manage_options' => true];
+    $done = HubServer::enableFromProduct('fluent-crm');
+    if ('done' !== $done['status'] || !HubServer::enabled() || true !== $done['state']['hub']['enabled'] || 'no' !== $GLOBALS['options']['_fluent_kit_settings']['mcp_oauth']) {
+        fail('Expected the hub to go on, sign-in to stay as the admin left it, and the fresh state to come back.');
+    }
+    $GLOBALS['user_caps'] = ['read' => true];
 
     // The MCP page changes one product per request. A product whose plugin is
     // not active keeps its state: it is neither excluded nor included by it.
