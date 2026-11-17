@@ -8,7 +8,19 @@ require('./style.scss');
 
 const app = createApp(App);
 
-app.config.globalProperties.$notify = ElNotification;
+// Every notification shows at the bottom right, clear of the WP admin bar and
+// the app's top bar, unless the caller asks for another position.
+const withPosition = options => Object.assign(
+    {position: 'bottom-right'},
+    typeof options === 'string' ? {message: options} : options
+);
+const notify = options => ElNotification(withPosition(options));
+['success', 'warning', 'info', 'error'].forEach(type => {
+    notify[type] = options => ElNotification[type](withPosition(options));
+});
+notify.closeAll = ElNotification.closeAll;
+
+app.config.globalProperties.$notify = notify;
 app.config.globalProperties.$confirm = ElMessageBox.confirm;
 app.use(ElLoading);
 

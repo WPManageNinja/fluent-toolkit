@@ -1,5 +1,8 @@
 @use "./mcp";
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
+// The :root variables every Element Plus component stylesheet reads. Without
+// them a notification has no background, border or shadow.
+@import "~element-plus/theme-chalk/el-var.css";
 @import "~element-plus/theme-chalk/el-notification.css";
 @import "~element-plus/theme-chalk/el-loading.css";
 @import "~element-plus/theme-chalk/el-message-box.css";
@@ -7,6 +10,16 @@
 #fluent_app {
   min-height: 100vh;
   padding: 0 0 24px;
+}
+
+// Notifications are added to <body>, outside the app's own color tokens.
+body.fluent_theme_dark .el-notification {
+  --el-bg-color-overlay: #1a2530;
+  --el-notification-border-color: #243040;
+  --el-notification-title-color: #f2f4f7;
+  --el-notification-content-color: #c3cad5;
+  --el-notification-close-color: #8b96a5;
+  --el-notification-close-hover-color: #f2f4f7;
 }
 
 body.fluent_theme_dark {

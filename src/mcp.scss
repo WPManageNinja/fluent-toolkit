@@ -66,48 +66,6 @@
     }
   }
 
-  .ft-mcp-grid {
-    display: grid;
-    gap: 0;
-    grid-template-columns: 1.6fr .7fr .8fr .8fr;
-  }
-
-  .ft-mcp-metric {
-    border-right: 1px solid var(--border);
-    min-width: 0;
-    padding: 20px 24px;
-
-    &:last-child {
-      border-right: 0;
-    }
-
-    span {
-      color: var(--text-soft);
-      display: block;
-      font-size: 11px;
-      font-weight: 500;
-      letter-spacing: 0.08em;
-      margin-bottom: 8px;
-      text-transform: uppercase;
-    }
-
-    strong {
-      color: var(--text);
-      display: block;
-      font-size: 14px;
-      font-weight: 600;
-      overflow-wrap: anywhere;
-    }
-
-    em {
-      color: var(--text-soft);
-      display: block;
-      font-size: 12px;
-      font-style: normal;
-      margin-top: 4px;
-    }
-  }
-
   .ft-mcp-note {
     background: var(--warn-soft);
     border-top: 1px solid oklch(88% 0.05 70);
@@ -122,11 +80,301 @@
     }
   }
 
+  .ft-mcp-rows {
+    display: grid;
+  }
+
+  .ft-mcp-row {
+    align-items: center;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+    padding: 14px 24px;
+
+    &:first-child {
+      border-top: 0;
+    }
+  }
+
+  .ft-mcp-row-logo {
+    border-radius: 9px;
+    flex-shrink: 0;
+    height: 36px;
+    object-fit: contain;
+    width: 36px;
+  }
+
+  .ft-mcp-row-logo-blank {
+    align-items: center;
+    background: var(--surface-2);
+    color: var(--text-muted);
+    display: flex;
+    font-size: 15px;
+    font-weight: 600;
+    justify-content: center;
+  }
+
+  .ft-mcp-row-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .ft-mcp-row-desc {
+    color: var(--text-soft);
+    font-size: 13px;
+    margin: 0;
+  }
+
+  .ft-mcp-row-text {
+    align-items: baseline;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    min-width: 0;
+
+    strong {
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    span {
+      color: var(--text-soft);
+      font-size: 13px;
+    }
+  }
+
+  // One labelled row of the Connect panel: the label says what the control
+  // next to it picks.
+  .ft-mcp-field {
+    align-items: start;
+    display: grid;
+    gap: 8px 20px;
+    grid-template-columns: 130px minmax(0, 1fr);
+    padding: 18px 24px 0;
+
+    .ft-channels {
+      flex-wrap: wrap;
+    }
+  }
+
+  .ft-mcp-field-label {
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
+    padding-top: 8px;
+  }
+
+  .ft-mcp-help {
+    p {
+      color: var(--text-soft);
+      font-size: 13px;
+      margin: 8px 0 0;
+      max-width: 680px;
+    }
+
+    &.ft-mcp-help-ok p {
+      color: oklch(38% 0.13 155);
+    }
+  }
+
+  .ft-mcp-select {
+    background: var(--surface-2);
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    height: 38px;
+    line-height: 1.4;
+    max-width: 100%;
+    min-height: 38px;
+    min-width: 320px;
+    padding: 6px 30px 6px 11px;
+  }
+
+  .ft-mcp-oauth-head {
+    align-items: flex-start;
+    display: flex;
+    gap: 16px;
+    padding-top: 6px;
+
+    .ft-mcp-help p:first-child {
+      margin-top: 2px;
+    }
+  }
+
+  .ft-mcp-switchmode {
+    border-top: 1px solid var(--border);
+    padding: 12px 24px;
+  }
+
+  .ft-mcp-link {
+    background: none;
+    border: 0;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+    padding: 0;
+    text-decoration: underline;
+
+    &:hover {
+      color: var(--text);
+    }
+  }
+
+  .ft-mcp-advanced-switch {
+    align-items: flex-start;
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+
+    strong {
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    p {
+      color: var(--text-soft);
+      font-size: 13px;
+      margin: 4px 0 0;
+      max-width: 760px;
+    }
+  }
+
+  .ft-mcp-blank {
+    color: var(--text-soft);
+    font-size: 13px;
+    margin: 0;
+    padding: 18px 24px;
+  }
+
+  .ft-mcp-advanced {
+    summary {
+      color: var(--text);
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 18px 24px;
+    }
+
+    .ft-mcp-table {
+      padding: 0;
+    }
+  }
+
+  .ft-mcp-advanced-block {
+    border-top: 1px solid var(--border);
+    display: grid;
+    gap: 8px;
+    padding: 18px 24px;
+
+    > strong {
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    > p {
+      color: var(--text-soft);
+      font-size: 13px;
+      margin: 0;
+      max-width: 760px;
+    }
+  }
+
+  .ft-mcp-oauth-warn {
+    color: oklch(42% 0.13 70) !important;
+  }
+
+  .ft-mcp-oauth-check {
+    display: grid;
+    gap: 10px;
+    justify-items: start;
+
+    ul {
+      display: grid;
+      gap: 6px;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    li {
+      align-items: center;
+      color: var(--text-muted);
+      display: flex;
+      font-size: 13px;
+      gap: 8px;
+      margin: 0;
+    }
+  }
+
+  .ft-mcp-table {
+    overflow-x: auto;
+    padding: 6px 24px 12px;
+
+    table {
+      border-collapse: collapse;
+      font-size: 13px;
+      min-width: 560px;
+      width: 100%;
+    }
+
+    th {
+      color: var(--text-soft);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 8px 6px 0;
+      text-align: left;
+    }
+
+    td {
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 10px 8px 10px 0;
+      vertical-align: top;
+
+      strong {
+        color: var(--text);
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      em {
+        color: var(--text-soft);
+        display: block;
+        font-size: 12px;
+        font-style: normal;
+      }
+
+      &.ft-mono {
+        overflow-wrap: anywhere;
+      }
+    }
+  }
+
+  .ft-mcp-apps-more {
+    color: var(--text-soft);
+    font-size: 13px;
+    margin: 10px 0 0;
+  }
+
+  .ft-mcp-apps td:last-child {
+    text-align: right;
+  }
+
   .ft-connect-actions {
     display: flex;
-    flex-shrink: 0;
     flex-wrap: wrap;
     gap: 8px;
+    margin-top: 12px;
   }
 
   .ft-switch {
@@ -182,7 +430,7 @@
     display: grid;
     gap: 14px;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
-    padding: 22px 24px 0;
+    max-width: 680px;
 
     label {
       display: grid;
@@ -244,10 +492,6 @@
     }
   }
 
-  .ft-client-tabs {
-    margin: 18px 24px 0;
-  }
-
   .ft-snippet-box {
     border-top: 1px solid var(--border);
     margin-top: 22px;
@@ -274,6 +518,14 @@
     overflow-x: auto;
     padding: 20px 24px;
     white-space: pre;
+
+    // WP admin gives every <code> a padding and a background, which shifts
+    // the first line.
+    code {
+      background: none;
+      font: inherit;
+      padding: 0;
+    }
   }
 }
 
@@ -286,18 +538,18 @@
       flex-direction: column;
     }
 
-    .ft-mcp-grid,
+    .ft-mcp-field,
     .ft-credential-row {
       grid-template-columns: 1fr;
     }
 
-    .ft-mcp-metric {
-      border-bottom: 1px solid var(--border);
-      border-right: 0;
+    .ft-mcp-field-label {
+      padding-top: 0;
+    }
 
-      &:last-child {
-        border-bottom: 0;
-      }
+    .ft-mcp-select {
+      min-width: 0;
+      width: 100%;
     }
   }
 }

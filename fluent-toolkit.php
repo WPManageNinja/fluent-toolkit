@@ -27,6 +27,12 @@ class FluentToolkitBootstrap
 
         $this->loadClasses();
 
+        // Keeps FluentHub's OAuth application passwords to the MCP endpoint.
+        // Hooked here, not in OAuthServer::register(): that one waits for the
+        // MCP adapter, and without this hook the passwords would work on the
+        // whole REST API and XML-RPC.
+        add_action('wp_authenticate_application_password_errors', array(\FluentToolkit\Mcp\OAuth\OAuthServer::class, 'restrictPasswords'), 10, 3);
+
         add_action('init', function () {
             load_plugin_textdomain('fluent-toolkit', false, dirname(plugin_basename(__FILE__)) . '/language');
         });
@@ -39,9 +45,24 @@ class FluentToolkitBootstrap
         add_action('wp_ajax_fluent_beta_get_beta_versions', array($this, 'getBetaVersions'));
         add_action('wp_ajax_fluent_toolkit_activate_plugin', array($this, 'activatePlugin'));
         add_action('wp_ajax_fluent_toolkit_save_dashboard_settings', array($this, 'saveDashboardSettings'));
+        // What a product's own settings screen reads to offer the FluentHub
+        // connection. Null stays null when the hub classes are not loaded.
+        add_filter('fluent_kit/mcp_hub_state', function ($state, $slug = '') {
+            return class_exists('\\FluentToolkit\\Mcp\\HubServer') ? \FluentToolkit\Mcp\HubServer::connectState($slug) : $state;
+        }, 10, 2);
+
+        // Lets a product's settings screen turn the hub on for a user who can
+        // manage the site. The product's own route checks the nonce.
+        add_filter('fluent_kit/mcp_hub_enable', function ($result, $slug = '', $target = 'hub') {
+            return class_exists('\\FluentToolkit\\Mcp\\HubServer') ? \FluentToolkit\Mcp\HubServer::enableFromProduct($slug, $target) : $result;
+        }, 10, 3);
+
         add_action('wp_ajax_fluent_toolkit_mcp_overview', array($this, 'fetchMcpOverview'));
         add_action('wp_ajax_fluent_toolkit_mcp_toggle', array($this, 'toggleMcpAccess'));
         add_action('wp_ajax_fluent_toolkit_mcp_create_app_password', array($this, 'createMcpAppPassword'));
+        add_action('wp_ajax_fluent_toolkit_mcp_hub_toggle', array($this, 'toggleMcpHub'));
+        add_action('wp_ajax_fluent_toolkit_mcp_oauth_toggle', array($this, 'toggleMcpOAuth'));
+        add_action('wp_ajax_fluent_toolkit_mcp_oauth_revoke', array($this, 'revokeMcpOAuthApp'));
 
         // add plugin menu link to plugins page
         add_filter('plugin_action_links_' . plugin_basename(__FILE__), function ($links) {
@@ -83,7 +104,10 @@ class FluentToolkitBootstrap
 
             }, 10, 2);
 
-            \FluentToolkit\Mcp\AdapterBootstrap::boot();
+            if (\FluentToolkit\Mcp\AdapterBootstrap::boot()) {
+                \FluentToolkit\Mcp\HubServer::register();
+                \FluentToolkit\Mcp\OAuth\OAuthServer::register();
+            }
         }, 999);
 
 
@@ -334,6 +358,65 @@ class FluentToolkitBootstrap
         ), 200);
     }
 
+    public function toggleMcpHub()
+    {
+        $this->verifySettingsAjaxRequest();
+
+        $enabled = isset($_POST['enabled']) ? sanitize_text_field(wp_unslash($_POST['enabled'])) : '';
+        $enabled = in_array($enabled, ['yes', 'true', '1', 'on'], true);
+
+        \FluentToolkit\Mcp\HubServer::setEnabled($enabled);
+
+        wp_send_json([
+            'message' => $enabled
+                ? __('The FluentHub MCP server is on.', 'fluent-toolkit')
+                : __('The FluentHub MCP server is off. Apps connected to it stop working until you turn it on again.', 'fluent-toolkit'),
+            'status'  => \FluentToolkit\Classes\McpManager::status(),
+        ], 200);
+    }
+
+    public function toggleMcpOAuth()
+    {
+        $this->verifySettingsAjaxRequest();
+
+        $enabled = isset($_POST['enabled']) ? sanitize_text_field(wp_unslash($_POST['enabled'])) : '';
+        $enabled = in_array($enabled, ['yes', 'true', '1', 'on'], true);
+
+        \FluentToolkit\Mcp\OAuth\OAuthServer::setEnabled($enabled);
+
+        wp_send_json([
+            'message' => $enabled
+                ? __('Sign-in with OAuth is on.', 'fluent-toolkit')
+                : __('Sign-in with OAuth is off. No new app can sign in. Connected apps keep working until you disconnect them.', 'fluent-toolkit'),
+            'status'  => \FluentToolkit\Classes\McpManager::status(),
+        ], 200);
+    }
+
+    public function revokeMcpOAuthApp()
+    {
+        $this->verifySettingsAjaxRequest();
+
+        $userId = isset($_POST['user_id']) ? absint($_POST['user_id']) : 0;
+        $uuid = isset($_POST['id']) ? sanitize_text_field(wp_unslash($_POST['id'])) : '';
+
+        // Not edit_user: on multisite only a network admin has it for other
+        // users. A token opens this site only, and Store::deleteToken() removes
+        // nothing but this site's FluentHub passwords, so the site admin
+        // (checked above) decides.
+        if (!$userId) {
+            wp_send_json(['message' => __('This app is already disconnected.', 'fluent-toolkit')], 404);
+        }
+
+        if (!$uuid || !\FluentToolkit\Mcp\OAuth\Store::deleteToken($userId, $uuid)) {
+            wp_send_json(['message' => __('This app is already disconnected.', 'fluent-toolkit')], 404);
+        }
+
+        wp_send_json([
+            'message' => __('App disconnected.', 'fluent-toolkit'),
+            'status'  => \FluentToolkit\Classes\McpManager::status(),
+        ], 200);
+    }
+
     public function saveDashboardSettings()
     {
         $this->verifySettingsAjaxRequest();
@@ -451,6 +534,10 @@ class FluentToolkitBootstrap
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/TransStrings.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/AdminBarMenu.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'includes/Mcp/AdapterBootstrap.php';
+        require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'includes/Mcp/HubServer.php';
+        require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'includes/Mcp/OAuth/Store.php';
+        require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'includes/Mcp/OAuth/OAuthServer.php';
+        require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'includes/Mcp/OAuth/AuthorizePage.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/ToolkitHelper.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/McpManager.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/UnifiedUi/Icons.php';
