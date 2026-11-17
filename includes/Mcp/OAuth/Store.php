@@ -150,8 +150,9 @@ class Store
     public static function createToken($userId, $clientName)
     {
         $base = '' !== $clientName ? $clientName : __('AI app', 'fluent-toolkit');
-        /* translators: %s: the name the AI app registered with, for example Claude Code */
-        $base = sprintf(__('%s (FluentHub MCP)', 'fluent-toolkit'), $base);
+        // "FluentHub" first, so a user's FluentHub connections sort together
+        // on the profile. It is a product name and is not translated.
+        $base = sprintf('FluentHub: %s', $base);
         $name = $base;
 
         self::pruneTokens($userId, $base);

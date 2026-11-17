@@ -876,7 +876,8 @@ export default {
             this.creatingPassword = true;
 
             this.$post('fluent_toolkit_mcp_create_app_password', {
-                name: 'FluentHub MCP',
+                // The same shape as the name a sign-in gives: "FluentHub: Claude Code".
+                name: this.activeClientInfo && this.activeClientInfo.label ? `FluentHub: ${this.activeClientInfo.label}` : 'FluentHub MCP',
             })
                 .then(response => {
                     const created = response.app_password || {};
