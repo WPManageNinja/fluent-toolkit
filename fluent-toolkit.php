@@ -387,7 +387,7 @@ class FluentToolkitBootstrap
         wp_send_json([
             'message' => $enabled
                 ? __('Sign-in with OAuth is on.', 'fluent-toolkit')
-                : __('Sign-in with OAuth is off. Connected apps stop working until you turn it on again.', 'fluent-toolkit'),
+                : __('Sign-in with OAuth is off. No new app can sign in. Connected apps keep working until you disconnect them.', 'fluent-toolkit'),
             'status'  => \FluentToolkit\Classes\McpManager::status(),
         ], 200);
     }

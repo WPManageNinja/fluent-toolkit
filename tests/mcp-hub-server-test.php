@@ -11,8 +11,7 @@
  * - the product tool's own permission check runs before it executes;
  * - help returns the product's instructions and one line per action of the
  *   tool; with action names it returns the full definition of those actions;
- * - a product whose transport gate the user fails is hidden from tools/list;
- * - a product left out on the MCP page is not served.
+ * - a product whose transport gate the user fails is hidden from tools/list.
  */
 
 namespace {
@@ -770,6 +769,14 @@ namespace {
         fail('Expected the hub to go on, sign-in to stay as the admin left it, and the fresh state to come back.');
     }
     $GLOBALS['user_caps'] = ['read' => true];
+
+    // The state a product screen reads is ready only when that product is
+    // served. A known product whose plugin is not active, or whose MCP is
+    // off, must not show a working URL.
+    $state = HubServer::connectState('fluent-crm');
+    if (false !== $state['ready'] || true !== $state['product']['known']) {
+        fail('Expected a known product that is not served to be not ready.');
+    }
 
     // The adapter's tool-call filters run for the product's tool, by its name
     // and with its server, so a site rule on that tool also holds on the hub.

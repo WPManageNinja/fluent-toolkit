@@ -33,6 +33,9 @@ defined('ABSPATH') || exit;
  */
 class OAuthServer
 {
+    /** Rows in the Connected apps list. */
+    const APPS_SHOWN = 200;
+
     const ROUTE_BASE = 'oauth';
     const LOGIN_ACTION = 'fluent_hub_authorize';
 
@@ -306,12 +309,15 @@ class OAuthServer
 
         // Clients ask for refresh_token too. It is accepted, and the response
         // lists the grant types this server uses.
-        $grantTypes = isset($body['grant_types']) ? (array) $body['grant_types'] : ['authorization_code'];
+        $strings = function ($value) {
+            return array_values(array_filter((array) $value, 'is_string'));
+        };
+        $grantTypes = isset($body['grant_types']) ? $strings($body['grant_types']) : ['authorization_code'];
         if (array_diff($grantTypes, ['authorization_code', 'refresh_token'])) {
             return self::error('invalid_client_metadata', 'Only the authorization_code grant type is supported.');
         }
 
-        $responseTypes = isset($body['response_types']) ? (array) $body['response_types'] : ['code'];
+        $responseTypes = isset($body['response_types']) ? $strings($body['response_types']) : ['code'];
         if (array_diff($responseTypes, ['code'])) {
             return self::error('invalid_client_metadata', 'Only the code response type is supported.');
         }
@@ -871,7 +877,10 @@ class OAuthServer
         // Listed also while sign-in is off: the passwords still exist, and the
         // admin may want to remove them.
         if (class_exists('\WP_Application_Passwords')) {
-            foreach (Store::tokens() as $token) {
+            $tokens = Store::tokens(self::APPS_SHOWN + 1);
+            $truncated = count($tokens) > self::APPS_SHOWN;
+
+            foreach (array_slice($tokens, 0, self::APPS_SHOWN) as $token) {
                 $user = get_userdata($token['user_id']);
 
                 $apps[] = [
@@ -897,7 +906,7 @@ class OAuthServer
             'apps'                  => $apps,
             // The list holds the newest 200. Past that, the rest is on each
             // user's profile.
-            'apps_truncated'        => count($apps) >= 200,
+            'apps_truncated'        => !empty($truncated),
         ];
     }
 }

@@ -8,7 +8,7 @@
  * - a registered loopback URI matches on any port, everything else exactly;
  * - PKCE S256 accepts the matching verifier only;
  * - a signed client_id round-trips, and a changed one is refused;
- * - access tokens parse as fhp_{user_id}_{24-character password};
+ * - an access token seals the application password and never contains it;
  * - FluentHub's application passwords work only while a Bearer token is
  *   checked, and then only this site's FluentHub passwords work.
  *
@@ -183,13 +183,35 @@ namespace {
     }
 
     // Access tokens.
-    if (Store::parseToken('fhp_12_abcdefghijklmnopqrstuvwx') !== [12, 'abcdefghijklmnopqrstuvwx']) {
-        fail('Expected a valid access token to parse.');
+    // An access token does not contain the application password: it is
+    // sealed with this site's salt. The same password seals to a different
+    // token each time, opens to the same password, and a changed token or
+    // the bare password is refused.
+    $seal = new ReflectionMethod(Store::class, 'sealToken');
+    $seal->setAccessible(true);
+    $password = 'abcdefghijklmnopqrstuvwx';
+    $tokenA = $seal->invoke(null, 12, $password);
+    $tokenB = $seal->invoke(null, 12, $password);
+
+    if (Store::parseToken($tokenA) !== [12, $password] || Store::parseToken($tokenB) !== [12, $password] || $tokenA === $tokenB) {
+        fail('Expected a sealed token to open to its user and password, and two tokens of one password to differ.');
     }
 
-    foreach (['fhp_12_short', 'fhp_x_abcdefghijklmnopqrstuvwx', 'fhp_12_abcdefghijklmnopqrstuv-x', 'abcdefghijklmnopqrstuvwx', '', null] as $bad) {
+    if (false !== strpos($tokenA, $password)) {
+        fail('Expected the access token not to contain the application password.');
+    }
+
+    $changed = substr($tokenA, 0, -1) . ('A' === substr($tokenA, -1) ? 'B' : 'A');
+    $otherUser = preg_replace('/^fhp_12_/', 'fhp_13_', $tokenA);
+    foreach (['fhp_12_' . $password, 'fhp_12_short', $password, '', null] as $bad) {
         if (null !== Store::parseToken($bad)) {
-            fail('Expected a bad access token to be refused: ' . var_export($bad, true));
+            fail('Expected a malformed access token to be refused: ' . var_export($bad, true));
+        }
+    }
+    foreach ([$changed, $otherUser] as $tampered) {
+        $opened = Store::parseToken($tampered);
+        if (null !== $opened && $opened[1] === $password) {
+            fail('Expected a changed token not to open to the password.');
         }
     }
 

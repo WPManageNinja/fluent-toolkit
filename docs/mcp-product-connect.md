@@ -108,6 +108,10 @@ add_filter('fluent_kit/mcp_hub_product_user_can_connect', function ($allowed, $s
 }, 10, 3);
 ```
 
+The callback must return `$allowed` unchanged for every other slug. The filter is shared by
+all products: a callback that returns true without checking `$slug` admits its users to the
+hub for every product, and a product without a gate of its own then shows them its tools.
+
 Such a user can sign in, and reaches that product only. The router tools of every other
 product stay hidden and refuse a call, whatever those products' own gates say. The product's
 own gate and each tool's permission check still apply.

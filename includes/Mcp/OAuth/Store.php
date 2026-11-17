@@ -22,6 +22,9 @@ defined('ABSPATH') || exit;
  */
 class Store
 {
+    /** Length of a core application password (WP_Application_Passwords::PW_LENGTH). */
+    const PASSWORD_LENGTH = 24;
+
     // Marks FluentHub's application passwords; the last 12 hex digits are the
     // blog ID. Fixed, never change it.
     const APP_ID_PREFIX = '6f1c2b8e-4d3a-4f5b-9a7e-';
@@ -122,6 +125,12 @@ class Store
      */
     public static function claimCode($code)
     {
+        // Some object caches report a successful delete for a key that is
+        // already gone. Adding a lock key succeeds once on all of them.
+        if (wp_using_ext_object_cache() && !wp_cache_add(self::codeKey($code), 1, 'fluent_hub_code_claim', 600)) {
+            return false;
+        }
+
         return delete_transient(self::codeKey($code));
     }
 
@@ -162,7 +171,33 @@ class Store
             return $created;
         }
 
-        return 'fhp_' . (int) $userId . '_' . $created[0];
+        return self::sealToken((int) $userId, $created[0]);
+    }
+
+    /**
+     * The access token an app holds. It does not contain the application
+     * password: the password is sealed with a key made from this site's
+     * secret salt and a random value in the token, and only this plugin, on
+     * this site, can open it (see parseToken()).
+     *
+     * So the token is worth nothing to WordPress itself. Where nothing limits
+     * the application password to the MCP endpoint (the plugin is deactivated
+     * or deleted, recovery mode paused it, or another site of a multisite
+     * network does not run it), a stolen token still cannot be used as a
+     * login: the password cannot be read out of it.
+     */
+    private static function sealToken($userId, $password)
+    {
+        $nonce = bin2hex(random_bytes(8));
+
+        return 'fhp_' . $userId . '_' . $nonce . self::base64url($password ^ self::tokenKey($userId, $nonce, strlen($password)));
+    }
+
+    private static function tokenKey($userId, $nonce, $length)
+    {
+        $key = hash_hmac('sha256', 'fluent-hub-token|' . get_current_blog_id() . '|' . (int) $userId . '|' . $nonce, wp_salt('auth'), true);
+
+        return substr($key, 0, $length);
     }
 
     /**
@@ -210,15 +245,27 @@ class Store
     }
 
     /**
-     * [user ID, password] from an access token, or null.
+     * [user ID, application password] from an access token, or null. The
+     * password is unsealed with this site's salt; a token that was changed,
+     * or that another site issued, gives a password core refuses.
      */
     public static function parseToken($token)
     {
-        if (!is_string($token) || !preg_match('/^fhp_(\d+)_([A-Za-z0-9]{24})$/', $token, $match)) {
+        if (!is_string($token) || !preg_match('/^fhp_(\d+)_([0-9a-f]{16})([A-Za-z0-9_-]{32})$/', $token, $match)) {
             return null;
         }
 
-        return [(int) $match[1], $match[2]];
+        $sealed = base64_decode(strtr($match[3], '-_', '+/'), true);
+
+        if (false === $sealed || self::PASSWORD_LENGTH !== strlen($sealed)) {
+            return null;
+        }
+
+        $password = $sealed ^ self::tokenKey((int) $match[1], $match[2], self::PASSWORD_LENGTH);
+
+        // Core's passwords are letters and digits. Anything else is a token
+        // that was not sealed here.
+        return preg_match('/^[A-Za-z0-9]+$/', $password) ? [(int) $match[1], $password] : null;
     }
 
     /**
@@ -255,10 +302,13 @@ class Store
         global $wpdb;
 
         $userIds = $wpdb->get_col($wpdb->prepare(
-            "SELECT user_id FROM {$wpdb->usermeta} WHERE meta_key = %s AND meta_value LIKE %s LIMIT %d",
+            "SELECT user_id FROM {$wpdb->usermeta} WHERE meta_key = %s AND meta_value LIKE %s ORDER BY umeta_id DESC LIMIT %d",
             \WP_Application_Passwords::USERMETA_KEY_APPLICATION_PASSWORDS,
             '%' . $wpdb->esc_like(self::appId()) . '%',
-            $limit
+            // More users than rows shown, so the newest rows are found on a
+            // site where many users hold a connection. The order is by the
+            // users who got their first application password most recently.
+            max(1000, (int) $limit)
         ));
 
         $tokens = [];

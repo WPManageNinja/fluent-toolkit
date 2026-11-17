@@ -188,7 +188,7 @@ class HubServer
     }
 
     /**
-     * A role that may connect, or the product's own word for this user.
+     * A site administrator, or the product's own word for this user.
      */
     public static function userCanUseProduct($slug, $user = null)
     {
@@ -249,6 +249,12 @@ class HubServer
 
         $signInReady = '' === $hubReason && $signInEnabled && '' === $signInReason;
 
+        $rows = self::connectProducts();
+        $servedSlugs = array_column(array_filter($rows, function ($row) {
+            return !empty($row['served']);
+        }), 'slug');
+        $served = '' === $slug ? (bool) $servedSlugs : in_array($slug, $servedSlugs, true);
+
         return [
             'version'          => 1,
             'hub'              => [
@@ -270,10 +276,12 @@ class HubServer
                 'known'    => $known,
                 'included' => $included,
             ],
-            // Sign-in works, and this product is served: lead with the one URL.
-            'ready'            => $signInReady && $included,
+            // Sign-in works, and this product is served (its plugin is active
+            // and its own MCP is on): lead with the one URL. For the hub
+            // alone, at least one product is served.
+            'ready'            => $signInReady && $served,
             'user_can_connect' => '' === $slug ? self::userCanConnectAny($user) : self::userCanUseProduct($slug, $user),
-            'products'         => self::connectProducts(),
+            'products'         => $rows,
             'clients'          => OAuth\OAuthServer::clients(self::endpointUrl(), self::clientServerName()),
             'manage_url'       => admin_url('admin.php?page=fluent-toolkit#mcp'),
             'profile_url'      => admin_url('profile.php#application-passwords-section'),
@@ -1148,7 +1156,7 @@ class HubServer
 
     /**
      * Transport gate: the user must reach at least one served product. That
-     * needs a role that may connect or the product's own word for the user
+     * needs a site administrator or the product's own word for the user
      * (productVouchesFor()), and the product's own gate.
      *
      * @param \WP_REST_Request $request
@@ -1182,8 +1190,8 @@ class HubServer
     }
 
     /**
-     * Whether the current user may use this product on the hub: a role that
-     * may connect or the product's own word for the user, then the product
+     * Whether the current user may use this product on the hub: a site
+     * administrator or the product's own word for the user, then the product
      * server's own transport gate. A server without a gate gets the adapter's
      * default: the `read` capability.
      */
