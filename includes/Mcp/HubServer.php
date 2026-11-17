@@ -641,8 +641,10 @@ class HubServer
             'handler'     => function ($args, $callContext = null) use ($slug, $access) {
                 return HubServer::runAction($slug, $access, $args, $callContext);
             },
+            // A WP_Error, not false: the adapter answers false with a bare
+            // "Permission denied", and passes the message of a WP_Error on.
             'permission'  => function () use ($slug) {
-                return HubServer::productAllowed($slug);
+                return HubServer::productPermission($slug);
             },
         ];
     }
@@ -1075,6 +1077,21 @@ class HubServer
         }
 
         return false;
+    }
+
+    /**
+     * True, or the error an agent reads when the user may not use this
+     * product: the same envelope as every other error.
+     */
+    public static function productPermission($slug)
+    {
+        if (true === self::productAllowed($slug)) {
+            return true;
+        }
+
+        $title = isset(self::$catalog[$slug]) ? self::$catalog[$slug]['title'] : (string) $slug;
+
+        return self::error('permission_denied', sprintf('Your account cannot use %s on this server. Use the tools of a product you have access to.', $title));
     }
 
     /**

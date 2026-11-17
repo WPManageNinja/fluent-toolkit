@@ -668,6 +668,7 @@ namespace {
     // A product can admit its own managers to its own tools. A subscriber who
     // manages FluentCRM reaches FluentCRM only: the Support tools stay hidden,
     // although this user would pass the Support gate.
+    HubServer::setExcludedProducts([]);
     $GLOBALS['created_servers'] = [];
     HubServer::createServer(build_adapter());
     $GLOBALS['user_roles'] = ['subscriber'];
@@ -691,6 +692,14 @@ namespace {
 
     if (true === HubServer::productAllowed('fluent-support') || HubServer::userCanUseProduct('fluent-support')) {
         fail('Expected the other product to stay closed to a user only FluentCRM vouches for.');
+    }
+
+    // The refusal is the error envelope, not a bare "Permission denied".
+    $vouchedTools = router_tools();
+    $refusal = call_user_func($vouchedTools['fluent-support-read']['permission']);
+    $refusalBody = is_wp_error($refusal) ? json_decode($refusal->get_error_message(), true) : null;
+    if (!is_wp_error($refusal) || 'forbidden' !== ($refusalBody['error']['code'] ?? '') || true !== call_user_func($vouchedTools['fluent-crm-read']['permission'])) {
+        fail('Expected a structured forbidden error for a product the user may not use, and true for the one they may.');
     }
 
     unset($GLOBALS['filter_overrides']['fluent_kit/mcp_hub_product_user_can_connect']);
