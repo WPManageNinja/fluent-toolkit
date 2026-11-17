@@ -130,6 +130,8 @@ an automation platform, and accept the second copy for that tool.
   `invalid_structure`, `invalid_value`, `missing_value`, `unknown_property`,
   `unknown_entity`, `too_many_conditions`, `empty_filters` and `no_advanced_options`. Its
   other input codes follow rule 2.
+- FluentBooking's `get-available-slots` returns times of day (`HH:MM`) keyed by date, in the
+  timezone named in `meta.timezone`. An offset on every slot would triple the result.
 - FluentCRM returns a flat result (`items`, `total`, ...) and nests extra error data under
   `details`, beside `fields`. FluentCart and Fluent Support return `summary`, `data` and
   `meta`.
