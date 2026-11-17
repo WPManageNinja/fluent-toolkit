@@ -27,6 +27,10 @@ WordPress plugin that unifies Fluent plugin admin UIs into one workspace, manage
 
 `docs/mcp-standard.md` holds the rules every Fluent MCP server follows, the product servers and the hub alike: one error envelope, two input codes (`invalid_param`, `unknown_param`), `meta.warnings`, dates and money conventions, plain-English text for AI, each server working without the hub, one copy of each tool result, and no `outputSchema` by default. Read it before changing what an MCP server returns, and update it when a rule changes.
 
+## Products and the hub connection
+
+`docs/mcp-product-connect.md` is the contract for the "connect with one URL" card on each product's own MCP screen. A product reads `apply_filters('fluent_kit/mcp_hub_state', null, $slug)` (built by `HubServer::connectState()`, null when FluentHub is not active) and never calls our classes. The per-app sign-in instructions have one source, `OAuthServer::clients()`; the MCP page gets them in `oauth.clients`. A product admits its own non-admin managers to its own tools with the filter `fluent_kit/mcp_hub_product_user_can_connect`: `HubServer::productAllowed()` asks `userCanUseProduct()` per product, so such a user reaches that product only, and the consent screen and token endpoint ask `userCanConnectAny()`.
+
 ## Settings
 
 - Stored in `_fluent_kit_settings` option (array).

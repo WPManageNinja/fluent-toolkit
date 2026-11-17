@@ -383,6 +383,7 @@ export default {
                     https: true,
                     resource_metadata_url: '',
                     server_metadata_url: '',
+                    clients: [],
                     apps: [],
                 },
                 products: [],
@@ -415,14 +416,6 @@ export default {
                 { key: 'claude-desktop', label: 'Claude Desktop', note: this.$t('Paste this JSON into claude_desktop_config.json and restart Claude Desktop.') },
                 { key: 'cursor', label: 'Cursor', note: this.$t('Paste this JSON into the Cursor MCP settings and restart Cursor.') },
                 { key: 'generic', label: this.$_x('Generic', 'MCP client type'), note: this.$t('Use this URL and Basic Auth header with any HTTP MCP client.') },
-            ],
-            oauthClients: [
-                { key: 'claude', label: 'Claude', note: this.$t('In Claude, open Settings > Connectors, add a custom connector and paste this URL.') },
-                { key: 'claude-code', label: 'Claude Code', note: this.$t('Run this, then run /mcp in Claude Code and pick fluent-hub to sign in.') },
-                { key: 'codex', label: 'Codex', note: this.$t('Run these commands. The second one opens the sign-in page.') },
-                { key: 'copilot', label: 'GitHub Copilot', note: this.$t('Paste this JSON into .vscode/mcp.json. VS Code asks you to sign in.') },
-                { key: 'cursor', label: 'Cursor', note: this.$t('Paste this JSON into the Cursor MCP settings. Cursor asks you to sign in.') },
-                { key: 'generic', label: this.$_x('Generic', 'MCP client type'), note: this.$t('Add this URL to any MCP client that supports OAuth, then sign in.') },
             ],
         };
     },
@@ -460,7 +453,7 @@ export default {
             };
         },
         oauth() {
-            return this.overview.oauth || { apps: [] };
+            return this.overview.oauth || { apps: [], clients: [] };
         },
         oauthReady() {
             return !!(this.hub.enabled && this.hub.available && this.oauth.enabled && this.oauth.available);
@@ -495,7 +488,9 @@ export default {
             return this.oauthReady && !this.oauth.https ? this.$t('MCP_OAuth_No_Https') : '';
         },
         visibleClients() {
-            return this.useOAuth ? this.oauthClients : this.clients;
+            // The sign-in instructions come from PHP (OAuthServer::clients()),
+            // so each product's own screen shows the same wording.
+            return this.useOAuth ? (this.oauth.clients || []) : this.clients;
         },
         hubServes() {
             return !!(this.hubProduct && this.hubProduct.mcp_enabled);
@@ -588,7 +583,9 @@ export default {
             return this.$_x('Available', 'MCP adapter status');
         },
         activeClientInfo() {
-            return this.visibleClients.find(client => client.key === this.activeClient) || this.visibleClients[0];
+            return this.visibleClients.find(client => client.key === this.activeClient)
+                || this.visibleClients[0]
+                || { key: '', label: '', note: '', snippet: '' };
         },
         // Only enabled products get an entry in the combined snippet — a disabled
         // server's route isn't registered, so pasting it would just 404.
@@ -626,7 +623,7 @@ export default {
             const client = this.activeClientInfo ? this.activeClientInfo.key : '';
 
             if (this.useOAuth) {
-                return this.oauthSnippet(entries[0].endpoint_url);
+                return this.activeClientInfo ? this.activeClientInfo.snippet : '';
             }
 
             const user = this.username || '<your-username>';
@@ -715,27 +712,6 @@ export default {
                 servers[product.slug] = build(product);
                 return servers;
             }, {});
-        },
-        oauthSnippet(url) {
-            const client = this.activeClientInfo.key;
-
-            if (client === 'claude-code') {
-                return `claude mcp add --transport http fluent-hub ${url}`;
-            }
-
-            if (client === 'codex') {
-                return [`codex mcp add fluent-hub --url ${url}`, 'codex mcp login fluent-hub'].join('\n');
-            }
-
-            if (client === 'copilot') {
-                return JSON.stringify({ servers: { 'fluent-hub': { type: 'http', url } } }, null, 2);
-            }
-
-            if (client === 'cursor') {
-                return JSON.stringify({ mcpServers: { 'fluent-hub': { url } } }, null, 2);
-            }
-
-            return url;
         },
         formatDate(timestamp) {
             return new Date(timestamp * 1000).toLocaleString();

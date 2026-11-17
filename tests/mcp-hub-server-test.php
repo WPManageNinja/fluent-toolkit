@@ -665,6 +665,38 @@ namespace {
         fail('Expected the filter to keep both copies.');
     }
 
+    // A product can admit its own managers to its own tools. A subscriber who
+    // manages FluentCRM reaches FluentCRM only: the Support tools stay hidden,
+    // although this user would pass the Support gate.
+    $GLOBALS['created_servers'] = [];
+    HubServer::createServer(build_adapter());
+    $GLOBALS['user_roles'] = ['subscriber'];
+    $GLOBALS['user_caps'] = ['read' => true, 'support_agent' => true];
+
+    if (false !== HubServer::transportPermission(null) || HubServer::userCanConnectAny()) {
+        fail('Expected a subscriber no product vouches for to be refused.');
+    }
+
+    $GLOBALS['filter_overrides']['fluent_kit/mcp_hub_product_user_can_connect'] = function ($allowed, $slug) {
+        return 'fluent-crm' === $slug;
+    };
+
+    $vouched = HubServer::filterToolsList(
+        [['name' => 'fluent-crm-read'], ['name' => 'fluent-crm-write'], ['name' => 'fluent-support-read']],
+        new StubServer('fluent-hub', [])
+    );
+    if (true !== HubServer::transportPermission(null) || !HubServer::userCanConnectAny() || array_column($vouched, 'name') !== ['fluent-crm-read', 'fluent-crm-write']) {
+        fail('Expected a product to admit its own manager to its own tools only: ' . json_encode(array_column($vouched, 'name')));
+    }
+
+    if (true === HubServer::productAllowed('fluent-support') || HubServer::userCanUseProduct('fluent-support')) {
+        fail('Expected the other product to stay closed to a user only FluentCRM vouches for.');
+    }
+
+    unset($GLOBALS['filter_overrides']['fluent_kit/mcp_hub_product_user_can_connect']);
+    $GLOBALS['user_roles'] = ['administrator'];
+    $GLOBALS['user_caps'] = ['read' => true];
+
     // The server is off until the admin turns it on. The first time, sign-in
     // comes on with it; after that the admin's own choice for sign-in stays.
     if (HubServer::enabled()) {

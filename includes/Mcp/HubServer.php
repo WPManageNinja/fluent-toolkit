@@ -184,6 +184,129 @@ class HubServer
         return (bool) apply_filters('fluent_kit/mcp_hub_user_can_connect', $allowed, $user);
     }
 
+    /**
+     * Whether a product lets this user use ITS tools on the hub, although no
+     * role of the user is ticked under "Who can connect apps".
+     *
+     * For a product whose managers are not WordPress administrators: a
+     * FluentCommunity moderator or a support agent is often a subscriber. The
+     * user then reaches that product only: productAllowed() asks this for each
+     * product, so the tools of the other products stay hidden.
+     *
+     * @param string        $slug Product server id.
+     * @param \WP_User|null $user Defaults to the current user.
+     */
+    public static function productVouchesFor($slug, $user = null)
+    {
+        $user = $user ? $user : wp_get_current_user();
+
+        if (!$user || !$user->exists()) {
+            return false;
+        }
+
+        /**
+         * Filter whether a product admits a user to its own tools on the
+         * FluentHub MCP server.
+         *
+         * @since 2.2.0
+         *
+         * @param bool     $allowed Default false.
+         * @param string   $slug    Product server id, for example "fluent-community".
+         * @param \WP_User $user    The user.
+         */
+        return (bool) apply_filters('fluent_kit/mcp_hub_product_user_can_connect', false, (string) $slug, $user);
+    }
+
+    /**
+     * A role that may connect, or the product's own word for this user.
+     */
+    public static function userCanUseProduct($slug, $user = null)
+    {
+        return self::userCanConnect($user) || self::productVouchesFor($slug, $user);
+    }
+
+    /**
+     * Whether the user may connect an app at all: by role, or because one
+     * served product admits them. For the consent screen and the token
+     * endpoint, which run before a product is chosen.
+     */
+    public static function userCanConnectAny($user = null)
+    {
+        if (self::userCanConnect($user)) {
+            return true;
+        }
+
+        foreach (array_diff(array_keys(self::products()), self::excludedProducts()) as $slug) {
+            if (self::productVouchesFor($slug, $user)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * What a product's own settings screen needs to offer "connect with one
+     * URL": the state of the hub and of sign-in, whether this product is in
+     * it, whether this user may use it, and the per-app instructions, so the
+     * wording is the same on every screen. Products read it with
+     * apply_filters('fluent_kit/mcp_hub_state', null, $slug), which is null
+     * when FluentHub is not active, and never bind to this class.
+     *
+     * @param string        $slug Product server id, or '' for the hub alone.
+     * @param \WP_User|null $user Defaults to the current user.
+     */
+    public static function connectState($slug = '', $user = null)
+    {
+        $slug = sanitize_key((string) $slug);
+        $supported = self::supported();
+        $enabled = self::enabled();
+        $signInReason = OAuth\OAuthServer::unavailableReason();
+        $signInEnabled = OAuth\OAuthServer::enabled();
+        $known = '' === $slug || array_key_exists($slug, self::products());
+        $included = $known && !in_array($slug, self::excludedProducts(), true);
+
+        $hubReason = '';
+        if (!AdapterBootstrap::available()) {
+            $hubReason = 'adapter_missing';
+        } elseif (!$supported) {
+            $hubReason = 'adapter_outdated';
+        } elseif (!$enabled) {
+            $hubReason = 'off';
+        }
+
+        $signInReady = '' === $hubReason && $signInEnabled && '' === $signInReason;
+
+        return [
+            'version'          => 1,
+            'hub'              => [
+                'enabled'      => $enabled,
+                'supported'    => $supported,
+                'reason'       => $hubReason,
+                'endpoint_url' => self::endpointUrl(),
+            ],
+            'sign_in'          => [
+                'enabled'   => $signInEnabled,
+                'available' => $signInReady,
+                // '', hub_unavailable, hub_off, plain_permalinks, app_passwords_off, or off.
+                'reason'    => '' !== $signInReason ? $signInReason : ($signInEnabled ? '' : 'off'),
+                'https'     => 'https' === wp_parse_url(home_url(), PHP_URL_SCHEME),
+            ],
+            'product'          => [
+                'slug'     => $slug,
+                'known'    => $known,
+                'included' => $included,
+            ],
+            // Sign-in works, and this product is served: lead with the one URL.
+            'ready'            => $signInReady && $included,
+            'user_can_connect' => '' === $slug ? self::userCanConnectAny($user) : self::userCanUseProduct($slug, $user),
+            'clients'          => OAuth\OAuthServer::clients(self::endpointUrl()),
+            'manage_url'       => admin_url('admin.php?page=fluent-toolkit#mcp'),
+            'profile_url'      => admin_url('profile.php#application-passwords-section'),
+            'can_manage'       => current_user_can('manage_options'),
+        ];
+    }
+
     public static function endpointUrl()
     {
         return get_rest_url(null, trailingslashit(self::ROUTE_NAMESPACE) . self::ROUTE);
@@ -935,18 +1058,15 @@ class HubServer
     }
 
     /**
-     * Transport gate: the user must have a role that may connect, and pass at
-     * least one served product's gate.
+     * Transport gate: the user must reach at least one served product. That
+     * needs a role that may connect or the product's own word for the user
+     * (productVouchesFor()), and the product's own gate.
      *
      * @param \WP_REST_Request $request
      */
     public static function transportPermission($request = null)
     {
         self::$request = $request;
-
-        if (!self::userCanConnect()) {
-            return false;
-        }
 
         foreach (array_keys(self::$catalog) as $slug) {
             if (true === self::productAllowed($slug)) {
@@ -958,12 +1078,14 @@ class HubServer
     }
 
     /**
-     * Whether the current user passes the product server's own transport gate.
-     * A server without a gate gets the adapter's default: the `read` capability.
+     * Whether the current user may use this product on the hub: a role that
+     * may connect or the product's own word for the user, then the product
+     * server's own transport gate. A server without a gate gets the adapter's
+     * default: the `read` capability.
      */
     public static function productAllowed($slug)
     {
-        if (!isset(self::$catalog[$slug])) {
+        if (!isset(self::$catalog[$slug]) || !self::userCanUseProduct($slug)) {
             return false;
         }
 

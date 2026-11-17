@@ -69,7 +69,7 @@ class AuthorizePage
             self::fail(__('Your account cannot connect apps to this site.', 'fluent-toolkit'));
         }
 
-        if (!\FluentToolkit\Mcp\HubServer::userCanConnect($user)) {
+        if (!\FluentToolkit\Mcp\HubServer::userCanConnectAny($user)) {
             self::fail(__('Your account is not allowed to connect apps to this site. Ask the site admin.', 'fluent-toolkit'));
         }
 

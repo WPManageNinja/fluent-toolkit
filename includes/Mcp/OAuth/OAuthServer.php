@@ -465,7 +465,7 @@ class OAuthServer
             return self::error('invalid_grant', 'This user cannot use application passwords.');
         }
 
-        if (!HubServer::userCanConnect($user)) {
+        if (!HubServer::userCanConnectAny($user)) {
             return self::error('invalid_grant', 'This user is not allowed to connect apps to this site.');
         }
 
@@ -781,6 +781,62 @@ class OAuthServer
      * MCP page
      */
 
+    /**
+     * How to connect each AI app with sign-in: one place for the wording, used
+     * by the FluentHub MCP page and by each product's own settings screen
+     * (HubServer::connectState()). A person reads the notes, so they are
+     * translated; the snippets are commands and stay as they are.
+     *
+     * @param string $url The FluentHub MCP endpoint.
+     * @return array<int, array{key: string, label: string, note: string, snippet: string}>
+     */
+    public static function clients($url)
+    {
+        $url = (string) $url;
+        $json = function ($data) {
+            return (string) wp_json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        };
+
+        return [
+            [
+                'key'     => 'claude',
+                'label'   => 'Claude',
+                'note'    => __('In Claude, open Settings > Connectors, add a custom connector and paste this URL.', 'fluent-toolkit'),
+                'snippet' => $url,
+            ],
+            [
+                'key'     => 'claude-code',
+                'label'   => 'Claude Code',
+                'note'    => __('Run this, then run /mcp in Claude Code and pick fluent-hub to sign in.', 'fluent-toolkit'),
+                'snippet' => 'claude mcp add --transport http fluent-hub ' . $url,
+            ],
+            [
+                'key'     => 'codex',
+                'label'   => 'Codex',
+                'note'    => __('Run these commands. The second one opens the sign-in page.', 'fluent-toolkit'),
+                'snippet' => 'codex mcp add fluent-hub --url ' . $url . "\n" . 'codex mcp login fluent-hub',
+            ],
+            [
+                'key'     => 'copilot',
+                'label'   => 'GitHub Copilot',
+                'note'    => __('Paste this JSON into .vscode/mcp.json. VS Code asks you to sign in.', 'fluent-toolkit'),
+                'snippet' => $json(['servers' => ['fluent-hub' => ['type' => 'http', 'url' => $url]]]),
+            ],
+            [
+                'key'     => 'cursor',
+                'label'   => 'Cursor',
+                'note'    => __('Paste this JSON into the Cursor MCP settings. Cursor asks you to sign in.', 'fluent-toolkit'),
+                'snippet' => $json(['mcpServers' => ['fluent-hub' => ['url' => $url]]]),
+            ],
+            [
+                'key'     => 'generic',
+                'label'   => _x('Generic', 'MCP client type', 'fluent-toolkit'),
+                'note'    => __('Add this URL to any MCP client that supports OAuth, then sign in.', 'fluent-toolkit'),
+                'snippet' => $url,
+            ],
+        ];
+    }
+
     public static function status()
     {
         $reason = self::unavailableReason();
@@ -812,6 +868,7 @@ class OAuthServer
             'https'                 => 'https' === wp_parse_url(home_url(), PHP_URL_SCHEME),
             'resource_metadata_url' => self::resourceMetadataUrl(),
             'server_metadata_url'   => self::serverMetadataUrl(),
+            'clients'               => self::clients(HubServer::endpointUrl()),
             'apps'                  => $apps,
         ];
     }

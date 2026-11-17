@@ -45,6 +45,12 @@ class FluentToolkitBootstrap
         add_action('wp_ajax_fluent_beta_get_beta_versions', array($this, 'getBetaVersions'));
         add_action('wp_ajax_fluent_toolkit_activate_plugin', array($this, 'activatePlugin'));
         add_action('wp_ajax_fluent_toolkit_save_dashboard_settings', array($this, 'saveDashboardSettings'));
+        // What a product's own settings screen reads to offer the FluentHub
+        // connection. Null stays null when the hub classes are not loaded.
+        add_filter('fluent_kit/mcp_hub_state', function ($state, $slug = '') {
+            return class_exists('\\FluentToolkit\\Mcp\\HubServer') ? \FluentToolkit\Mcp\HubServer::connectState($slug) : $state;
+        }, 10, 2);
+
         add_action('wp_ajax_fluent_toolkit_mcp_overview', array($this, 'fetchMcpOverview'));
         add_action('wp_ajax_fluent_toolkit_mcp_toggle', array($this, 'toggleMcpAccess'));
         add_action('wp_ajax_fluent_toolkit_mcp_create_app_password', array($this, 'createMcpAppPassword'));
