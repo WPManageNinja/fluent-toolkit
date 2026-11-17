@@ -28,7 +28,6 @@
 
         <section class="ft-card ft-workspace-card" v-loading="unifiedUiSaving" :element-loading-text="$t('Saving…')">
             <header class="ft-card-head">
-                <span class="ft-card-eyebrow">{{ $t('Unified Fluent Workspace') }}</span>
                 <h2 class="ft-card-title">{{ $t('Fluent Unified UI') }}</h2>
                 <p class="ft-card-sub">{{ $t('Open all your Fluent plugins in one workspace, with a shared sidebar to move between them.') }}</p>
             </header>
@@ -112,7 +111,6 @@
         <section class="ft-hero ft-mcp-hero ft-mcp-dashboard-banner">
             <div class="ft-hero-inner">
                 <div class="ft-mcp-banner-copy">
-                    <div class="ft-hero-eyebrow">{{ $t('MCP for agents') }}</div>
                     <h1>{{ $t('Connect AI agents to Fluent plugins') }}</h1>
                     <p>{{ $t('MCP_Banner_Desc') }}</p>
                 </div>
@@ -123,10 +121,7 @@
         </section>
 
         <div class="ft-section-head ft-beta-head">
-            <div>
-                <span class="ft-section-kicker">{{ $t('Fluent ecosystem') }}</span>
-                <h2>{{ $t('Plugins & Add-ons') }}</h2>
-            </div>
+            <h2>{{ $t('Plugins & Add-ons') }}</h2>
             <div class="ft-beta-stats">
                 <button class="ft-iconbtn" @click="getBetaPlugins(true)" :title="$t('Refresh plugin list')" :aria-label="$t('Refresh plugin list')">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
@@ -244,7 +239,7 @@
 
         <!-- Footer -->
         <div class="ft-footer">
-            <div>{{ $t('Registry synced') }} · <span @click="getBetaPlugins(true)" style="cursor: pointer; color: var(--accent);">{{ $t('Refresh now') }}</span></div>
+            <div>{{ $t('Registry synced') }} · <span @click="getBetaPlugins(true)" style="cursor: pointer; color: var(--link);">{{ $t('Refresh now') }}</span></div>
             <!-- <div>Toggle <a href="#">beta channel</a> in settings to opt in to release candidates</div> -->
         </div>
 

@@ -5,15 +5,15 @@
 
   .ft-mcp-layout {
     display: grid;
-    gap: 18px;
+    gap: 24px;
   }
 
   .ft-mcp-empty {
     align-items: center;
     background: var(--warn-soft);
-    border: 1px solid oklch(88% 0.05 70);
-    border-radius: 12px;
-    color: oklch(40% 0.11 70);
+    border: 1px solid var(--warn-border);
+    border-radius: var(--radius);
+    color: var(--warn-text);
     display: flex;
     gap: 18px;
     justify-content: space-between;
@@ -37,8 +37,8 @@
 
   .ft-panel {
     background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
+    border: 1px solid transparent;
+    border-radius: var(--radius);
     overflow: hidden;
   }
 
@@ -48,19 +48,21 @@
     display: flex;
     gap: 18px;
     justify-content: space-between;
-    padding: 22px 24px;
+    padding: 20px 24px;
 
     h2 {
-      font-size: 17px;
+      color: var(--text);
+      font-size: 16px;
       font-weight: 600;
-      letter-spacing: 0;
-      line-height: 1.25;
-      margin: 0 0 5px;
+      letter-spacing: inherit;
+      line-height: 1.4;
+      margin: 0 0 4px;
+      padding: 0;
     }
 
     p {
       color: var(--text-muted);
-      font-size: 13px;
+      font-size: 14px;
       margin: 0;
       max-width: 680px;
     }
@@ -68,15 +70,15 @@
 
   .ft-mcp-note {
     background: var(--warn-soft);
-    border-top: 1px solid oklch(88% 0.05 70);
-    color: oklch(42% 0.13 70);
+    border-top: 1px solid var(--warn-border);
+    color: var(--warn-text);
     font-size: 13px;
     padding: 14px 24px;
 
     &.ft-mcp-note-ok {
       background: var(--ok-soft);
-      border-top-color: oklch(88% 0.05 155);
-      color: oklch(38% 0.13 155);
+      border-top-color: var(--ok-border);
+      color: var(--ok-text);
     }
   }
 
@@ -98,7 +100,7 @@
   }
 
   .ft-mcp-row-logo {
-    border-radius: 9px;
+    border-radius: var(--radius);
     flex-shrink: 0;
     height: 36px;
     object-fit: contain;
@@ -178,14 +180,14 @@
     }
 
     &.ft-mcp-help-ok p {
-      color: oklch(38% 0.13 155);
+      color: var(--ok-text);
     }
   }
 
   .ft-mcp-select {
-    background: var(--surface-2);
+    background: var(--surface);
     border: 1px solid var(--border-strong);
-    border-radius: 8px;
+    border-radius: var(--radius);
     color: var(--text);
     font-family: inherit;
     font-size: 13px;
@@ -259,7 +261,7 @@
     summary {
       color: var(--text);
       cursor: pointer;
-      font-size: 15px;
+      font-size: 16px;
       font-weight: 600;
       padding: 18px 24px;
     }
@@ -290,7 +292,7 @@
   }
 
   .ft-mcp-oauth-warn {
-    color: oklch(42% 0.13 70) !important;
+    color: var(--warn-text) !important;
   }
 
   .ft-mcp-oauth-check {
@@ -328,10 +330,10 @@
     }
 
     th {
-      color: var(--text-soft);
-      font-size: 12px;
+      color: var(--text-muted);
+      font-size: 13px;
       font-weight: 500;
-      padding: 6px 8px 6px 0;
+      padding: 8px 8px 8px 0;
       text-align: left;
     }
 
@@ -393,31 +395,35 @@
       background: var(--border-strong);
       border-radius: 999px;
       display: block;
-      height: 26px;
+      height: 22px;
       position: relative;
       transition: background .15s;
-      width: 46px;
+      width: 40px;
 
       &::after {
         background: #fff;
         border-radius: 50%;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, .18);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, .15);
         content: '';
-        height: 20px;
-        left: 3px;
+        height: 18px;
+        left: 2px;
         position: absolute;
-        top: 3px;
+        top: 2px;
         transition: transform .15s;
-        width: 20px;
+        width: 18px;
       }
     }
 
     input:checked + span {
-      background: var(--ok);
+      background: #253241;
 
       &::after {
-        transform: translateX(20px);
+        transform: translateX(18px);
       }
+    }
+
+    input:focus-visible + span {
+      box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--border-strong);
     }
 
     input:disabled + span {
@@ -444,9 +450,9 @@
     }
 
     input {
-      background: var(--surface-2);
+      background: var(--surface);
       border: 1px solid var(--border-strong);
-      border-radius: 8px;
+      border-radius: var(--radius);
       box-shadow: none;
       color: var(--text);
       font-family: inherit;
@@ -457,8 +463,8 @@
       width: 100%;
 
       &:focus {
-        border-color: var(--accent-border);
-        box-shadow: 0 0 0 3px oklch(58% 0.18 280 / .12);
+        border-color: var(--text-soft);
+        box-shadow: none;
       }
     }
 
@@ -511,7 +517,7 @@
   .ft-snippet {
     background: #171717;
     color: #f5f5f5;
-    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 12px;
     line-height: 1.7;
     margin: 0;
@@ -526,6 +532,22 @@
       font: inherit;
       padding: 0;
     }
+  }
+}
+
+// Dark switch: FluentCart's dark track and knob.
+.fluent_theme_dark .ft-app .ft-switch {
+  span {
+    background: #1C2732;
+    box-shadow: inset 0 0 0 1px #2C3C4E;
+
+    &::after { background: #8D9095; }
+  }
+
+  input:checked + span {
+    background: #2C3C4E;
+
+    &::after { background: #fff; }
   }
 }
 

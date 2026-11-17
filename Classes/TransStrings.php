@@ -81,7 +81,6 @@ class TransStrings
             'Error' => __('Error', 'fluent-toolkit'),
             'Every plugin as its own entry' => __('Every plugin as its own entry', 'fluent-toolkit'),
             'Fluent Unified UI' => __('Fluent Unified UI', 'fluent-toolkit'),
-            'Fluent ecosystem' => __('Fluent ecosystem', 'fluent-toolkit'),
             /* translators: %s is the new FluentHub version, for example v2.1.4 */
             'FluentHub %s is available' => __('FluentHub %s is available', 'fluent-toolkit'),
             'FluentHub MCP server' => __('FluentHub MCP server', 'fluent-toolkit'),
@@ -107,7 +106,6 @@ class TransStrings
             "MCP adapter status\x04Available" => _x('Available', 'MCP adapter status', 'fluent-toolkit'),
             "MCP adapter status\x04Missing" => _x('Missing', 'MCP adapter status', 'fluent-toolkit'),
             "MCP client type\x04Generic" => _x('Generic', 'MCP client type', 'fluent-toolkit'),
-            'MCP for agents' => __('MCP for agents', 'fluent-toolkit'),
             'MCP is off' => __('MCP is off', 'fluent-toolkit'),
             "MCP status\x04Disabled" => _x('Disabled', 'MCP status', 'fluent-toolkit'),
             "MCP status\x04Ready" => _x('Ready', 'MCP status', 'fluent-toolkit'),
@@ -187,7 +185,6 @@ class TransStrings
             'Turn MCP on for a plugin above to get the connection details.' => __('Turn MCP on for a plugin above to get the connection details.', 'fluent-toolkit'),
             'Turn MCP on for each plugin your AI apps may use.' => __('Turn MCP on for each plugin your AI apps may use.', 'fluent-toolkit'),
             'Turned on and off in the plugin settings' => __('Turned on and off in the plugin settings', 'fluent-toolkit'),
-            'Unified Fluent Workspace' => __('Unified Fluent Workspace', 'fluent-toolkit'),
             'Unnamed app' => __('Unnamed app', 'fluent-toolkit'),
             'Up to date' => __('Up to date', 'fluent-toolkit'),
             /* translators: %s is the number of active plugins that will be updated */
