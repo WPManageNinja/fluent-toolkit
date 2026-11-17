@@ -281,11 +281,11 @@
                 </div>
 
                 <div class="ft-mcp-advanced-block" v-if="oauthReady">
-                    <strong>{{ $t('Sign-in setup') }}</strong>
-                    <p>{{ $t('Runs the first steps an AI app takes to sign in, from this browser.') }}</p>
+                    <strong>{{ $t('Sign-in not working?') }}</strong>
+                    <p>{{ $t('Runs the first steps an AI app takes to sign in, from this browser, and shows what blocks them.') }}</p>
                     <div class="ft-mcp-oauth-check">
                         <button class="ft-btn ft-btn-ghost" :disabled="oauthCheck.running" @click="runOAuthCheck()">
-                            {{ oauthCheck.running ? $t('Checking…') : $t('Check sign-in setup') }}
+                            {{ oauthCheck.running ? $t('Checking…') : $t('Check this site') }}
                         </button>
                         <ul v-if="oauthCheck.results.length">
                             <li v-for="result in oauthCheck.results" :key="result.key" :class="'is-' + result.state">

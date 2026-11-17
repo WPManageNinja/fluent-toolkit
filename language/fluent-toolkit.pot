@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-17T10:05:00+00:00\n"
+"POT-Creation-Date: 2026-11-17T10:07:37+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: fluent-toolkit\n"
@@ -333,7 +333,7 @@ msgid "Changelog"
 msgstr ""
 
 #: Classes/TransStrings.php:50
-msgid "Check sign-in setup"
+msgid "Check this site"
 msgstr ""
 
 #: Classes/TransStrings.php:51
@@ -795,7 +795,7 @@ msgid "Run this in your terminal. It adds the server to Claude Code with your ap
 msgstr ""
 
 #: Classes/TransStrings.php:164
-msgid "Runs the first steps an AI app takes to sign in, from this browser."
+msgid "Runs the first steps an AI app takes to sign in, from this browser, and shows what blocks them."
 msgstr ""
 
 #: Classes/TransStrings.php:165
@@ -835,15 +835,15 @@ msgid "Sign in with WordPress"
 msgstr ""
 
 #: Classes/TransStrings.php:173
-msgid "Sign-in server metadata does not load."
+msgid "Sign-in not working?"
 msgstr ""
 
 #: Classes/TransStrings.php:174
-msgid "Sign-in server metadata loads."
+msgid "Sign-in server metadata does not load."
 msgstr ""
 
 #: Classes/TransStrings.php:175
-msgid "Sign-in setup"
+msgid "Sign-in server metadata loads."
 msgstr ""
 
 #: Classes/TransStrings.php:176
