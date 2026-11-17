@@ -1,29 +1,41 @@
-=== FluentKit ===
+=== FluentHub ===
 Contributors: techjewel, wpmanageninja
 Tags: fluent plugins, toolkit
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.1.4
+Stable tag: 2.2.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Install early access addons, release candidates, and companion add-ons for the Fluent ecosystem — all from one place.
+One place to install, update and connect your Fluent plugins.
 
 == Description ==
 
-Fluent Toolkit gives you early access to beta builds and release candidates across the Fluent plugin ecosystem. Install companion add-ons, track update availability, and stay ahead of what's shipping — without leaving your WordPress dashboard.
+FluentHub lists every Fluent plugin and add-on in one dashboard. Install them, update them all in one click, and get release candidates before they reach wordpress.org. The Unified UI opens your Fluent plugins in one workspace, with a shared sidebar to move between them.
 
-Fluent Toolkit can load the official WordPress MCP Adapter as an isolated, replaceable dependency fallback. Authentication and authorization for MCP routes should be handled outside this plugin.
+FluentHub also runs one MCP server for all your Fluent plugins, so AI apps such as Claude, Codex, GitHub Copilot and Cursor can work with them through one URL. Apps sign in with your WordPress account (OAuth), and each connection has the permissions of the user who approved it. The MCP server is off until you turn it on. FluentHub loads the official WordPress MCP Adapter when no other plugin supplies it.
 
 == Installation ==
 
-Download the latest plugin zip from the GitHub Latest Release page:
-https://github.com/WPManageNinja/fluent-toolkit/releases/latest
+Download the latest plugin zip:
+https://static.wpmanageninja.com/fluent-toolkit.zip
 
-Upload the zip from your WordPress dashboard, activate Fluent Toolkit, then open Dashboard > Fluent Toolkit.
+Upload the zip from your WordPress dashboard, activate FluentHub, then open FluentHub in the admin menu.
 
 == Changelog ==
+
+= 2.2.0 (Date: 17 Nov, 2026) =
+* New: FluentHub MCP server: one URL gives AI apps every Fluent plugin whose MCP is on, with one read tool and one write tool per plugin
+* New: Sign in with WordPress (OAuth 2.1) for the FluentHub MCP server: Claude, Claude Code, Codex, GitHub Copilot, Cursor and other MCP apps connect with the URL alone, with no application password to copy
+* New: Connected apps list on the MCP page; revoke a connection there or on the user's profile
+* New: Fluent plugins can show a "connect with one URL" card on their own MCP screens and turn the FluentHub MCP server on from there
+* New: FluentCommunity in the FluentHub MCP server
+* Improved: The FluentHub dashboard and MCP page now look like the other Fluent apps, in light and dark mode
+* Improved: Plainer wording across FluentHub, and one name (FluentHub) everywhere; error messages now say what to do next
+* Improved: A simpler MCP page around one "FluentHub MCP server" switch, with a logo and a short description for each plugin
+* Improved: Each tool result is sent once, so AI apps that read both copies use fewer tokens
+* Fixed: Dashboard notifications had no background and sat on the top bar; they now show at the bottom right
 
 = 2.1.4 (Date: 23 Oct, 2026) =
 * New: Update all active Fluent plugins in one click: free plugins first, then Pro add-ons, then FluentHub

@@ -229,21 +229,21 @@ class ToolkitHelper
     private static function freePluginSubTitles()
     {
         return [
-            'fluent-crm'        => __('Self-hosted email marketing with no per-subscriber fees and full ownership of your data.', 'fluent-toolkit'),
-            'fluent-cart'       => __('A modern e-commerce engine for selling digital and physical products.', 'fluent-toolkit'),
-            'fluentform'        => __('Drag-and-drop form builder with conditional logic, payments, and integrations.', 'fluent-toolkit'),
-            'fluent-smtp'       => __('Reliable WP email delivery via SES, SendGrid, Mailgun, Postmark, and more.', 'fluent-toolkit'),
-            'fluent-community'  => __('Build a private community with spaces, courses, and member discussions.', 'fluent-toolkit'),
-            'fluent-support'    => __('A complete helpdesk and ticketing system built into your WordPress admin.', 'fluent-toolkit'),
-            'fluent-booking'    => __('Online appointment scheduling with calendar sync, reminders, and payments.', 'fluent-toolkit'),
-            'fluent-boards'     => __('Kanban boards for managing tasks and projects inside WordPress.', 'fluent-toolkit'),
-            'fluent-security'   => __('Two-factor auth, magic login, social logins, and brute-force protection.', 'fluent-toolkit'),
-            'wp-payment-form'   => __('Accept one-time and recurring payments with Stripe, PayPal, and more.', 'fluent-toolkit'),
-            'ninja-tables'      => __('Create responsive data tables from CSV, Google Sheets, or your database.', 'fluent-toolkit'),
-            'wp-social-reviews' => __('Embed reviews, social feeds, testimonials, and chat widgets from Google, Facebook, Yelp, and more.', 'fluent-toolkit'),
-            'fluent-affiliate'  => __('Self-hosted affiliate program management: track clicks, referrals, commissions and payouts.', 'fluent-toolkit'),
-            'fluent-player'     => __('Video player with lead capture forms, chapters, and playback interactions.', 'fluent-toolkit'),
-            'fluent-comments'   => __('AJAX comments with spam protection that needs no CAPTCHA, plus comment email notifications.', 'fluent-toolkit'),
+            'fluent-crm'        => __('Email marketing on your own site: contacts, campaigns and automations.', 'fluent-toolkit'),
+            'fluent-cart'       => __('Sell digital and physical products, subscriptions and licenses.', 'fluent-toolkit'),
+            'fluentform'        => __('Build forms by drag and drop, with conditional logic, payments and integrations.', 'fluent-toolkit'),
+            'fluent-smtp'       => __('Send WordPress email through Amazon SES, SendGrid, Mailgun, Postmark and others.', 'fluent-toolkit'),
+            'fluent-community'  => __('Run a community on your site, with spaces, courses and member discussions.', 'fluent-toolkit'),
+            'fluent-support'    => __('Answer customer support tickets from your WordPress admin.', 'fluent-toolkit'),
+            'fluent-booking'    => __('Let people book appointments, with calendar sync, reminders and payments.', 'fluent-toolkit'),
+            'fluent-boards'     => __('Manage tasks and projects on Kanban boards in WordPress.', 'fluent-toolkit'),
+            'fluent-security'   => __('Two-factor login, magic login links, social login and protection against password guessing.', 'fluent-toolkit'),
+            'wp-payment-form'   => __('Take one-time and recurring payments with Stripe, PayPal and others.', 'fluent-toolkit'),
+            'ninja-tables'      => __('Show data tables from CSV files, Google Sheets or your database.', 'fluent-toolkit'),
+            'wp-social-reviews' => __('Show reviews, social feeds, testimonials and chat widgets from Google, Facebook, Yelp and others.', 'fluent-toolkit'),
+            'fluent-affiliate'  => __('Run an affiliate program: track clicks, referrals, commissions and payouts.', 'fluent-toolkit'),
+            'fluent-player'     => __('A video player with chapters, lead capture forms and actions during playback.', 'fluent-toolkit'),
+            'fluent-comments'   => __('Comments that post without a page reload, block spam without a CAPTCHA and send email notifications.', 'fluent-toolkit'),
         ];
     }
 

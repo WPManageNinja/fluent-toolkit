@@ -19,7 +19,7 @@
             <div class="ft-update-banner-text">
                 <strong>{{ updateBannerTitle }}</strong>
                 <!-- translators: %s is the installed FluentHub version, for example v2.1.3 -->
-                <span>{{ $t("You're running %s. Update to get the latest features and fixes.", 'v' + appVars.version) }}</span>
+                <span>{{ $t("You're running %s. The update has new features and fixes.", 'v' + appVars.version) }}</span>
             </div>
             <button class="ft-btn ft-btn-accent" :disabled="installing" @click="updateToolkit()">
                 {{ installing ? $t('Updating…') : $t('Update now') }}
@@ -28,7 +28,6 @@
 
         <section class="ft-card ft-workspace-card" v-loading="unifiedUiSaving" :element-loading-text="$t('Saving…')">
             <header class="ft-card-head">
-                <span class="ft-card-eyebrow">{{ $t('Unified Fluent Workspace') }}</span>
                 <h2 class="ft-card-title">{{ $t('Fluent Unified UI') }}</h2>
                 <p class="ft-card-sub">{{ $t('Open all your Fluent plugins in one workspace, with a shared sidebar to move between them.') }}</p>
             </header>
@@ -94,7 +93,7 @@
                     </span>
                     <div class="ft-setting-text">
                         <strong>{{ $t('Hide app headers') }}</strong>
-                        <span>{{ $t('Hide the built-in headers of FluentCRM, FluentCart, Fluent Support and other Fluent apps for a cleaner workspace.') }}</span>
+                        <span>{{ $t('Hide the built-in headers of FluentCRM, FluentCart, Fluent Support and the other Fluent apps.') }}</span>
                     </div>
                     <label class="ft-switch" :title="unifiedUiEnabled ? $t('Hide built-in app headers') : $t('Enable Unified UI first')">
                         <input
@@ -112,8 +111,7 @@
         <section class="ft-hero ft-mcp-hero ft-mcp-dashboard-banner">
             <div class="ft-hero-inner">
                 <div class="ft-mcp-banner-copy">
-                    <div class="ft-hero-eyebrow">{{ $t('MCP for agents') }}</div>
-                    <h1>{{ $t('Connect AI agents to Fluent plugins') }}</h1>
+                    <h1>{{ $t('Connect AI apps to your Fluent plugins') }}</h1>
                     <p>{{ $t('MCP_Banner_Desc') }}</p>
                 </div>
                 <div class="ft-mcp-banner-actions">
@@ -123,10 +121,7 @@
         </section>
 
         <div class="ft-section-head ft-beta-head">
-            <div>
-                <span class="ft-section-kicker">{{ $t('Fluent ecosystem') }}</span>
-                <h2>{{ $t('Plugins & Add-ons') }}</h2>
-            </div>
+            <h2>{{ $t('Plugins & Add-ons') }}</h2>
             <div class="ft-beta-stats">
                 <button class="ft-iconbtn" @click="getBetaPlugins(true)" :title="$t('Refresh plugin list')" :aria-label="$t('Refresh plugin list')">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
@@ -242,12 +237,6 @@
             </div>
         </div>
 
-        <!-- Footer -->
-        <div class="ft-footer">
-            <div>{{ $t('Registry synced') }} · <span @click="getBetaPlugins(true)" style="cursor: pointer; color: var(--accent);">{{ $t('Refresh now') }}</span></div>
-            <!-- <div>Toggle <a href="#">beta channel</a> in settings to opt in to release candidates</div> -->
-        </div>
-
     </div>
 </template>
 
@@ -310,7 +299,7 @@ export default {
         },
         installingText() {
             if (!this.bulkProgress) {
-                return this.$t('Installing… Please wait.');
+                return this.$t('Installing…');
             }
 
             // translators: %1$s is the plugin being updated, %2$s its position in the queue, %3$s the number of plugins being updated

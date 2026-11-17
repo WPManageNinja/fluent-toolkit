@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: FluentHub
- * Description: Connects all your Fluent plugins under one roof — unified dashboard, AI/MCP support, early-access updates, and seamless cross-plugin data.
- * Version: 2.1.4
+ * Description: One place for all your Fluent plugins: install and update them, move between them in one workspace, and connect AI apps to them through one MCP server.
+ * Version: 2.2.0
  * Author: WPManageNinja
  * Text Domain: fluent-toolkit
  * Domain Path: /language
@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('FLUENT_TOOLKIT_VERSION', '2.1.4');
+define('FLUENT_TOOLKIT_VERSION', '2.2.0');
 define('FLUENT_TOOLKIT_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('FLUENT_TOOLKIT_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('FLUENT_TOOLKIT_PLUGIN_FILE', __FILE__);
@@ -97,7 +97,7 @@ class FluentToolkitBootstrap
                 ));
 
                 $row_meta = array(
-                    'check_update' => '<a style="color: #583fad;font-weight: 600;" href="' . $checkUpdateUrl . '" aria-label="' . esc_attr__('Check Update', 'fluent-toolkit') . '">' . esc_html__('Check Update', 'fluent-toolkit') . '</a>',
+                    'check_update' => '<a style="color: #583fad;font-weight: 600;" href="' . $checkUpdateUrl . '" aria-label="' . esc_attr__('Check for updates', 'fluent-toolkit') . '">' . esc_html__('Check for updates', 'fluent-toolkit') . '</a>',
                 );
 
                 return array_merge($links, $row_meta);
@@ -183,7 +183,7 @@ class FluentToolkitBootstrap
         $nonce = $_REQUEST['_ft_nonce'] ?? $_REQUEST['__nonce'] ?? '';
         $nonce = sanitize_text_field($nonce);
         if (!wp_verify_nonce($nonce, 'fluent_toolkit_nonce')) {
-            wp_send_json(array('message' => __('Invalid nonce.', 'fluent-toolkit')), 403);
+            wp_send_json(array('message' => __('This page expired. Reload it and try again.', 'fluent-toolkit')), 403);
         }
 
         // sanitize_key locks the slug to [a-z0-9_-]; anything else (including
@@ -191,7 +191,7 @@ class FluentToolkitBootstrap
         // the WP_PLUGIN_DIR/<slug>/<slug>.php pattern built below.
         $pluginSlug = isset($_POST['slug']) ? sanitize_key($_POST['slug']) : '';
         if (!$pluginSlug) {
-            wp_send_json(array('message' => __('Missing or invalid plugin slug.', 'fluent-toolkit')), 422);
+            wp_send_json(array('message' => __('FluentHub does not know this plugin. Reload the page and try again.', 'fluent-toolkit')), 422);
         }
         $licenseKey = isset($_POST['license_key']) ? sanitize_text_field($_POST['license_key']) : '';
         $isBeta = isset($_POST['beta']) ? $_POST['beta'] == 'yes' : false;
@@ -216,7 +216,7 @@ class FluentToolkitBootstrap
                 $targetBeta = $cachedSettings['toolkit'];
             } else {
                 wp_send_json([
-                    'message' => __('No version found.', 'fluent-toolkit'),
+                    'message' => __('FluentHub could not find its latest version. Refresh the plugin list and try again.', 'fluent-toolkit'),
                     'status'  => false,
                 ], 422);
             }
@@ -229,7 +229,7 @@ class FluentToolkitBootstrap
 
             if (empty($targetBeta)) {
                 wp_send_json([
-                    'message' => __('Plugin not found.', 'fluent-toolkit'),
+                    'message' => __('This plugin is not in the plugin list. Refresh the list and try again.', 'fluent-toolkit'),
                     'status'  => false,
                 ], 404);
             }
@@ -249,7 +249,7 @@ class FluentToolkitBootstrap
             $currentVersion = $allPlugins[$fullSlug]['Version'];
             if (version_compare($currentVersion, $targetVersion, '>=')) {
                 wp_send_json([
-                    'message' => __('Plugin is already up to date.', 'fluent-toolkit'),
+                    'message' => __('This plugin is already up to date.', 'fluent-toolkit'),
                     'status'  => true,
                 ], 200);
             }
@@ -286,7 +286,7 @@ class FluentToolkitBootstrap
         }
 
         wp_send_json([
-            'message' => __('Plugin installed successfully.', 'fluent-toolkit'),
+            'message' => __('Done. The plugin is installed.', 'fluent-toolkit'),
             'status'  => true,
         ], 200);
     }
@@ -297,7 +297,7 @@ class FluentToolkitBootstrap
         $nonce = $_REQUEST['_ft_nonce'] ?? $_REQUEST['__nonce'] ?? '';
         $nonce = sanitize_text_field($nonce);
         if (!wp_verify_nonce($nonce, 'fluent_toolkit_nonce')) {
-            wp_send_json(array('message' => __('Invalid nonce.', 'fluent-toolkit')), 403);
+            wp_send_json(array('message' => __('This page expired. Reload it and try again.', 'fluent-toolkit')), 403);
         }
 
         if (!current_user_can('activate_plugins')) {
@@ -306,7 +306,7 @@ class FluentToolkitBootstrap
 
         $pluginSlug = isset($_POST['slug']) ? sanitize_key($_POST['slug']) : '';
         if (!$pluginSlug) {
-            wp_send_json(array('message' => __('Missing plugin slug.', 'fluent-toolkit')), 422);
+            wp_send_json(array('message' => __('FluentHub does not know this plugin. Reload the page and try again.', 'fluent-toolkit')), 422);
         }
 
         $fullSlug = $pluginSlug . '/' . $pluginSlug . '.php';
@@ -386,8 +386,8 @@ class FluentToolkitBootstrap
 
         wp_send_json([
             'message' => $enabled
-                ? __('Sign-in with OAuth is on.', 'fluent-toolkit')
-                : __('Sign-in with OAuth is off. No new app can sign in. Connected apps keep working until you disconnect them.', 'fluent-toolkit'),
+                ? __('Sign in with WordPress is on.', 'fluent-toolkit')
+                : __('Sign in with WordPress is off. New apps cannot sign in. Apps that already signed in keep working until you disconnect them.', 'fluent-toolkit'),
             'status'  => \FluentToolkit\Classes\McpManager::status(),
         ], 200);
     }
@@ -486,9 +486,9 @@ class FluentToolkitBootstrap
         wp_send_json([
             'message' => $enabled
                 /* translators: %s is the plugin name, for example FluentCRM */
-                ? sprintf(__('%s MCP tools are enabled.', 'fluent-toolkit'), $productName)
+                ? sprintf(__('MCP is on for %s.', 'fluent-toolkit'), $productName)
                 /* translators: %s is the plugin name, for example FluentCRM */
-                : sprintf(__('%s MCP tools are disabled.', 'fluent-toolkit'), $productName),
+                : sprintf(__('MCP is off for %s.', 'fluent-toolkit'), $productName),
             'status'  => $status,
         ], 200);
     }
@@ -519,11 +519,11 @@ class FluentToolkitBootstrap
         $nonce = $_REQUEST['_ft_nonce'] ?? $_REQUEST['__nonce'] ?? '';
         $nonce = sanitize_text_field($nonce);
         if (!wp_verify_nonce($nonce, 'fluent_toolkit_nonce')) {
-            wp_send_json(array('message' => __('Invalid nonce.', 'fluent-toolkit')), 403);
+            wp_send_json(array('message' => __('This page expired. Reload it and try again.', 'fluent-toolkit')), 403);
         }
 
         if (!current_user_can('manage_options')) {
-            wp_send_json(array('message' => __('You do not have permission to manage Fluent Toolkit settings.', 'fluent-toolkit')), 403);
+            wp_send_json(array('message' => __('You do not have permission to change FluentHub settings.', 'fluent-toolkit')), 403);
         }
     }
 
