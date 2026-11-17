@@ -2,11 +2,10 @@
 
 $root = dirname(__DIR__);
 
-$oauthBridgeDir = $root . '/includes/Mcp/OAuth';
-if (is_dir($oauthBridgeDir)) {
-    fwrite(STDERR, 'Expected Toolkit bundle to omit the MCP OAuth bridge directory.' . PHP_EOL);
-    exit(1);
-}
+// The old "MCP Auth Bridge" (a bridge to FluentCRM's OAuth, removed in May
+// 2026) must not come back. The OAuth sign-in of the FluentHub MCP server in
+// includes/Mcp/OAuth is a different thing and ships: this test no longer
+// refuses that directory, its class names or its AJAX actions.
 
 $productionFiles = [
     $root . '/fluent-toolkit.php',
@@ -18,12 +17,8 @@ $productionFiles = [
 ];
 
 $forbiddenPatterns = [
-    'FluentToolkit\\Mcp\\OAuth',
-    'fluent_toolkit_mcp_oauth',
     'fluentcrm_mcp_oauth_bridge',
     'MCP Auth Bridge',
-    'mcp-auth',
-    'mcp-oauth',
     'fluent_toolkit_mcp_status',
     'getMcpStatus',
     'ft-mcp-lite',
