@@ -64,26 +64,46 @@ class OAuthServer
 
         self::$registered = true;
 
+        if (!self::tokensAccepted()) {
+            return;
+        }
+
+        // Tokens that were issued keep working while the hub is on, also
+        // after the admin turns sign-in off: that switch stops NEW sign-ins.
+        // An app is cut off under Connected apps, or by the hub's own switch.
+        // Before every other rest_authentication_errors callback, so plugins
+        // that refuse anonymous REST requests see the token's user.
+        add_filter('rest_authentication_errors', [__CLASS__, 'authenticate'], -1000);
+        add_filter('rest_exposed_cors_headers', [__CLASS__, 'exposeHeaders']);
+        add_filter('rest_allowed_cors_headers', [__CLASS__, 'allowHeaders']);
+
         if (!self::available()) {
             return;
         }
 
+        // What a new sign-in needs: registration, token and metadata routes,
+        // the challenge that points an app at them, and the consent screen.
         add_action('rest_api_init', [__CLASS__, 'registerRoutes']);
-        // Before every other rest_authentication_errors callback, so plugins
-        // that refuse anonymous REST requests see the token's user.
-        add_filter('rest_authentication_errors', [__CLASS__, 'authenticate'], -1000);
         add_filter('rest_post_dispatch', [__CLASS__, 'addChallenge'], 10, 3);
         add_filter('rest_authentication_errors', [__CLASS__, 'allowClientBasicAuth'], 101);
-        add_filter('rest_exposed_cors_headers', [__CLASS__, 'exposeHeaders']);
-        add_filter('rest_allowed_cors_headers', [__CLASS__, 'allowHeaders']);
         add_action('login_form_' . self::LOGIN_ACTION, [AuthorizePage::class, 'handle']);
+    }
+
+    /**
+     * Whether a token from an earlier sign-in is accepted: the hub runs.
+     * It does not depend on the sign-in switch.
+     */
+    public static function tokensAccepted()
+    {
+        return HubServer::supported() && HubServer::enabled();
     }
 
     /**
      * Off until a site admin turns the FluentHub MCP server on on the MCP page
      * (see HubServer::setEnabled()): it opens client registration and a
      * consent page, so an update must not do that alone. The admin can turn
-     * sign-in off alone under Advanced.
+     * sign-in off alone under Advanced: no new app can sign in then, and the
+     * apps that signed in before keep working (see register()).
      */
     public static function enabled()
     {

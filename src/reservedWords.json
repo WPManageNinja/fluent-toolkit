@@ -12,7 +12,7 @@
     "MCP_OAuth_App_Passwords_Off": "Sign-in gives each connected app its own application password, and application passwords are off on this site. WordPress turns them off on sites without HTTPS, and security plugins can turn them off too.",
     "MCP_OAuth_Check_Challenge_Fail": "The MCP endpoint does not ask clients to sign in. A security or caching plugin may strip the WWW-Authenticate header or change the response.",
     "MCP_OAuth_Check_Root_Redirect": "This site redirects /.well-known/ addresses at the site root. Some clients look there first and can fail to sign in. Clients that go on to the REST address still work.",
-    "MCP_OAuth_Desc": "When this is on, an AI app connects with the server address only: it opens the WordPress login, the user approves the app, and WordPress gives the app its own password. When this is off, apps connect with an application password that you copy by hand.",
+    "MCP_OAuth_Desc": "When this is on, an AI app connects with the server address only: it opens the WordPress login, the user approves the app, and WordPress gives the app its own password. When this is off, no new app can sign in. Apps that already signed in keep working until you disconnect them under Connected apps.",
     "MCP_OAuth_No_Https": "This site does not use HTTPS. Most AI clients refuse to sign in over plain HTTP, except on localhost.",
     "MCP_OAuth_Plain_Permalinks": "Sign-in needs pretty permalinks, because an OAuth address cannot contain a query string. Choose any setting other than Plain in Settings > Permalinks, or use an application password."
 }

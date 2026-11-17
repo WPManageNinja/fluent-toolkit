@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-17T10:07:37+00:00\n"
+"POT-Creation-Date: 2026-11-17T10:15:54+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: fluent-toolkit\n"
@@ -577,7 +577,7 @@ msgid "Missing"
 msgstr ""
 
 #: Classes/TransStrings.php:110
-#: includes/Mcp/OAuth/OAuthServer.php:838
+#: includes/Mcp/OAuth/OAuthServer.php:858
 msgctxt "MCP client type"
 msgid "Generic"
 msgstr ""
@@ -654,7 +654,7 @@ msgid "This site redirects /.well-known/ addresses at the site root. Some client
 msgstr ""
 
 #: Classes/TransStrings.php:129
-msgid "When this is on, an AI app connects with the server address only: it opens the WordPress login, the user approves the app, and WordPress gives the app its own password. When this is off, apps connect with an application password that you copy by hand."
+msgid "When this is on, an AI app connects with the server address only: it opens the WordPress login, the user approves the app, and WordPress gives the app its own password. When this is off, no new app can sign in. Apps that already signed in keep working until you disconnect them under Connected apps."
 msgstr ""
 
 #: Classes/TransStrings.php:130
@@ -1431,37 +1431,37 @@ msgstr ""
 msgid "Log out"
 msgstr ""
 
-#: includes/Mcp/OAuth/OAuthServer.php:653
+#: includes/Mcp/OAuth/OAuthServer.php:673
 msgid "This application password was not created by FluentHub sign-in on this site."
 msgstr ""
 
-#: includes/Mcp/OAuth/OAuthServer.php:656
+#: includes/Mcp/OAuth/OAuthServer.php:676
 msgid "This application password works only on the FluentHub MCP endpoint."
 msgstr ""
 
-#: includes/Mcp/OAuth/OAuthServer.php:808
+#: includes/Mcp/OAuth/OAuthServer.php:828
 msgid "In Claude, open Settings > Connectors, add a custom connector and paste this URL."
 msgstr ""
 
 #. translators: %s: the name of the connection in the AI app, for example fluent-example-com
-#: includes/Mcp/OAuth/OAuthServer.php:815
+#: includes/Mcp/OAuth/OAuthServer.php:835
 #, php-format
 msgid "Run this, then run /mcp in Claude Code and pick %s to sign in."
 msgstr ""
 
-#: includes/Mcp/OAuth/OAuthServer.php:821
+#: includes/Mcp/OAuth/OAuthServer.php:841
 msgid "Run these commands. The second one opens the sign-in page."
 msgstr ""
 
-#: includes/Mcp/OAuth/OAuthServer.php:827
+#: includes/Mcp/OAuth/OAuthServer.php:847
 msgid "Paste this JSON into .vscode/mcp.json. VS Code asks you to sign in."
 msgstr ""
 
-#: includes/Mcp/OAuth/OAuthServer.php:833
+#: includes/Mcp/OAuth/OAuthServer.php:853
 msgid "Paste this JSON into the Cursor MCP settings. Cursor asks you to sign in."
 msgstr ""
 
-#: includes/Mcp/OAuth/OAuthServer.php:839
+#: includes/Mcp/OAuth/OAuthServer.php:859
 msgid "Add this URL to any MCP client that supports OAuth, then sign in."
 msgstr ""
 
