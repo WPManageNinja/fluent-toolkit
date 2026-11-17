@@ -13,7 +13,7 @@ them to every component:
 | Helper | Use for | Resolves |
 |---|---|---|
 | `$t('text', ...args)` | ordinary strings; `%s`, `%d`, `%1$s` placeholders filled from `args` | `fluentToolkitVars.i18n['text']` |
-| `$_n('one', 'many', count)` | plural forms; `count` is also the first placeholder argument | whichever of the two keys applies |
+| `$_n('one', 'many', count)` | plural forms; `count` is also the first placeholder argument | `fluentToolkitVars.i18n["one\x00many"]`: every translated form, picked by the site language's plural rule |
 | `$_x('text', 'context', ...args)` | one English word that needs different translations in different places | `fluentToolkitVars.i18n["context\x04text"]`, then the plain key |
 
 The map is the PHP array from `Classes/TransStrings.php`, resolved through `__()` / `_x()`
@@ -38,6 +38,19 @@ directories feed which PHP class method. The generator:
 3. adds every entry of `src/reservedWords.json`;
 4. rewrites each output file, sorted. Strings that left the source leave
    the map.
+
+### Plurals
+
+A `$_n('%s ticket', '%s tickets', n)` call becomes one map entry,
+`"%s ticket\x00%s tickets" => self::pluralForms(_n_noop(...))`. Its value is
+every translated form of the string in the order of the site language's
+plural rule, and `_n_noop()` gives translators a real plural entry in the POT.
+The map also carries `"\x00plural_index"`: the form index for counts 0..199,
+computed from the language's Plural-Forms header with WordPress's own parser.
+`$_n()` reads a larger count as `n % 100 + 100`, which every gettext plural
+rule treats the same way. So Russian, Polish, Arabic and other languages with
+three or more forms get the right one. Both plural texts need a literal
+string: `$_n('%s file', label, n)` fails the lint.
 
 `pnpm run translate` also runs the lint afterwards. The build script runs
 both before regenerating the POT.
@@ -104,8 +117,8 @@ generates a double-quoted key with gettext's `\x04` separator:
 
 ## The lint gate
 
-`tests/lint/translation-map.js` runs from `pnpm run translate` and from
-`build.sh` (this repo has no `tests/bin/run-all.sh`). It regenerates the map in memory and fails when:
+`tests/lint/translation-map.js` runs in the static tier of
+`tests/bin/run-all.sh`. It regenerates the map in memory and fails when:
 
 - a committed map file differs from a fresh generation (stale map, run
   `pnpm run translate`);
