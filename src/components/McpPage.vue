@@ -11,7 +11,7 @@
 
         <div class="ft-mcp-empty" v-if="showEmptyBanner">
             <div>
-                <strong>{{ $t('No Fluent plugins are exposing MCP yet.') }}</strong>
+                <strong>{{ $t('No Fluent plugin offers MCP yet.') }}</strong>
                 <p>{{ $t('MCP_Empty_Desc') }}</p>
             </div>
             <button class="ft-btn ft-btn-ghost" @click="getOverview()">{{ $t('Refresh') }}</button>
@@ -55,7 +55,7 @@
                 <div class="ft-panel-head">
                     <div>
                         <h2>{{ $t('Plugins') }}</h2>
-                        <p>{{ hub.enabled ? $t('The FluentHub MCP server reaches every plugin that is on here.') : $t('Turn MCP on for each plugin your AI apps may use.') }}</p>
+                        <p>{{ hub.enabled ? $t('AI apps connected to FluentHub can use every plugin that is on here.') : $t('Turn MCP on for each plugin your AI apps may use.') }}</p>
                     </div>
                 </div>
 
@@ -70,7 +70,7 @@
                             <span v-if="product.mcp_enabled">{{ $_n('%s action', '%s actions', product.tools_count) }}</span>
                             <span v-else-if="product.status === 'disabled'">{{ $t('MCP is off') }}</span>
                             <span v-else>{{ statusLabel(product.status) }}</span>
-                            <span v-if="!product.toggleable && product.slug !== 'fluent-crm'">{{ $t('Turned on and off in the plugin settings') }}</span>
+                            <span v-if="!product.toggleable && product.slug !== 'fluent-crm'">{{ $t("Turn on or off in the plugin's own settings") }}</span>
                         </div>
                         <p class="ft-mcp-row-desc" v-if="productDesc(product)">{{ productDesc(product) }}</p>
                         </div>
@@ -380,7 +380,7 @@ export default {
                 { key: 'codex', label: 'Codex', note: this.$t('Paste these fields into the Codex custom MCP settings.') },
                 { key: 'copilot', label: 'GitHub Copilot', note: this.$t('Paste this JSON into the GitHub Copilot MCP configuration in VS Code.') },
                 { key: 'cursor', label: 'Cursor', note: this.$t('Paste this JSON into the Cursor MCP settings and restart Cursor.') },
-                { key: 'generic', label: this.$_x('Generic', 'MCP client type'), note: this.$t('Use this URL and Basic Auth header with any HTTP MCP client.') },
+                { key: 'generic', label: this.$_x('Generic', 'MCP client type'), note: this.$t('Use this URL and header in any MCP app that connects over HTTP.') },
             ],
         };
     },
@@ -469,7 +469,7 @@ export default {
             const list = [];
 
             if (this.hubServes) {
-                list.push({ key: 'fluent-hub', label: this.$t('All plugins through one endpoint (recommended)') });
+                list.push({ key: 'fluent-hub', label: this.$t('All plugins through one address (recommended)') });
             }
 
             this.enabledProducts.forEach(product => {
@@ -499,7 +499,7 @@ export default {
                 return this.$t('MCP_Connect_Desc');
             }
 
-            return this.$t('Connects to this plugin only, on its own endpoint.');
+            return this.$t('Connects to this plugin only, at its own address.');
         },
         canShowSnippet() {
             return this.mode === 'oauth' || this.targets.length > 0;
@@ -772,7 +772,7 @@ export default {
                 });
                 const challenge = response.headers.get('WWW-Authenticate') || '';
                 const ok = response.status === 401 && challenge.indexOf('resource_metadata=') !== -1;
-                results.push({ key: 'challenge', state: ok ? 'ok' : 'fail', label: ok ? this.$t('The MCP endpoint asks clients to sign in.') : this.$t('MCP_OAuth_Check_Challenge_Fail') });
+                results.push({ key: 'challenge', state: ok ? 'ok' : 'fail', label: ok ? this.$t('The MCP server asks apps to sign in.') : this.$t('MCP_OAuth_Check_Challenge_Fail') });
             } catch (e) {
                 results.push({ key: 'challenge', state: 'fail', label: this.$t('MCP_OAuth_Check_Challenge_Fail') });
             }
@@ -780,17 +780,17 @@ export default {
             try {
                 const metadata = await fetchJson(this.oauth.resource_metadata_url);
                 const ok = Array.isArray(metadata.authorization_servers) && metadata.authorization_servers.length > 0;
-                results.push({ key: 'resource', state: ok ? 'ok' : 'fail', label: ok ? this.$t('Resource metadata loads.') : this.$t('Resource metadata does not load.') });
+                results.push({ key: 'resource', state: ok ? 'ok' : 'fail', label: ok ? this.$t('Apps can find where to sign in.') : this.$t('Apps cannot find where to sign in.') });
             } catch (e) {
-                results.push({ key: 'resource', state: 'fail', label: this.$t('Resource metadata does not load.') });
+                results.push({ key: 'resource', state: 'fail', label: this.$t('Apps cannot find where to sign in.') });
             }
 
             try {
                 const metadata = await fetchJson(this.oauth.server_metadata_url);
                 const ok = !!(metadata.token_endpoint && metadata.authorization_endpoint);
-                results.push({ key: 'server', state: ok ? 'ok' : 'fail', label: ok ? this.$t('Sign-in server metadata loads.') : this.$t('Sign-in server metadata does not load.') });
+                results.push({ key: 'server', state: ok ? 'ok' : 'fail', label: ok ? this.$t('The sign-in details load.') : this.$t('The sign-in details do not load.') });
             } catch (e) {
-                results.push({ key: 'server', state: 'fail', label: this.$t('Sign-in server metadata does not load.') });
+                results.push({ key: 'server', state: 'fail', label: this.$t('The sign-in details do not load.') });
             }
 
             // Many clients look at the site root before the REST URL. WordPress
@@ -896,7 +896,7 @@ export default {
         },
         copySnippet() {
             if (!window.navigator || !window.navigator.clipboard) {
-                this.$notify.warning(this.$t('Copying is not available on this page. Select the snippet and copy it manually.'));
+                this.$notify.warning(this.$t('This browser blocks copying here. Select the text and copy it yourself.'));
                 return;
             }
 
@@ -905,7 +905,7 @@ export default {
                     this.$notify.success(this.$t('Copied.'));
                 })
                 .catch(() => {
-                    this.$notify.error(this.$t('Could not copy the connection snippet.'));
+                    this.$notify.error(this.$t('Could not copy. Select the text and copy it yourself.'));
                 });
         },
         statusLabel(status) {

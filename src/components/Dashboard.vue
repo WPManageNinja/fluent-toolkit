@@ -19,7 +19,7 @@
             <div class="ft-update-banner-text">
                 <strong>{{ updateBannerTitle }}</strong>
                 <!-- translators: %s is the installed FluentHub version, for example v2.1.3 -->
-                <span>{{ $t("You're running %s. Update to get the latest features and fixes.", 'v' + appVars.version) }}</span>
+                <span>{{ $t("You're running %s. The update has new features and fixes.", 'v' + appVars.version) }}</span>
             </div>
             <button class="ft-btn ft-btn-accent" :disabled="installing" @click="updateToolkit()">
                 {{ installing ? $t('Updating…') : $t('Update now') }}
@@ -93,7 +93,7 @@
                     </span>
                     <div class="ft-setting-text">
                         <strong>{{ $t('Hide app headers') }}</strong>
-                        <span>{{ $t('Hide the built-in headers of FluentCRM, FluentCart, Fluent Support and other Fluent apps for a cleaner workspace.') }}</span>
+                        <span>{{ $t('Hide the built-in headers of FluentCRM, FluentCart, Fluent Support and the other Fluent apps.') }}</span>
                     </div>
                     <label class="ft-switch" :title="unifiedUiEnabled ? $t('Hide built-in app headers') : $t('Enable Unified UI first')">
                         <input
@@ -111,7 +111,7 @@
         <section class="ft-hero ft-mcp-hero ft-mcp-dashboard-banner">
             <div class="ft-hero-inner">
                 <div class="ft-mcp-banner-copy">
-                    <h1>{{ $t('Connect AI agents to Fluent plugins') }}</h1>
+                    <h1>{{ $t('Connect AI apps to your Fluent plugins') }}</h1>
                     <p>{{ $t('MCP_Banner_Desc') }}</p>
                 </div>
                 <div class="ft-mcp-banner-actions">
@@ -237,12 +237,6 @@
             </div>
         </div>
 
-        <!-- Footer -->
-        <div class="ft-footer">
-            <div>{{ $t('Registry synced') }} · <span @click="getBetaPlugins(true)" style="cursor: pointer; color: var(--link);">{{ $t('Refresh now') }}</span></div>
-            <!-- <div>Toggle <a href="#">beta channel</a> in settings to opt in to release candidates</div> -->
-        </div>
-
     </div>
 </template>
 
@@ -305,7 +299,7 @@ export default {
         },
         installingText() {
             if (!this.bulkProgress) {
-                return this.$t('Installing… Please wait.');
+                return this.$t('Installing…');
             }
 
             // translators: %1$s is the plugin being updated, %2$s its position in the queue, %3$s the number of plugins being updated

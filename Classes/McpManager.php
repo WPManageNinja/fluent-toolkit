@@ -230,7 +230,7 @@ class McpManager
         if (!$handler || empty($handler['set_enabled']) || !is_callable($handler['set_enabled'])) {
             return new \WP_Error(
                 'fluent_toolkit_mcp_toggle_not_supported',
-                __('This MCP product cannot be toggled by Fluent Toolkit.', 'fluent-toolkit')
+                __('Turn MCP on or off for this plugin in its own settings.', 'fluent-toolkit')
             );
         }
 
@@ -259,7 +259,7 @@ class McpManager
         if (!function_exists('fluentcrm_update_option')) {
             return new \WP_Error(
                 'fluent_toolkit_fluentcrm_helpers_missing',
-                __('FluentCRM option helpers are not available.', 'fluent-toolkit')
+                __('FluentHub could not change this FluentCRM setting. Update FluentCRM and try again.', 'fluent-toolkit')
             );
         }
 

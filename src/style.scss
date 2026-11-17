@@ -876,24 +876,6 @@ body.fluent_theme_dark {
     width: 82px;
     border-radius: var(--radius);
   }
-
-  // ── Footer ───────────────────────────
-  .ft-footer {
-    margin-top: 18px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 12px;
-    color: var(--text-soft);
-    padding: 0 6px;
-
-    a {
-      color: var(--link);
-      text-decoration: none;
-      &:hover { text-decoration: underline; }
-    }
-  }
-
 }
 
 // ── Dark Mode ─────────────────────────

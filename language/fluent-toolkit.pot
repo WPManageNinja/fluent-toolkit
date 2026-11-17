@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-17T12:24:12+00:00\n"
+"POT-Creation-Date: 2026-11-17T12:41:45+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: fluent-toolkit\n"
@@ -24,7 +24,7 @@ msgstr ""
 
 #. Description of the plugin
 #: fluent-toolkit.php
-msgid "Connects all your Fluent plugins under one roof — unified dashboard, AI/MCP support, early-access updates, and seamless cross-plugin data."
+msgid "One place for all your Fluent plugins: install and update them, move between them in one workspace, and connect AI apps to them through one MCP server."
 msgstr ""
 
 #. Author of the plugin
@@ -114,7 +114,14 @@ msgid "Community"
 msgstr ""
 
 #: Classes/AdminMenu.php:53
-msgid "Hub Settings"
+#: Classes/TransStrings.php:161
+#: Classes/UnifiedUi/MenuProviders.php:73
+#: Classes/UnifiedUi/MenuProviders.php:253
+#: Classes/UnifiedUi/MenuProviders.php:618
+#: Classes/UnifiedUi/MenuProviders.php:670
+#: Classes/UnifiedUi/MenuProviders.php:755
+#: fluent-toolkit.php:69
+msgid "Settings"
 msgstr ""
 
 #: Classes/AdminMenu.php:78
@@ -122,7 +129,9 @@ msgid "You do not have permission to access FluentHub."
 msgstr ""
 
 #: Classes/InstallerHandler.php:13
-msgid "Invalid plugin slug."
+#: fluent-toolkit.php:194
+#: fluent-toolkit.php:309
+msgid "FluentHub does not know this plugin. Reload the page and try again."
 msgstr ""
 
 #: Classes/McpManager.php:187
@@ -130,12 +139,12 @@ msgid "Application passwords are disabled on this site. They require HTTPS unles
 msgstr ""
 
 #: Classes/McpManager.php:191
-#: Classes/TransStrings.php:37
+#: Classes/TransStrings.php:38
 msgid "Application passwords are disabled for your user account."
 msgstr ""
 
 #: Classes/McpManager.php:195
-#: Classes/TransStrings.php:184
+#: Classes/TransStrings.php:179
 msgid "This WordPress version does not support application passwords."
 msgstr ""
 
@@ -144,11 +153,11 @@ msgid "Application passwords are not available right now."
 msgstr ""
 
 #: Classes/McpManager.php:233
-msgid "This MCP product cannot be toggled by Fluent Toolkit."
+msgid "Turn MCP on or off for this plugin in its own settings."
 msgstr ""
 
 #: Classes/McpManager.php:262
-msgid "FluentCRM option helpers are not available."
+msgid "FluentHub could not change this FluentCRM setting. Update FluentCRM and try again."
 msgstr ""
 
 #: Classes/McpManager.php:280
@@ -156,63 +165,63 @@ msgid "FluentCRM"
 msgstr ""
 
 #: Classes/ToolkitHelper.php:232
-msgid "Self-hosted email marketing with no per-subscriber fees and full ownership of your data."
+msgid "Email marketing on your own site: contacts, campaigns and automations."
 msgstr ""
 
 #: Classes/ToolkitHelper.php:233
-msgid "A modern e-commerce engine for selling digital and physical products."
+msgid "Sell digital and physical products, subscriptions and licenses."
 msgstr ""
 
 #: Classes/ToolkitHelper.php:234
-msgid "Drag-and-drop form builder with conditional logic, payments, and integrations."
+msgid "Build forms by drag and drop, with conditional logic, payments and integrations."
 msgstr ""
 
 #: Classes/ToolkitHelper.php:235
-msgid "Reliable WP email delivery via SES, SendGrid, Mailgun, Postmark, and more."
+msgid "Send WordPress email through Amazon SES, SendGrid, Mailgun, Postmark and others."
 msgstr ""
 
 #: Classes/ToolkitHelper.php:236
-msgid "Build a private community with spaces, courses, and member discussions."
+msgid "Run a community on your site, with spaces, courses and member discussions."
 msgstr ""
 
 #: Classes/ToolkitHelper.php:237
-msgid "A complete helpdesk and ticketing system built into your WordPress admin."
+msgid "Answer customer support tickets from your WordPress admin."
 msgstr ""
 
 #: Classes/ToolkitHelper.php:238
-msgid "Online appointment scheduling with calendar sync, reminders, and payments."
+msgid "Let people book appointments, with calendar sync, reminders and payments."
 msgstr ""
 
 #: Classes/ToolkitHelper.php:239
-msgid "Kanban boards for managing tasks and projects inside WordPress."
+msgid "Manage tasks and projects on Kanban boards in WordPress."
 msgstr ""
 
 #: Classes/ToolkitHelper.php:240
-msgid "Two-factor auth, magic login, social logins, and brute-force protection."
+msgid "Two-factor login, magic login links, social login and protection against password guessing."
 msgstr ""
 
 #: Classes/ToolkitHelper.php:241
-msgid "Accept one-time and recurring payments with Stripe, PayPal, and more."
+msgid "Take one-time and recurring payments with Stripe, PayPal and others."
 msgstr ""
 
 #: Classes/ToolkitHelper.php:242
-msgid "Create responsive data tables from CSV, Google Sheets, or your database."
+msgid "Show data tables from CSV files, Google Sheets or your database."
 msgstr ""
 
 #: Classes/ToolkitHelper.php:243
-msgid "Embed reviews, social feeds, testimonials, and chat widgets from Google, Facebook, Yelp, and more."
+msgid "Show reviews, social feeds, testimonials and chat widgets from Google, Facebook, Yelp and others."
 msgstr ""
 
 #: Classes/ToolkitHelper.php:244
-msgid "Self-hosted affiliate program management: track clicks, referrals, commissions and payouts."
+msgid "Run an affiliate program: track clicks, referrals, commissions and payouts."
 msgstr ""
 
 #: Classes/ToolkitHelper.php:245
-msgid "Video player with lead capture forms, chapters, and playback interactions."
+msgid "A video player with chapters, lead capture forms and actions during playback."
 msgstr ""
 
 #: Classes/ToolkitHelper.php:246
-msgid "AJAX comments with spam protection that needs no CAPTCHA, plus comment email notifications."
+msgid "Comments that post without a page reload, block spam without a CAPTCHA and send email notifications."
 msgstr ""
 
 #. translators: %1$s is the plugin name, %2$s the reason it was not updated
@@ -245,183 +254,191 @@ msgid "AI app"
 msgstr ""
 
 #: Classes/TransStrings.php:26
-msgid "Action"
+msgid "AI apps connected to FluentHub can use every plugin that is on here."
 msgstr ""
 
 #: Classes/TransStrings.php:27
-msgid "Activate"
+msgid "Action"
 msgstr ""
 
 #: Classes/TransStrings.php:28
-msgid "Adapter required"
+msgid "Activate"
 msgstr ""
 
 #: Classes/TransStrings.php:29
-msgid "Advanced"
+msgid "Adapter required"
 msgstr ""
 
 #: Classes/TransStrings.php:30
-msgid "All Fluent plugins"
+msgid "Advanced"
 msgstr ""
 
 #: Classes/TransStrings.php:31
-msgid "All plugins are up to date."
+msgid "All Fluent plugins"
 msgstr ""
 
 #: Classes/TransStrings.php:32
-msgid "All plugins through one endpoint (recommended)"
+msgid "All plugins are up to date."
 msgstr ""
 
 #: Classes/TransStrings.php:33
-msgid "App"
+msgid "All plugins through one address (recommended)"
 msgstr ""
 
 #: Classes/TransStrings.php:34
-msgid "WordPress shows an application password only once, so copy the snippet before you leave this page. You can revoke it at any time from your profile."
+msgid "App"
 msgstr ""
 
 #: Classes/TransStrings.php:35
-msgid "Application passwords are disabled on this site. WordPress requires HTTPS for them unless the site runs in a local environment."
+msgid "WordPress shows an application password only once, so copy the snippet before you leave this page. You can revoke it at any time from your profile."
 msgstr ""
 
 #: Classes/TransStrings.php:36
+msgid "Application passwords are disabled on this site. WordPress requires HTTPS for them unless the site runs in a local environment."
+msgstr ""
+
+#: Classes/TransStrings.php:37
 msgid "Application password"
 msgstr ""
 
-#: Classes/TransStrings.php:38
+#: Classes/TransStrings.php:39
+msgid "Apps can find where to sign in."
+msgstr ""
+
+#: Classes/TransStrings.php:40
+msgid "Apps cannot find where to sign in."
+msgstr ""
+
+#: Classes/TransStrings.php:41
 msgid "Apps that people approved on the WordPress login. Disconnect an app to end its access."
 msgstr ""
 
 #. translators: %s is the number of plugins in the list
-#: Classes/TransStrings.php:40
+#: Classes/TransStrings.php:43
 #, php-format
 msgid "Available: %s"
 msgstr ""
 
-#: Classes/TransStrings.php:41
+#: Classes/TransStrings.php:44
 msgid "Back to sign in with WordPress"
 msgstr ""
 
-#: Classes/TransStrings.php:42
+#: Classes/TransStrings.php:45
 msgid "Beta"
 msgstr ""
 
 #. translators: %s is the plugin name that bundles the MCP Adapter, for example Rank Math SEO
-#: Classes/TransStrings.php:44
+#: Classes/TransStrings.php:47
 #, php-format
 msgid "Bundled with %s"
 msgstr ""
 
-#: Classes/TransStrings.php:45
+#: Classes/TransStrings.php:48
 msgid "Bundled with FluentHub"
 msgstr ""
 
-#: Classes/TransStrings.php:46
+#: Classes/TransStrings.php:49
 msgid "Calendars, bookings and open time slots."
 msgstr ""
 
-#: Classes/TransStrings.php:47
+#: Classes/TransStrings.php:50
 msgid "Change color theme"
 msgstr ""
 
-#: Classes/TransStrings.php:48
+#: Classes/TransStrings.php:51
 msgid "Changelog"
 msgstr ""
 
-#: Classes/TransStrings.php:49
+#: Classes/TransStrings.php:52
 msgid "Check this site"
 msgstr ""
 
-#: Classes/TransStrings.php:50
+#: Classes/TransStrings.php:53
 msgid "Checking…"
 msgstr ""
 
-#: Classes/TransStrings.php:51
+#: Classes/TransStrings.php:54
 msgid "Choose what to connect to, add an application password, choose your app, then copy the details."
 msgstr ""
 
-#: Classes/TransStrings.php:52
+#: Classes/TransStrings.php:55
 msgid "Choose your app and copy the line into it. The app opens your WordPress login, and you approve it there."
 msgstr ""
 
-#: Classes/TransStrings.php:53
+#: Classes/TransStrings.php:56
 msgctxt "Color theme"
 msgid "Dark"
 msgstr ""
 
-#: Classes/TransStrings.php:54
+#: Classes/TransStrings.php:57
 msgctxt "Color theme"
 msgid "Light"
 msgstr ""
 
-#: Classes/TransStrings.php:55
+#: Classes/TransStrings.php:58
 msgctxt "Color theme"
 msgid "System"
 msgstr ""
 
-#: Classes/TransStrings.php:56
-msgid "Connect AI agents to Fluent plugins"
-msgstr ""
-
-#: Classes/TransStrings.php:57
-msgid "Connect an AI app"
-msgstr ""
-
-#: Classes/TransStrings.php:58
-msgid "Connect to"
-msgstr ""
-
 #: Classes/TransStrings.php:59
-msgid "Connect with an application password instead"
+msgid "Connect AI apps to your Fluent plugins"
 msgstr ""
 
 #: Classes/TransStrings.php:60
-msgid "Connected apps"
+msgid "Connect an AI app"
 msgstr ""
 
 #: Classes/TransStrings.php:61
-msgid "Connects to this plugin only, on its own endpoint."
+msgid "Connect to"
 msgstr ""
 
 #: Classes/TransStrings.php:62
-msgid "Contacts, tags, lists, email campaigns and automations."
+msgid "Connect with an application password instead"
 msgstr ""
 
 #: Classes/TransStrings.php:63
-msgid "Copied."
+msgid "Connected apps"
 msgstr ""
 
 #: Classes/TransStrings.php:64
-msgid "Copy"
+msgid "Connects to this plugin only, at its own address."
 msgstr ""
 
 #: Classes/TransStrings.php:65
-msgid "Copying is not available on this page. Select the snippet and copy it manually."
+msgid "Contacts, tags, lists, email campaigns and automations."
 msgstr ""
 
 #: Classes/TransStrings.php:66
-msgid "Could not copy the connection snippet."
+msgid "Copied."
 msgstr ""
 
 #: Classes/TransStrings.php:67
+msgid "Copy"
+msgstr ""
+
+#: Classes/TransStrings.php:68
+msgid "Could not copy. Select the text and copy it yourself."
+msgstr ""
+
+#: Classes/TransStrings.php:69
 msgid "Create application password"
 msgstr ""
 
 #. translators: %s is the name of the new application password, for example FluentHub MCP
-#: Classes/TransStrings.php:69
+#: Classes/TransStrings.php:71
 #, php-format
 msgid "Created the application password \"%s\" and filled it in above."
 msgstr ""
 
-#: Classes/TransStrings.php:70
+#: Classes/TransStrings.php:72
 msgid "Creating…"
 msgstr ""
 
-#: Classes/TransStrings.php:71
+#: Classes/TransStrings.php:73
 msgid "Credentials"
 msgstr ""
 
-#: Classes/TransStrings.php:72
+#: Classes/TransStrings.php:74
 #: Classes/UnifiedUi/MenuProviders.php:33
 #: Classes/UnifiedUi/MenuProviders.php:102
 #: Classes/UnifiedUi/MenuProviders.php:126
@@ -432,154 +449,146 @@ msgstr ""
 msgid "Dashboard"
 msgstr ""
 
-#: Classes/TransStrings.php:73
+#: Classes/TransStrings.php:75
 msgid "Disabled"
 msgstr ""
 
-#: Classes/TransStrings.php:74
+#: Classes/TransStrings.php:76
 msgid "Disconnect"
 msgstr ""
 
-#: Classes/TransStrings.php:75
+#: Classes/TransStrings.php:77
 msgid "Enable Fluent Unified UI"
 msgstr ""
 
-#: Classes/TransStrings.php:76
+#: Classes/TransStrings.php:78
 msgid "Enable Unified UI"
 msgstr ""
 
-#: Classes/TransStrings.php:77
+#: Classes/TransStrings.php:79
 msgid "Enable Unified UI first"
 msgstr ""
 
-#: Classes/TransStrings.php:78
+#: Classes/TransStrings.php:80
 msgid "Enabled"
 msgstr ""
 
 #. translators: %s is the plugin name
-#: Classes/TransStrings.php:80
+#: Classes/TransStrings.php:82
 #, php-format
 msgid "Enter your license key to install %s."
 msgstr ""
 
-#: Classes/TransStrings.php:81
+#: Classes/TransStrings.php:83
 msgid "Error"
 msgstr ""
 
-#: Classes/TransStrings.php:82
+#: Classes/TransStrings.php:84
 msgid "Every plugin as its own entry"
 msgstr ""
 
-#: Classes/TransStrings.php:83
+#: Classes/TransStrings.php:85
 msgid "Fluent Unified UI"
 msgstr ""
 
-#: Classes/TransStrings.php:84
-msgid "Fluent ecosystem"
-msgstr ""
-
 #. translators: %s is the new FluentHub version, for example v2.1.4
-#: Classes/TransStrings.php:86
+#: Classes/TransStrings.php:87
 #, php-format
 msgid "FluentHub %s is available"
 msgstr ""
 
-#: Classes/TransStrings.php:87
+#: Classes/TransStrings.php:88
 msgid "FluentHub MCP server"
 msgstr ""
 
-#: Classes/TransStrings.php:88
+#: Classes/TransStrings.php:89
 msgid "FluentHub logo"
 msgstr ""
 
-#: Classes/TransStrings.php:89
+#: Classes/TransStrings.php:90
 msgid "FluentHub sections"
 msgstr ""
 
-#: Classes/TransStrings.php:90
+#: Classes/TransStrings.php:91
 msgid "Forms, submissions, notifications and form reports."
 msgstr ""
 
-#: Classes/TransStrings.php:91
+#: Classes/TransStrings.php:92
 msgid "Hide app headers"
 msgstr ""
 
-#: Classes/TransStrings.php:92
+#: Classes/TransStrings.php:93
 msgid "Hide built-in app headers"
 msgstr ""
 
-#: Classes/TransStrings.php:93
+#: Classes/TransStrings.php:94
 msgid "Hide each Fluent plugin's top-level WordPress menu so everything opens from the unified workspace."
 msgstr ""
 
-#: Classes/TransStrings.php:94
+#: Classes/TransStrings.php:95
 msgid "Hide password"
 msgstr ""
 
-#: Classes/TransStrings.php:95
-msgid "Hide the built-in headers of FluentCRM, FluentCart, Fluent Support and other Fluent apps for a cleaner workspace."
-msgstr ""
-
 #: Classes/TransStrings.php:96
-msgid "Inactive"
+msgid "Hide the built-in headers of FluentCRM, FluentCart, Fluent Support and the other Fluent apps."
 msgstr ""
 
 #: Classes/TransStrings.php:97
-msgid "Install"
+msgid "Inactive"
 msgstr ""
 
 #: Classes/TransStrings.php:98
+msgid "Install"
+msgstr ""
+
+#: Classes/TransStrings.php:99
 msgid "Installed"
 msgstr ""
 
 #. translators: %s is the number of plugins installed on this site
-#: Classes/TransStrings.php:100
+#: Classes/TransStrings.php:101
 #, php-format
 msgid "Installed: %s"
 msgstr ""
 
-#: Classes/TransStrings.php:101
-msgid "Installing… Please wait."
-msgstr ""
-
 #: Classes/TransStrings.php:102
-msgid "Last used"
+msgid "Installing…"
 msgstr ""
 
 #: Classes/TransStrings.php:103
-msgid "License key added"
+msgid "Last used"
 msgstr ""
 
 #: Classes/TransStrings.php:104
-msgid "Loading MCP status…"
+msgid "License key added"
 msgstr ""
 
 #: Classes/TransStrings.php:105
-msgid "MCP"
+msgid "Loading MCP status…"
 msgstr ""
 
 #: Classes/TransStrings.php:106
-msgid "MCP adapter"
+msgid "MCP"
 msgstr ""
 
 #: Classes/TransStrings.php:107
-msgctxt "MCP adapter status"
-msgid "Available"
+msgid "MCP adapter"
 msgstr ""
 
 #: Classes/TransStrings.php:108
 msgctxt "MCP adapter status"
-msgid "Missing"
+msgid "Available"
 msgstr ""
 
 #: Classes/TransStrings.php:109
-#: includes/Mcp/OAuth/OAuthServer.php:864
-msgctxt "MCP client type"
-msgid "Generic"
+msgctxt "MCP adapter status"
+msgid "Missing"
 msgstr ""
 
 #: Classes/TransStrings.php:110
-msgid "MCP for agents"
+#: includes/Mcp/OAuth/OAuthServer.php:864
+msgctxt "MCP client type"
+msgid "Generic"
 msgstr ""
 
 #: Classes/TransStrings.php:111
@@ -612,29 +621,29 @@ msgid "%1$s loads an older copy of the MCP Adapter (%2$s). FluentHub bundles %3$
 msgstr ""
 
 #: Classes/TransStrings.php:118
-msgid "Turn on MCP servers for your Fluent plugins, see which tools each one exposes and get connection settings for Codex, Claude, Cursor and other HTTP MCP clients."
+msgid "Let AI apps such as Claude, Codex and Cursor work with your Fluent plugins. Choose which plugins they can use, then copy the connection details into your app."
 msgstr ""
 
 #: Classes/TransStrings.php:119
-msgid "Adds each plugin as a separate entry in your AI app, one per endpoint. The same application password works for all of them. Plugins with MCP off are left out."
+msgid "Adds each plugin to your AI app as a separate server. One application password works for all of them. Plugins with MCP off are left out."
 msgstr ""
 
 #: Classes/TransStrings.php:120
-msgid "Install or update a Fluent plugin that supports MCP. Once it registers an MCP endpoint, it shows up here with its tools, status and connection snippets."
+msgid "Install or update a Fluent plugin that supports MCP. It then shows here, with a switch to turn MCP on."
 msgstr ""
 
 #. translators: 1: the MCP Adapter version that runs, 2: the minimum MCP Adapter version the FluentHub server needs
 #: Classes/TransStrings.php:122
 #, php-format
-msgid "The FluentHub MCP server needs MCP Adapter %2$s or later, and this site runs %1$s. The MCP server of each plugin still works on its own endpoint."
+msgid "The FluentHub MCP server needs MCP Adapter %2$s or later, and this site runs %1$s. The MCP server of each plugin still works at its own address."
 msgstr ""
 
 #: Classes/TransStrings.php:123
-msgid "Add this one endpoint to your AI app. It serves every plugin that is turned on above, and one application password works for all of them."
+msgid "Add this one address to your AI app. It serves every plugin that is on above, and one application password works for all of them."
 msgstr ""
 
 #: Classes/TransStrings.php:124
-msgid "One address that lets an AI app reach all your Fluent plugins. Turn it on, choose your app below and paste one line into it. The app opens your WordPress login, and you approve it there. Administrators reach every plugin. Other users reach the plugins that give them access."
+msgid "One address that lets an AI app use all your Fluent plugins. Turn it on, choose your app below and paste one line into it. The app opens your WordPress login, and you approve it there. Administrators can use every plugin. Other users can use the plugins that give them access."
 msgstr ""
 
 #: Classes/TransStrings.php:125
@@ -642,7 +651,7 @@ msgid "Sign-in gives each connected app its own application password, and applic
 msgstr ""
 
 #: Classes/TransStrings.php:126
-msgid "The MCP endpoint does not ask clients to sign in. A security or caching plugin may strip the WWW-Authenticate header or change the response."
+msgid "The MCP server does not ask apps to sign in. A security or caching plugin may remove the sign-in header (WWW-Authenticate) or change the response."
 msgstr ""
 
 #: Classes/TransStrings.php:127
@@ -650,7 +659,7 @@ msgid "This site redirects /.well-known/ addresses at the site root. Some client
 msgstr ""
 
 #: Classes/TransStrings.php:128
-msgid "When this is on, an AI app connects with the server address only: it opens the WordPress login, the user approves the app, and WordPress gives the app its own password. When this is off, no new app can sign in. Apps that already signed in keep working until you disconnect them under Connected apps."
+msgid "When this is on, an AI app connects with the server address only: it opens the WordPress login, the user approves the app, and WordPress gives the app its own password. When this is off, new apps cannot sign in. Apps that already signed in keep working until you disconnect them under Connected apps."
 msgstr ""
 
 #: Classes/TransStrings.php:129
@@ -678,7 +687,7 @@ msgid "Merge top-level Fluent menus"
 msgstr ""
 
 #: Classes/TransStrings.php:135
-msgid "No Fluent plugins are exposing MCP yet."
+msgid "No Fluent plugin offers MCP yet."
 msgstr ""
 
 #: Classes/TransStrings.php:136
@@ -762,216 +771,186 @@ msgid "Refresh MCP status"
 msgstr ""
 
 #: Classes/TransStrings.php:156
-msgid "Refresh now"
-msgstr ""
-
-#: Classes/TransStrings.php:157
 msgid "Refresh plugin list"
 msgstr ""
 
-#: Classes/TransStrings.php:158
-msgid "Registry synced"
-msgstr ""
-
-#: Classes/TransStrings.php:159
+#: Classes/TransStrings.php:157
 msgctxt "Release candidate badge"
 msgid "RC"
 msgstr ""
 
-#: Classes/TransStrings.php:160
-msgid "Resource metadata does not load."
-msgstr ""
-
-#: Classes/TransStrings.php:161
-msgid "Resource metadata loads."
-msgstr ""
-
-#: Classes/TransStrings.php:162
+#: Classes/TransStrings.php:158
 msgid "Run this in your terminal. It adds the server to Claude Code with your application password."
 msgstr ""
 
-#: Classes/TransStrings.php:163
+#: Classes/TransStrings.php:159
 msgid "Runs the first steps an AI app takes to sign in, from this browser, and shows what blocks them."
 msgstr ""
 
-#: Classes/TransStrings.php:164
+#: Classes/TransStrings.php:160
 msgid "Saving…"
 msgstr ""
 
-#: Classes/TransStrings.php:165
-#: Classes/UnifiedUi/MenuProviders.php:73
-#: Classes/UnifiedUi/MenuProviders.php:253
-#: Classes/UnifiedUi/MenuProviders.php:618
-#: Classes/UnifiedUi/MenuProviders.php:670
-#: Classes/UnifiedUi/MenuProviders.php:755
-#: fluent-toolkit.php:69
-msgid "Settings"
-msgstr ""
-
-#: Classes/TransStrings.php:166
+#: Classes/TransStrings.php:162
 msgid "Show Fluent plugin screens inside the unified workspace."
 msgstr ""
 
 #. translators: %s is the number of connected apps, for example 34
-#: Classes/TransStrings.php:168
+#: Classes/TransStrings.php:164
 #, php-format
 msgid "Show all %s apps"
 msgstr ""
 
-#: Classes/TransStrings.php:169
+#: Classes/TransStrings.php:165
 msgid "Show fewer"
 msgstr ""
 
-#: Classes/TransStrings.php:170
+#: Classes/TransStrings.php:166
 msgid "Show password"
 msgstr ""
 
-#: Classes/TransStrings.php:171
+#: Classes/TransStrings.php:167
 msgid "Sign in with WordPress"
 msgstr ""
 
-#: Classes/TransStrings.php:172
+#: Classes/TransStrings.php:168
 msgid "Sign-in not working?"
 msgstr ""
 
-#: Classes/TransStrings.php:173
-msgid "Sign-in server metadata does not load."
-msgstr ""
-
-#: Classes/TransStrings.php:174
-msgid "Sign-in server metadata loads."
-msgstr ""
-
-#: Classes/TransStrings.php:175
+#: Classes/TransStrings.php:169
 msgid "Skipped because a free plugin update failed"
 msgstr ""
 
-#: Classes/TransStrings.php:176
-msgid "Something went wrong. Please try again."
-msgstr ""
-
-#: Classes/TransStrings.php:177
+#: Classes/TransStrings.php:170
 msgid "Spaces, posts, comments, members and courses."
 msgstr ""
 
-#: Classes/TransStrings.php:178
+#: Classes/TransStrings.php:171
 msgid "Standalone plugin"
 msgstr ""
 
-#: Classes/TransStrings.php:179
+#: Classes/TransStrings.php:172
 msgid "Status"
 msgstr ""
 
-#: Classes/TransStrings.php:180
-msgid "The FluentHub MCP server reaches every plugin that is on here."
+#: Classes/TransStrings.php:173
+msgid "That did not work. Try again, or reload the page."
 msgstr ""
 
-#: Classes/TransStrings.php:181
-msgid "The MCP endpoint asks clients to sign in."
+#: Classes/TransStrings.php:174
+msgid "The MCP server asks apps to sign in."
+msgstr ""
+
+#: Classes/TransStrings.php:175
+msgid "The sign-in details do not load."
+msgstr ""
+
+#: Classes/TransStrings.php:176
+msgid "The sign-in details load."
 msgstr ""
 
 #. translators: %s is the selected color theme: Light, Dark or System
-#: Classes/TransStrings.php:183
+#: Classes/TransStrings.php:178
 #, php-format
 msgid "Theme: %s"
 msgstr ""
 
-#: Classes/TransStrings.php:185
+#: Classes/TransStrings.php:180
+msgid "This browser blocks copying here. Select the text and copy it yourself."
+msgstr ""
+
+#: Classes/TransStrings.php:181
 msgid "This list shows the newest 200 apps. Older ones are on each user profile."
 msgstr ""
 
-#: Classes/TransStrings.php:186
+#: Classes/TransStrings.php:182
 msgid "Tickets, replies, customers and support reports."
 msgstr ""
 
-#: Classes/TransStrings.php:187
+#: Classes/TransStrings.php:183
 msgid "Turn MCP on for a plugin above to get the connection details."
 msgstr ""
 
-#: Classes/TransStrings.php:188
+#: Classes/TransStrings.php:184
 msgid "Turn MCP on for each plugin your AI apps may use."
 msgstr ""
 
-#: Classes/TransStrings.php:189
-msgid "Turned on and off in the plugin settings"
+#: Classes/TransStrings.php:185
+msgid "Turn on or off in the plugin's own settings"
 msgstr ""
 
-#: Classes/TransStrings.php:190
-msgid "Unified Fluent Workspace"
-msgstr ""
-
-#: Classes/TransStrings.php:191
+#: Classes/TransStrings.php:186
 msgid "Unnamed app"
 msgstr ""
 
-#: Classes/TransStrings.php:192
+#: Classes/TransStrings.php:187
 msgid "Up to date"
 msgstr ""
 
 #. translators: %s is the number of active plugins that will be updated
-#: Classes/TransStrings.php:194
+#: Classes/TransStrings.php:189
 #, php-format
 msgid "Update %s active plugins to their latest stable versions?"
 msgstr ""
 
 #. translators: %s is the number of active plugins that will be updated
-#: Classes/TransStrings.php:196
+#: Classes/TransStrings.php:191
 #, php-format
 msgid "Update all (%s)"
 msgstr ""
 
-#: Classes/TransStrings.php:197
+#: Classes/TransStrings.php:192
 msgid "Update available"
 msgstr ""
 
-#: Classes/TransStrings.php:198
+#: Classes/TransStrings.php:193
 msgid "Update now"
 msgstr ""
 
 #. translators: %s is the version number the plugin will be updated to
-#: Classes/TransStrings.php:200
+#: Classes/TransStrings.php:195
 #, php-format
 msgid "Update to %s"
 msgstr ""
 
 #. translators: %1$s is the number of plugins updated, %2$s the number of plugins attempted
-#: Classes/TransStrings.php:202
+#: Classes/TransStrings.php:197
 #, php-format
 msgid "Updated %1$s of %2$s plugins"
 msgstr ""
 
 #. translators: %s is the number of plugins with an update available
-#: Classes/TransStrings.php:204
+#: Classes/TransStrings.php:199
 #, php-format
 msgid "Updates: %s"
 msgstr ""
 
 #. translators: %1$s is the plugin being updated, %2$s its position in the queue, %3$s the number of plugins being updated
-#: Classes/TransStrings.php:206
+#: Classes/TransStrings.php:201
 #, php-format
 msgid "Updating %1$s (%2$s of %3$s)…"
 msgstr ""
 
-#: Classes/TransStrings.php:207
+#: Classes/TransStrings.php:202
 msgid "Updating…"
 msgstr ""
 
-#: Classes/TransStrings.php:208
-msgid "Use this URL and Basic Auth header with any HTTP MCP client."
+#: Classes/TransStrings.php:203
+msgid "Use this URL and header in any MCP app that connects over HTTP."
 msgstr ""
 
-#: Classes/TransStrings.php:209
+#: Classes/TransStrings.php:204
 msgid "User"
 msgstr ""
 
-#: Classes/TransStrings.php:210
+#: Classes/TransStrings.php:205
 msgid "Username"
 msgstr ""
 
 #. translators: %s is the installed FluentHub version, for example v2.1.3
-#: Classes/TransStrings.php:212
+#: Classes/TransStrings.php:207
 #, php-format
-msgid "You're running %s. Update to get the latest features and fixes."
+msgid "You're running %s. The update has new features and fixes."
 msgstr ""
 
 #: Classes/UnifiedUi/MenuProviders.php:49
@@ -1150,7 +1129,7 @@ msgid "New Snippet"
 msgstr ""
 
 #: Classes/UnifiedUiHandler.php:194
-msgid "Addons & AI Settings"
+msgid "Add-ons & AI settings"
 msgstr ""
 
 #: Classes/UnifiedUiHandler.php:417
@@ -1158,7 +1137,7 @@ msgid "Quick navigation"
 msgstr ""
 
 #: Classes/UnifiedUiHandler.php:432
-msgid "Mobile Nav"
+msgid "Main menu"
 msgstr ""
 
 #: Classes/UnifiedUiHandler.php:435
@@ -1170,19 +1149,20 @@ msgid "Menu"
 msgstr ""
 
 #: Classes/UnifiedUiHandler.php:482
-msgid "Visit Site"
+msgid "Visit site"
 msgstr ""
 
 #: Classes/UnifiedUiHandler.php:492
-msgid "Back to WP Admin"
+msgid "Back to WordPress admin"
 msgstr ""
 
 #: Classes/UnifiedUiHandler.php:503
-msgid "Log Out"
+#: includes/Mcp/OAuth/AuthorizePage.php:191
+msgid "Log out"
 msgstr ""
 
 #: Classes/UnifiedUiHandler.php:532
-msgid "Others"
+msgid "Other plugins"
 msgstr ""
 
 #. translators: %1$s is the new FluentHub version, %2$s is the installed version
@@ -1217,7 +1197,7 @@ msgid "System"
 msgstr ""
 
 #: Classes/UnifiedUiHandler.php:690
-msgid "FluentToolkit Settings"
+msgid "FluentHub settings"
 msgstr ""
 
 #: Classes/UnifiedUiHandler.php:701
@@ -1230,17 +1210,13 @@ msgid "Expand sidebar"
 msgstr ""
 
 #: fluent-toolkit.php:100
-msgid "Check Update"
+msgid "Check for updates"
 msgstr ""
 
 #: fluent-toolkit.php:186
 #: fluent-toolkit.php:300
 #: fluent-toolkit.php:522
-msgid "Invalid nonce."
-msgstr ""
-
-#: fluent-toolkit.php:194
-msgid "Missing or invalid plugin slug."
+msgid "This page expired. Reload it and try again."
 msgstr ""
 
 #: fluent-toolkit.php:208
@@ -1252,27 +1228,23 @@ msgid "You do not have permission to install plugins."
 msgstr ""
 
 #: fluent-toolkit.php:219
-msgid "No version found."
+msgid "FluentHub could not find its latest version. Refresh the plugin list and try again."
 msgstr ""
 
 #: fluent-toolkit.php:232
-msgid "Plugin not found."
+msgid "This plugin is not in the plugin list. Refresh the list and try again."
 msgstr ""
 
 #: fluent-toolkit.php:252
-msgid "Plugin is already up to date."
+msgid "This plugin is already up to date."
 msgstr ""
 
 #: fluent-toolkit.php:289
-msgid "Plugin installed successfully."
+msgid "Done. The plugin is installed."
 msgstr ""
 
 #: fluent-toolkit.php:304
 msgid "You do not have permission to activate plugins."
-msgstr ""
-
-#: fluent-toolkit.php:309
-msgid "Missing plugin slug."
 msgstr ""
 
 #: fluent-toolkit.php:319
@@ -1298,11 +1270,11 @@ msgid "The FluentHub MCP server is off. Apps connected to it stop working until 
 msgstr ""
 
 #: fluent-toolkit.php:389
-msgid "Sign-in with OAuth is on."
+msgid "Sign in with WordPress is on."
 msgstr ""
 
 #: fluent-toolkit.php:390
-msgid "Sign-in with OAuth is off. No new app can sign in. Connected apps keep working until you disconnect them."
+msgid "Sign in with WordPress is off. New apps cannot sign in. Apps that already signed in keep working until you disconnect them."
 msgstr ""
 
 #: fluent-toolkit.php:407
@@ -1321,17 +1293,17 @@ msgstr ""
 #. translators: %s is the plugin name, for example FluentCRM
 #: fluent-toolkit.php:489
 #, php-format
-msgid "%s MCP tools are enabled."
+msgid "MCP is on for %s."
 msgstr ""
 
 #. translators: %s is the plugin name, for example FluentCRM
 #: fluent-toolkit.php:491
 #, php-format
-msgid "%s MCP tools are disabled."
+msgid "MCP is off for %s."
 msgstr ""
 
 #: fluent-toolkit.php:526
-msgid "You do not have permission to manage Fluent Toolkit settings."
+msgid "You do not have permission to change FluentHub settings."
 msgstr ""
 
 #: includes/Mcp/OAuth/AuthorizePage.php:36
@@ -1421,10 +1393,6 @@ msgstr ""
 #: includes/Mcp/OAuth/AuthorizePage.php:190
 #, php-format
 msgid "Not %s?"
-msgstr ""
-
-#: includes/Mcp/OAuth/AuthorizePage.php:191
-msgid "Log out"
 msgstr ""
 
 #: includes/Mcp/OAuth/OAuthServer.php:679

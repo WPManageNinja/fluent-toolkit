@@ -50,7 +50,7 @@ class AdminMenu
 
             if ($isAdmin) {
                 $submenu['fluent-toolkit'][] = [
-                    __('Hub Settings', 'fluent-toolkit'),
+                    __('Settings', 'fluent-toolkit'),
                     'manage_options',
                     admin_url('admin.php?page=fluent-toolkit#/')
                 ];

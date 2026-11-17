@@ -82,7 +82,7 @@ app.mixin({
                 errorMessage = convertToText(response);
             }
             if (!errorMessage) {
-                errorMessage = $t('Something went wrong. Please try again.');
+                errorMessage = $t('That did not work. Try again, or reload the page.');
             }
             this.$notify({
                 type: 'error',
