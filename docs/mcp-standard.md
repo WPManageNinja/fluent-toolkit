@@ -123,8 +123,13 @@ an automation platform, and accept the second copy for that tool.
 
 ## Known differences, November 2026
 
-- FluentCart keeps some released, more specific input codes: `invalid_date`,
-  `invalid_date_range`, `missing_param` and `missing_identifier`. It returns dates in UTC.
+- FluentCart returns dates in UTC, by decision, and says so in its instructions and in
+  `get-store-context`. Report windows are read in the store timezone. It is the one known
+  difference on rule 4.
+- FluentCart's advanced search keeps its own codes for a bad filter: `invalid_operator`,
+  `invalid_structure`, `invalid_value`, `missing_value`, `unknown_property`,
+  `unknown_entity`, `too_many_conditions`, `empty_filters` and `no_advanced_options`. Its
+  other input codes follow rule 2.
 - FluentCRM returns a flat result (`items`, `total`, ...) and nests extra error data under
   `details`, beside `fields`. FluentCart and Fluent Support return `summary`, `data` and
   `meta`.
