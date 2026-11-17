@@ -6,7 +6,6 @@
     "MCP_Banner_Desc": "Turn on MCP servers for your Fluent plugins, see which tools each one exposes and get connection settings for Codex, Claude, Cursor and other HTTP MCP clients.",
     "MCP_Connect_Desc": "Adds each plugin as a separate entry in your AI app, one per endpoint. The same application password works for all of them. Plugins with MCP off are left out.",
     "MCP_Empty_Desc": "Install or update a Fluent plugin that supports MCP. Once it registers an MCP endpoint, it shows up here with its tools, status and connection snippets.",
-    "MCP_Endpoints_Desc": "Use the FluentHub MCP server address in most cases. Each plugin also keeps its own endpoint, for an app that should reach one plugin only. Untick a plugin to keep it out of the FluentHub MCP server while its own endpoint stays on.",
     "MCP_Hub_Adapter_Outdated": "The FluentHub MCP server needs MCP Adapter %2$s or later, and this site runs %1$s. The MCP server of each plugin still works on its own endpoint.",
     "MCP_Hub_Connect_Desc": "Add this one endpoint to your AI app. It serves every plugin that is turned on above, and one application password works for all of them.",
     "MCP_Hub_Desc": "One address that lets an AI app reach all your Fluent plugins. Turn it on, choose your app below and paste one line into it. The app opens your WordPress login, and you approve it there. Administrators reach every plugin. Other users reach the plugins that give them access.",

@@ -206,7 +206,7 @@ class HubServer
             return true;
         }
 
-        foreach (array_diff(array_keys(self::products()), self::excludedProducts()) as $slug) {
+        foreach (array_keys(self::products()) as $slug) {
             if (self::productVouchesFor($slug, $user)) {
                 return true;
             }
@@ -234,7 +234,9 @@ class HubServer
         $signInReason = OAuth\OAuthServer::unavailableReason();
         $signInEnabled = OAuth\OAuthServer::enabled();
         $known = '' === $slug || array_key_exists($slug, self::products());
-        $included = $known && !in_array($slug, self::excludedProducts(), true);
+        // Every known product is served. The key stays for version 1 of the
+        // state; a product cannot be left out of the hub any more.
+        $included = $known;
 
         $hubReason = '';
         if (!AdapterBootstrap::available()) {
@@ -324,8 +326,7 @@ class HubServer
             return $result('done');
         }
 
-        // A product: its own MCP switch on, and back into the hub if it was
-        // left out. The hub's own switch is not touched.
+        // A product: its own MCP switch on. The hub's own switch is not touched.
         if (!array_key_exists($target, self::products())) {
             return $result('unavailable', 'unknown_product');
         }
@@ -354,8 +355,6 @@ class HubServer
             }
         }
 
-        self::setProductIncluded($target, true);
-
         return $result('done');
     }
 
@@ -363,8 +362,7 @@ class HubServer
      * The active Fluent plugins with an MCP server that the hub knows, for a
      * product screen that offers to turn the others on.
      *
-     * `served` reads the settings: the hub is on, the product's MCP is on and
-     * the product is not left out. Each MCP request builds the servers again,
+     * `served` reads the settings: the hub is on and the product's MCP is on. Each MCP request builds the servers again,
      * so a product turned on now is in the next request an app sends.
      */
     public static function connectProducts()
@@ -374,7 +372,6 @@ class HubServer
         }
 
         $known = self::products();
-        $excluded = self::excludedProducts();
         $hubOn = self::supported() && self::enabled();
         $canManage = current_user_can('manage_options');
         $rows = [];
@@ -384,7 +381,7 @@ class HubServer
                 continue;
             }
 
-            $included = !in_array($product['slug'], $excluded, true);
+            $included = true;
             $on = !empty($product['mcp_enabled']);
 
             $rows[] = [
@@ -395,8 +392,7 @@ class HubServer
                 'included'    => $included,
                 'served'      => $hubOn && $on && $included,
                 'tools_count' => (int) $product['tools_count'],
-                // Turning on is possible: the product gave a switch handler,
-                // or its switch is on and it only needs to come back in.
+                // Turning on is possible: the product gave a switch handler.
                 'can_enable'  => $canManage && (!empty($product['toggleable']) || $on),
             ];
         }
@@ -512,53 +508,6 @@ class HubServer
     }
 
     /**
-     * Product server ids the site admin left out of the hub. Stored as an
-     * exclude list, so a product added later is included by default.
-     */
-    public static function excludedProducts()
-    {
-        $settings = get_option('_fluent_kit_settings', []);
-
-        if (!is_array($settings) || empty($settings['mcp_hub_excluded']) || !is_array($settings['mcp_hub_excluded'])) {
-            return [];
-        }
-
-        return array_values(array_filter(array_map('sanitize_key', $settings['mcp_hub_excluded'])));
-    }
-
-    public static function setExcludedProducts($excluded)
-    {
-        $known = array_keys(self::products());
-        $excluded = array_values(array_intersect($known, array_map('sanitize_key', (array) $excluded)));
-
-        $settings = get_option('_fluent_kit_settings', []);
-        if (!is_array($settings)) {
-            $settings = [];
-        }
-
-        $settings['mcp_hub_excluded'] = $excluded;
-        update_option('_fluent_kit_settings', $settings);
-
-        return $excluded;
-    }
-
-    /**
-     * Include or leave out one product. The other products keep their state,
-     * also those whose plugin is not active now.
-     */
-    public static function setProductIncluded($slug, $included)
-    {
-        $slug = sanitize_key($slug);
-        $excluded = array_values(array_diff(self::excludedProducts(), [$slug]));
-
-        if (!$included) {
-            $excluded[] = $slug;
-        }
-
-        return self::setExcludedProducts($excluded);
-    }
-
-    /**
      * @param \WP\MCP\Core\McpAdapter $adapter
      */
     public static function createServer($adapter)
@@ -625,18 +574,13 @@ class HubServer
     }
 
     /**
-     * Read every included product's server back from the adapter.
+     * Read every product's server back from the adapter.
      */
     private static function buildCatalog($adapter)
     {
         $catalog = [];
-        $excluded = self::excludedProducts();
 
         foreach (self::products() as $slug => $info) {
-            if (in_array($slug, $excluded, true)) {
-                continue;
-            }
-
             $server = $adapter->get_server($slug);
 
             if (!$server || !method_exists($server, 'get_schemas')) {
@@ -1369,7 +1313,6 @@ class HubServer
      */
     public static function status($productStatuses)
     {
-        $excluded = self::excludedProducts();
         $known = self::products();
         $products = [];
         $toolsCount = 0;
@@ -1379,7 +1322,7 @@ class HubServer
                 continue;
             }
 
-            $included = !in_array($status['slug'], $excluded, true);
+            $included = true;
             $products[] = [
                 'slug'        => $status['slug'],
                 'name'        => $status['name'],

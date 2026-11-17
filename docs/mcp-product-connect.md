@@ -27,10 +27,10 @@ $state = apply_filters('fluent_kit/mcp_hub_state', null, 'fluent-community');
 | `sign_in.reason` | `''`, `off`, `hub_off`, `hub_unavailable`, `plain_permalinks` or `app_passwords_off`. |
 | `sign_in.https` | The site uses HTTPS. Most AI apps refuse sign-in over plain HTTP. |
 | `product.known` | FluentHub knows this product slug. |
-| `product.included` | The admin has not left this product out of the hub. |
+| `product.included` | Always true for a known product. FluentHub serves every plugin whose MCP is on; a plugin cannot be left out any more. The key stays for version 1. |
 | `ready` | Sign-in works and this product is served. Lead with the one URL. |
 | `user_can_connect` | The current user may use this product through the hub. |
-| `products` | The active Fluent plugins with an MCP server: `slug`, `name`, `active`, `mcp_enabled` (its own switch), `included` (not left out of the hub), `served` (the hub is on, its MCP is on, and it is included), `tools_count`, `can_enable` (the current user can turn it on from here). Plugins that are not installed are left out. |
+| `products` | The active Fluent plugins with an MCP server: `slug`, `name`, `active`, `mcp_enabled` (its own switch), `included` (always true), `served` (the hub is on and its MCP is on), `tools_count`, `can_enable` (the current user can turn it on from here). Plugins that are not installed are left out. |
 | `clients` | The per-app instructions: `key`, `label`, `note`, `snippet`. Print them as given. |
 | `manage_url` | The FluentHub MCP page: the switches and the connected apps. |
 | `profile_url` | The user's own application passwords, where they can revoke an app. |
@@ -66,7 +66,7 @@ there: access comes from the plugin's own permissions.
 ```php
 // The hub's own switch.
 $result = apply_filters('fluent_kit/mcp_hub_enable', null, 'fluent-community', 'hub');
-// Another Fluent plugin's MCP: its own switch on, and back into the hub if it was left out.
+// Another Fluent plugin's MCP: its own switch on.
 $result = apply_filters('fluent_kit/mcp_hub_enable', null, 'fluent-community', 'fluent-crm');
 ```
 

@@ -70,7 +70,6 @@
                             <span v-if="product.mcp_enabled">{{ $_n('%s action', '%s actions', product.tools_count) }}</span>
                             <span v-else-if="product.status === 'disabled'">{{ $t('MCP is off') }}</span>
                             <span v-else>{{ statusLabel(product.status) }}</span>
-                            <span v-if="hub.enabled && product.mcp_enabled && leftOutOfHub(product)">{{ $t('Left out of the FluentHub server (see Advanced)') }}</span>
                             <span v-if="!product.toggleable && product.slug !== 'fluent-crm'">{{ $t('Turned on and off in the plugin settings') }}</span>
                         </div>
                         <p class="ft-mcp-row-desc" v-if="productDesc(product)">{{ productDesc(product) }}</p>
@@ -273,43 +272,6 @@
                             />
                             <span></span>
                         </label>
-                    </div>
-                </div>
-
-                <div class="ft-mcp-advanced-block">
-                    <strong>{{ $t('Endpoints') }}</strong>
-                    <p>{{ hub.enabled ? $t('MCP_Endpoints_Desc') : $t('Each plugin has its own endpoint.') }}</p>
-                    <div class="ft-mcp-table">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>{{ $t('Server') }}</th>
-                                    <th>{{ $t('Endpoint') }}</th>
-                                    <th v-if="hub.enabled">{{ $t('In the FluentHub server') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-if="hubProduct && hub.enabled">
-                                    <td><strong>{{ $t('FluentHub MCP server') }}</strong></td>
-                                    <td class="ft-mono">{{ hub.endpoint_url }}</td>
-                                    <td></td>
-                                </tr>
-                                <tr v-for="product in products" :key="product.slug">
-                                    <td><strong>{{ product.name }}</strong></td>
-                                    <td class="ft-mono">{{ product.endpoint_url }}</td>
-                                    <td v-if="hub.enabled">
-                                        <input
-                                            v-if="hubEntry(product)"
-                                            type="checkbox"
-                                            :checked="hubEntry(product).included"
-                                            :disabled="saving || !hub.available"
-                                            :aria-label="product.name"
-                                            @change="toggleHubProduct(product.slug, $event.target.checked)"
-                                        />
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
                     </div>
                 </div>
 
@@ -862,9 +824,6 @@ export default {
         },
         // The FluentHub server's record of a plugin, or undefined for a plugin
         // it does not know.
-        hubEntry(product) {
-            return (this.hub.products || []).find(entry => entry.slug === product.slug);
-        },
         productLogo(product) {
             const files = {
                 'fluent-crm': 'fluentcrm_icon.svg',
@@ -894,48 +853,12 @@ export default {
 
             return lines[product.slug] || '';
         },
-        leftOutOfHub(product) {
-            const entry = this.hubEntry(product);
-
-            return !!(this.hub.available && entry && !entry.included);
-        },
-        // One switch per plugin. Turning a plugin on also puts it back in the
-        // FluentHub server, so "on" always means an AI app can reach it.
         toggleProduct(product, enabled) {
-            const putBack = enabled && this.leftOutOfHub(product);
-
             this.saving = true;
 
             this.$post('fluent_toolkit_mcp_toggle', {
                 slug: product.slug,
                 enabled: enabled ? 'yes' : 'no',
-            })
-                .then(response => {
-                    if (!putBack) {
-                        return response;
-                    }
-
-                    return this.$post('fluent_toolkit_mcp_hub_products', { slug: product.slug, included: 'yes' })
-                        .then(hubResponse => ({ message: response.message, status: hubResponse.status }));
-                })
-                .then(response => {
-                    this.$notify.success(response.message);
-                    this.overview = response.status;
-                })
-                .catch(error => {
-                    this.$handleError(error);
-                    this.getOverview();
-                })
-                .finally(() => {
-                    this.saving = false;
-                });
-        },
-        toggleHubProduct(slug, included) {
-            this.saving = true;
-
-            this.$post('fluent_toolkit_mcp_hub_products', {
-                slug,
-                included: included ? 'yes' : 'no',
             })
                 .then(response => {
                     this.$notify.success(response.message);

@@ -606,20 +606,6 @@ namespace {
         fail('Expected filterToolsList to leave other servers alone.');
     }
 
-    // A product left out on the MCP page is not served.
-    HubServer::setExcludedProducts(['fluent-support', 'not-a-product']);
-    if (HubServer::excludedProducts() !== ['fluent-support']) {
-        fail('Expected only known products in the exclude list.');
-    }
-
-    $GLOBALS['created_servers'] = [];
-    HubServer::createServer(build_adapter());
-    $names = array_keys(router_tools());
-    sort($names);
-    if ($names !== ['fluent-crm-read', 'fluent-crm-write']) {
-        fail('Expected an excluded product to drop out of the hub: ' . implode(', ', $names));
-    }
-
     // Who may connect: a site administrator reaches every product. There is
     // no role setting; anyone else needs a product to admit them.
     $GLOBALS['user_caps'] = ['read' => true];
@@ -686,7 +672,6 @@ namespace {
     // A product can admit its own managers to its own tools. A subscriber who
     // manages FluentCRM reaches FluentCRM only: the Support tools stay hidden,
     // although this user would pass the Support gate.
-    HubServer::setExcludedProducts([]);
     $GLOBALS['created_servers'] = [];
     HubServer::createServer(build_adapter());
     $GLOBALS['user_roles'] = ['subscriber'];
@@ -785,21 +770,6 @@ namespace {
         fail('Expected the hub to go on, sign-in to stay as the admin left it, and the fresh state to come back.');
     }
     $GLOBALS['user_caps'] = ['read' => true];
-
-    // The MCP page changes one product per request. A product whose plugin is
-    // not active keeps its state: it is neither excluded nor included by it.
-    HubServer::setExcludedProducts([]);
-    HubServer::setProductIncluded('fluent-crm', false);
-    if (HubServer::excludedProducts() !== ['fluent-crm']) {
-        fail('Expected only the unticked product in the exclude list: ' . implode(', ', HubServer::excludedProducts()));
-    }
-
-    HubServer::setProductIncluded('fluent-support', false);
-    HubServer::setProductIncluded('fluent-crm', true);
-    if (HubServer::excludedProducts() !== ['fluent-support']) {
-        fail('Expected ticking a product to leave the other exclusions alone.');
-    }
-    HubServer::setExcludedProducts([]);
 
     // The adapter's tool-call filters run for the product's tool, by its name
     // and with its server, so a site rule on that tool also holds on the hub.

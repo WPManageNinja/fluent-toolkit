@@ -61,7 +61,6 @@ class FluentToolkitBootstrap
         add_action('wp_ajax_fluent_toolkit_mcp_toggle', array($this, 'toggleMcpAccess'));
         add_action('wp_ajax_fluent_toolkit_mcp_create_app_password', array($this, 'createMcpAppPassword'));
         add_action('wp_ajax_fluent_toolkit_mcp_hub_toggle', array($this, 'toggleMcpHub'));
-        add_action('wp_ajax_fluent_toolkit_mcp_hub_products', array($this, 'saveMcpHubProducts'));
         add_action('wp_ajax_fluent_toolkit_mcp_oauth_toggle', array($this, 'toggleMcpOAuth'));
         add_action('wp_ajax_fluent_toolkit_mcp_oauth_revoke', array($this, 'revokeMcpOAuthApp'));
 
@@ -372,28 +371,6 @@ class FluentToolkitBootstrap
             'message' => $enabled
                 ? __('The FluentHub MCP server is on.', 'fluent-toolkit')
                 : __('The FluentHub MCP server is off. Apps connected to it stop working until you turn it on again.', 'fluent-toolkit'),
-            'status'  => \FluentToolkit\Classes\McpManager::status(),
-        ], 200);
-    }
-
-    public function saveMcpHubProducts()
-    {
-        $this->verifySettingsAjaxRequest();
-
-        // One product per request. The page lists active plugins only, so a
-        // full list from it would exclude every plugin that is not installed.
-        $slug = isset($_POST['slug']) ? sanitize_key(wp_unslash($_POST['slug'])) : '';
-        $included = isset($_POST['included']) ? sanitize_text_field(wp_unslash($_POST['included'])) : '';
-        $included = in_array($included, ['yes', 'true', '1', 'on'], true);
-
-        if (!$slug || !array_key_exists($slug, \FluentToolkit\Mcp\HubServer::products())) {
-            wp_send_json(['message' => __('This plugin is not part of the FluentHub MCP server.', 'fluent-toolkit')], 422);
-        }
-
-        \FluentToolkit\Mcp\HubServer::setProductIncluded($slug, $included);
-
-        wp_send_json([
-            'message' => __('FluentHub MCP server updated.', 'fluent-toolkit'),
             'status'  => \FluentToolkit\Classes\McpManager::status(),
         ], 200);
     }
