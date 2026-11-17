@@ -251,15 +251,39 @@
   .ft-mcp-roles {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px 22px;
+    gap: 8px;
+    padding: 18px 24px 20px;
 
     label {
       align-items: center;
-      color: var(--text);
+      border: 1px solid var(--border-strong);
+      border-radius: 999px;
+      color: var(--text-muted);
       cursor: pointer;
       display: inline-flex;
       font-size: 13px;
       gap: 7px;
+      padding: 6px 13px 6px 10px;
+
+      &.is-on {
+        background: var(--ok-soft);
+        border-color: oklch(88% 0.05 155);
+        color: var(--text);
+      }
+
+      &.is-locked {
+        cursor: default;
+      }
+    }
+
+    input {
+      margin: 0;
+    }
+
+    em {
+      color: var(--text-soft);
+      font-size: 12px;
+      font-style: normal;
     }
 
     input:disabled {

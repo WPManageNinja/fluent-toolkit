@@ -31,6 +31,7 @@ class TransStrings
             'All Fluent plugins' => __('All Fluent plugins', 'fluent-toolkit'),
             'All plugins are up to date.' => __('All plugins are up to date.', 'fluent-toolkit'),
             'All plugins through one endpoint (recommended)' => __('All plugins through one endpoint (recommended)', 'fluent-toolkit'),
+            'Always' => __('Always', 'fluent-toolkit'),
             'App' => __('App', 'fluent-toolkit'),
             'App_Password_Once_Notice' => __('WordPress shows an application password only once, so copy the snippet before you leave this page. You can revoke it at any time from your profile.', 'fluent-toolkit'),
             'App_Password_Site_Disabled' => __('Application passwords are disabled on this site. WordPress requires HTTPS for them unless the site runs in a local environment.', 'fluent-toolkit'),
@@ -135,7 +136,7 @@ class TransStrings
             'MCP_OAuth_Desc' => __('When this is on, an AI app connects with the server address only: it opens the WordPress login, the user approves the app, and WordPress gives the app its own password. When this is off, apps connect with an application password that you copy by hand.', 'fluent-toolkit'),
             'MCP_OAuth_No_Https' => __('This site does not use HTTPS. Most AI clients refuse to sign in over plain HTTP, except on localhost.', 'fluent-toolkit'),
             'MCP_OAuth_Plain_Permalinks' => __('Sign-in needs pretty permalinks, because an OAuth address cannot contain a query string. Choose any setting other than Plain in Settings > Permalinks, or use an application password.', 'fluent-toolkit'),
-            'MCP_Roles_Desc' => __('Only users with a ticked role can connect an AI app to the FluentHub MCP server, with sign-in or with an application password. Administrators can always connect. Each plugin still applies its own permissions to what a connected user can do.', 'fluent-toolkit'),
+            'MCP_Roles_Desc' => __('Users with a ticked role can connect an AI app to the FluentHub MCP server and reach every plugin above. Each plugin still applies its own permissions to what a connected user can do, and a plugin can let its own managers reach that plugin alone.', 'fluent-toolkit'),
             'Manage MCP' => __('Manage MCP', 'fluent-toolkit'),
             'Manage passwords' => __('Manage passwords', 'fluent-toolkit'),
             'Merge admin menus' => __('Merge admin menus', 'fluent-toolkit'),
@@ -213,7 +214,7 @@ class TransStrings
             'Use this URL and Basic Auth header with any HTTP MCP client.' => __('Use this URL and Basic Auth header with any HTTP MCP client.', 'fluent-toolkit'),
             'User' => __('User', 'fluent-toolkit'),
             'Username' => __('Username', 'fluent-toolkit'),
-            'Who can connect apps' => __('Who can connect apps', 'fluent-toolkit'),
+            'Who can connect' => __('Who can connect', 'fluent-toolkit'),
             /* translators: %s is the installed FluentHub version, for example v2.1.3 */
             'You\'re running %s. Update to get the latest features and fixes.' => __('You\'re running %s. Update to get the latest features and fixes.', 'fluent-toolkit'),
         ];

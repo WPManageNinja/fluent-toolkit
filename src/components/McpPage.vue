@@ -97,6 +97,31 @@
                 </div>
             </section>
 
+            <section class="ft-panel ft-mcp-access" v-if="hub.enabled && (hub.roles || []).length">
+                <div class="ft-panel-head">
+                    <div>
+                        <h2>{{ $t('Who can connect') }}</h2>
+                        <p>{{ $t('MCP_Roles_Desc') }}</p>
+                    </div>
+                </div>
+                <div class="ft-mcp-roles">
+                    <label
+                        v-for="role in hub.roles"
+                        :key="role.slug"
+                        :class="{ 'is-on': role.allowed, 'is-locked': role.locked }"
+                    >
+                        <input
+                            type="checkbox"
+                            :checked="role.allowed"
+                            :disabled="saving || role.locked"
+                            @change="toggleRole(role.slug, $event.target.checked)"
+                        />
+                        {{ role.name }}
+                        <em v-if="role.locked">{{ $t('Always') }}</em>
+                    </label>
+                </div>
+            </section>
+
             <section class="ft-panel ft-mcp-connect" v-if="products.length">
                 <div class="ft-panel-head">
                     <div>
@@ -263,22 +288,6 @@
                                 @change="toggleOAuth($event.target.checked)"
                             />
                             <span></span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="ft-mcp-advanced-block" v-if="hub.enabled && (hub.roles || []).length">
-                    <strong>{{ $t('Who can connect apps') }}</strong>
-                    <p>{{ $t('MCP_Roles_Desc') }}</p>
-                    <div class="ft-mcp-roles">
-                        <label v-for="role in hub.roles" :key="role.slug">
-                            <input
-                                type="checkbox"
-                                :checked="role.allowed"
-                                :disabled="saving || role.locked"
-                                @change="toggleRole(role.slug, $event.target.checked)"
-                            />
-                            {{ role.name }}
                         </label>
                     </div>
                 </div>
