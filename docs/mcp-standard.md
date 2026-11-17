@@ -50,6 +50,34 @@ for example a `per_page` that was lowered to the maximum.
   10:00" becomes today at 10:00, and "x" is a timezone. Refuse them with `invalid_param`.
 - Refuse a reversed range with `invalid_param`.
 
+### Why the plugins store dates on different clocks
+
+The storage clock is a design choice per plugin. Do not change it to make the plugins match.
+
+| Plugin | Stores | Why |
+|---|---|---|
+| FluentCart, FluentBooking | UTC | They exchange exact moments with outside systems: payment providers, webhooks, calendars. A booking must mean one moment for a host and a guest in two zones, and a billing date must not move when the site changes its timezone setting. |
+| FluentCRM, Fluent Support, Fluent Boards, FluentCommunity | Site time | They record what happened on the site for the people who work there. The database, the screen and the report use one clock, with no conversion between them. |
+
+The bugs are at the boundaries, where a value crosses from one clock to another without a
+conversion. So the rule is: each plugin keeps its clock, and every value that enters or leaves
+is converted at that point.
+
+- An import converts the source's dates to the plugin's clock before it writes them. Found
+  without this: the contact migrators in FluentCRM, the ticket importers in Fluent Support and
+  the Trello and Asana importers in Fluent Boards wrote UTC into site-time tables; FluentCart's
+  WooCommerce migrator wrote site time into a UTC table.
+- A cut-off is computed on the clock of the column it is compared with. "Now" in UTC against a
+  site-time column is wrong by the site's offset.
+- A UTC column is shifted to the report's zone before it is grouped by day, week or month.
+- One plugin that reads another's dates converts them: FluentCRM and Fluent Support read
+  FluentCart's UTC dates and convert them to site time.
+- A WordPress site set to a manual offset ("UTC+6") has no named timezone. Show the offset,
+  not a stand-in city.
+
+MCP hides the difference from the agent: every date goes out with its offset, so the agent
+never has to know which clock a plugin stores.
+
 ## 5. Money
 
 A decimal number in major units, beside its currency code. Not cents, and not a formatted
