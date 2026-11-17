@@ -875,6 +875,9 @@ class OAuthServer
             'server_metadata_url'   => self::serverMetadataUrl(),
             'clients'               => self::clients(HubServer::endpointUrl()),
             'apps'                  => $apps,
+            // The list holds the newest 200. Past that, the rest is on each
+            // user's profile.
+            'apps_truncated'        => count($apps) >= 200,
         ];
     }
 }

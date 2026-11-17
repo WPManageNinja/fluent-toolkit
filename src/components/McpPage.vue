@@ -227,7 +227,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="app in oauth.apps" :key="app.id">
+                            <tr v-for="app in visibleApps" :key="app.id">
                                 <td>
                                     <strong>{{ app.name || $t('Unnamed app') }}</strong>
                                 </td>
@@ -242,6 +242,15 @@
                             </tr>
                         </tbody>
                     </table>
+                    <p class="ft-mcp-apps-more" v-if="oauth.apps.length > appsPageSize">
+                        <button class="ft-mcp-link" @click="showAllApps = !showAllApps">
+                            <!-- translators: %s is the number of connected apps, for example 34 -->
+                            {{ showAllApps ? $t('Show fewer') : $t('Show all %s apps', oauth.apps.length) }}
+                        </button>
+                    </p>
+                    <p class="ft-mcp-apps-more" v-if="oauth.apps_truncated && showAllApps">
+                        {{ $t('This list shows the newest 200 apps. Older ones are on each user profile.') }}
+                    </p>
                 </div>
             </section>
 
@@ -371,6 +380,8 @@ export default {
     emits: ['navigate'],
     data() {
         return {
+            showAllApps: false,
+            appsPageSize: 10,
             overview: {
                 adapter: {
                     available: false,
@@ -602,6 +613,11 @@ export default {
             }
 
             return this.$_x('Available', 'MCP adapter status');
+        },
+        visibleApps() {
+            const apps = this.oauth.apps || [];
+
+            return this.showAllApps ? apps : apps.slice(0, this.appsPageSize);
         },
         activeClientInfo() {
             return this.visibleClients.find(client => client.key === this.activeClient)

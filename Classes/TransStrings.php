@@ -174,6 +174,9 @@ class TransStrings
             'Server' => __('Server', 'fluent-toolkit'),
             'Settings' => __('Settings', 'fluent-toolkit'),
             'Show Fluent plugin screens inside the unified workspace.' => __('Show Fluent plugin screens inside the unified workspace.', 'fluent-toolkit'),
+            /* translators: %s is the number of connected apps, for example 34 */
+            'Show all %s apps' => __('Show all %s apps', 'fluent-toolkit'),
+            'Show fewer' => __('Show fewer', 'fluent-toolkit'),
             'Show password' => __('Show password', 'fluent-toolkit'),
             'Sign in with WordPress' => __('Sign in with WordPress', 'fluent-toolkit'),
             'Sign-in server metadata does not load.' => __('Sign-in server metadata does not load.', 'fluent-toolkit'),
@@ -189,6 +192,7 @@ class TransStrings
             /* translators: %s is the selected color theme: Light, Dark or System */
             'Theme: %s' => __('Theme: %s', 'fluent-toolkit'),
             'This WordPress version does not support application passwords.' => __('This WordPress version does not support application passwords.', 'fluent-toolkit'),
+            'This list shows the newest 200 apps. Older ones are on each user profile.' => __('This list shows the newest 200 apps. Older ones are on each user profile.', 'fluent-toolkit'),
             'Tickets, replies, customers and support reports.' => __('Tickets, replies, customers and support reports.', 'fluent-toolkit'),
             'Turn MCP on for a plugin above to get the connection details.' => __('Turn MCP on for a plugin above to get the connection details.', 'fluent-toolkit'),
             'Turn MCP on for each plugin your AI apps may use.' => __('Turn MCP on for each plugin your AI apps may use.', 'fluent-toolkit'),
