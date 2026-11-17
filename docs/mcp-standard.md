@@ -152,8 +152,9 @@ an automation platform, and accept the second copy for that tool.
 ## Known differences, November 2026
 
 - FluentCart returns dates in UTC, by decision, and says so in its instructions and in
-  `get-store-context`. Report windows are read in the store timezone. It is the one known
-  difference on rule 4.
+  `get-store-context`. It is the one known difference on rule 4. Dates that come in follow
+  the rule: a date without an offset is store time in report windows and in list filters.
+  `manage-coupon` dates are read as UTC, and its schema says so.
 - FluentCart's advanced search keeps its own codes for a bad filter: `invalid_operator`,
   `invalid_structure`, `invalid_value`, `missing_value`, `unknown_property`,
   `unknown_entity`, `too_many_conditions`, `empty_filters` and `no_advanced_options`. Its
