@@ -97,6 +97,38 @@
     }
   }
 
+  .ft-mcp-row-logo {
+    border-radius: 9px;
+    flex-shrink: 0;
+    height: 36px;
+    object-fit: contain;
+    width: 36px;
+  }
+
+  .ft-mcp-row-logo-blank {
+    align-items: center;
+    background: var(--surface-2);
+    color: var(--text-muted);
+    display: flex;
+    font-size: 15px;
+    font-weight: 600;
+    justify-content: center;
+  }
+
+  .ft-mcp-row-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .ft-mcp-row-desc {
+    color: var(--text-soft);
+    font-size: 13px;
+    margin: 0;
+  }
+
   .ft-mcp-row-text {
     align-items: baseline;
     display: flex;

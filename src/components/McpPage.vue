@@ -61,6 +61,9 @@
 
                 <div class="ft-mcp-rows">
                     <div class="ft-mcp-row" v-for="product in products" :key="product.slug">
+                        <img class="ft-mcp-row-logo" v-if="productLogo(product)" :src="productLogo(product)" alt="" />
+                        <span class="ft-mcp-row-logo ft-mcp-row-logo-blank" v-else aria-hidden="true">{{ product.name.charAt(0) }}</span>
+                        <div class="ft-mcp-row-body">
                         <div class="ft-mcp-row-text">
                             <strong>{{ product.name }}</strong>
                             <!-- translators: %s is the number of MCP actions, for example 28 -->
@@ -69,6 +72,8 @@
                             <span v-else>{{ statusLabel(product.status) }}</span>
                             <span v-if="hub.enabled && product.mcp_enabled && leftOutOfHub(product)">{{ $t('Left out of the FluentHub server (see Advanced)') }}</span>
                             <span v-if="!product.toggleable && product.slug !== 'fluent-crm'">{{ $t('Turned on and off in the plugin settings') }}</span>
+                        </div>
+                        <p class="ft-mcp-row-desc" v-if="productDesc(product)">{{ productDesc(product) }}</p>
                         </div>
                         <label class="ft-switch">
                             <input
@@ -880,6 +885,35 @@ export default {
         // it does not know.
         hubEntry(product) {
             return (this.hub.products || []).find(entry => entry.slug === product.slug);
+        },
+        productLogo(product) {
+            const files = {
+                'fluent-crm': 'fluentcrm_icon.svg',
+                'fluent-boards': 'fluentboards_icon.svg',
+                'fluent-booking': 'fluentbooking_icon.svg',
+                'fluent-cart': 'fluentcart_icon.svg',
+                'fluentform': 'fluentforms_icon.svg',
+                'fluent-community': 'fluentcommunity_icon.svg',
+                'fluent-support': 'fluentsupport_icon.svg',
+            };
+            const vars = window.fluentToolkitVars || {};
+            const base = vars.plugin_url || vars.pluginUrl || '';
+
+            return files[product.slug] && base ? `${base}dist/images/${files[product.slug]}` : '';
+        },
+        // What an AI app can work with in each plugin, for a person.
+        productDesc(product) {
+            const lines = {
+                'fluent-crm': this.$t('Contacts, tags, lists, email campaigns and automations.'),
+                'fluent-boards': this.$t('Project boards, tasks, subtasks and comments.'),
+                'fluent-booking': this.$t('Calendars, bookings and open time slots.'),
+                'fluent-cart': this.$t('Orders, products, customers, subscriptions and sales reports.'),
+                'fluentform': this.$t('Forms, submissions, notifications and form reports.'),
+                'fluent-community': this.$t('Spaces, posts, comments, members and courses.'),
+                'fluent-support': this.$t('Tickets, replies, customers and support reports.'),
+            };
+
+            return lines[product.slug] || '';
         },
         leftOutOfHub(product) {
             const entry = this.hubEntry(product);
