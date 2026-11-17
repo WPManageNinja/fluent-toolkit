@@ -21,6 +21,7 @@ $state = apply_filters('fluent_kit/mcp_hub_state', null, 'fluent-community');
 | `hub.supported` | The MCP adapter is present and new enough (0.7.0+). |
 | `hub.reason` | `''`, `adapter_missing`, `adapter_outdated` or `off`. |
 | `hub.endpoint_url` | The one URL. |
+| `hub.server_name` | The name an AI app gives this site's connection, for example `fluent-community-lab`. It carries the site's address, because an app refuses a second connection with a name it already has. The snippets in `clients` already use it. |
 | `sign_in.enabled` | Sign-in with WordPress is switched on. |
 | `sign_in.available` | Sign-in works on this site now. |
 | `sign_in.reason` | `''`, `off`, `hub_off`, `hub_unavailable`, `plain_permalinks` or `app_passwords_off`. |

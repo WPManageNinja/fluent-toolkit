@@ -443,6 +443,9 @@ export default {
 
             return {
                 slug: 'fluent-hub',
+                // The name the AI app gives the connection. It carries the
+                // site's address, so two sites do not collide in one app.
+                client_name: this.hub.server_name || 'fluent-hub',
                 name: this.$t('All Fluent plugins'),
                 endpoint_url: this.hub.endpoint_url,
                 tools_count: this.hub.actions_count,
@@ -631,7 +634,7 @@ export default {
 
             if (client === 'codex') {
                 const blocks = entries.map(product => [
-                    `Name: ${product.slug}`,
+                    `Name: ${product.client_name || product.slug}`,
                     'Transport: Streamable HTTP',
                     `URL: ${product.endpoint_url}`,
                     'Header key: Authorization',
@@ -709,7 +712,7 @@ export default {
         // per endpoint, so it doubles as the server key.
         keyBySlug(products, build) {
             return products.reduce((servers, product) => {
-                servers[product.slug] = build(product);
+                servers[product.client_name || product.slug] = build(product);
                 return servers;
             }, {});
         },

@@ -787,12 +787,16 @@ class OAuthServer
      * (HubServer::connectState()). A person reads the notes, so they are
      * translated; the snippets are commands and stay as they are.
      *
-     * @param string $url The FluentHub MCP endpoint.
+     * @param string $url  The FluentHub MCP endpoint.
+     * @param string $name The name the app gives the connection. It carries
+     *                     the site's address, because an app refuses a second
+     *                     connection with a name it already has.
      * @return array<int, array{key: string, label: string, note: string, snippet: string}>
      */
-    public static function clients($url)
+    public static function clients($url, $name = '')
     {
         $url = (string) $url;
+        $name = '' !== (string) $name ? (string) $name : HubServer::clientServerName();
         $json = function ($data) {
             return (string) wp_json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         };
@@ -807,26 +811,27 @@ class OAuthServer
             [
                 'key'     => 'claude-code',
                 'label'   => 'Claude Code',
-                'note'    => __('Run this, then run /mcp in Claude Code and pick fluent-hub to sign in.', 'fluent-toolkit'),
-                'snippet' => 'claude mcp add --transport http fluent-hub ' . $url,
+                /* translators: %s: the name of the connection in the AI app, for example fluent-example-com */
+                'note'    => sprintf(__('Run this, then run /mcp in Claude Code and pick %s to sign in.', 'fluent-toolkit'), $name),
+                'snippet' => 'claude mcp add --transport http ' . $name . ' ' . $url,
             ],
             [
                 'key'     => 'codex',
                 'label'   => 'Codex',
                 'note'    => __('Run these commands. The second one opens the sign-in page.', 'fluent-toolkit'),
-                'snippet' => 'codex mcp add fluent-hub --url ' . $url . "\n" . 'codex mcp login fluent-hub',
+                'snippet' => 'codex mcp add ' . $name . ' --url ' . $url . "\n" . 'codex mcp login ' . $name,
             ],
             [
                 'key'     => 'copilot',
                 'label'   => 'GitHub Copilot',
                 'note'    => __('Paste this JSON into .vscode/mcp.json. VS Code asks you to sign in.', 'fluent-toolkit'),
-                'snippet' => $json(['servers' => ['fluent-hub' => ['type' => 'http', 'url' => $url]]]),
+                'snippet' => $json(['servers' => [$name => ['type' => 'http', 'url' => $url]]]),
             ],
             [
                 'key'     => 'cursor',
                 'label'   => 'Cursor',
                 'note'    => __('Paste this JSON into the Cursor MCP settings. Cursor asks you to sign in.', 'fluent-toolkit'),
-                'snippet' => $json(['mcpServers' => ['fluent-hub' => ['url' => $url]]]),
+                'snippet' => $json(['mcpServers' => [$name => ['url' => $url]]]),
             ],
             [
                 'key'     => 'generic',

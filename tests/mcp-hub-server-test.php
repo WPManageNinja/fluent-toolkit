@@ -145,6 +145,16 @@ namespace {
         return !empty($GLOBALS['user_caps'][$cap]);
     }
 
+    function wp_parse_url($url, $component = -1)
+    {
+        return parse_url($url, $component);
+    }
+
+    function home_url($path = '')
+    {
+        return 'https://example.test' . $path;
+    }
+
     function get_rest_url($blogId = null, $path = '')
     {
         return 'https://example.test/wp-json/' . ltrim($path, '/');
@@ -705,6 +715,34 @@ namespace {
     unset($GLOBALS['filter_overrides']['fluent_kit/mcp_hub_product_user_can_connect']);
     $GLOBALS['user_roles'] = ['administrator'];
     $GLOBALS['user_caps'] = ['read' => true];
+
+    // The name an AI app gives the connection carries the site's address, so
+    // the owner of two sites can add both. It stays short enough for apps
+    // that cap tool names at 64 characters.
+    $names = [
+        'https://community.lab'                  => 'fluent-community-lab',
+        'https://www.fluentcart.com/'            => 'fluent-fluentcart-com',
+        'https://example.com/shop'               => 'fluent-example-com-shop',
+        'http://localhost:8080'                  => 'fluent-localhost',
+        'https://a-very-long-business-name.example.co.uk' => null,
+        'https://a-very-long-business-name.example.com'   => null,
+    ];
+    $long = [];
+    foreach ($names as $url => $expected) {
+        $name = HubServer::clientServerName($url);
+        if (null !== $expected && $name !== $expected) {
+            fail('Unexpected connection name for ' . $url . ': ' . $name);
+        }
+        if (strlen($name) > 28 || !preg_match('/^[a-z0-9-]+$/', $name)) {
+            fail('Expected a short name of letters, digits and hyphens: ' . $name);
+        }
+        if (null === $expected) {
+            $long[] = $name;
+        }
+    }
+    if ($long[0] === $long[1]) {
+        fail('Expected two long addresses with one prefix to get different names.');
+    }
 
     // The server is off until the admin turns it on. The first time, sign-in
     // comes on with it; after that the admin's own choice for sign-in stays.

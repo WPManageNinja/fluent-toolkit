@@ -284,6 +284,7 @@ class HubServer
                 'supported'    => $supported,
                 'reason'       => $hubReason,
                 'endpoint_url' => self::endpointUrl(),
+                'server_name'  => self::clientServerName(),
             ],
             'sign_in'          => [
                 'enabled'   => $signInEnabled,
@@ -300,11 +301,57 @@ class HubServer
             // Sign-in works, and this product is served: lead with the one URL.
             'ready'            => $signInReady && $included,
             'user_can_connect' => '' === $slug ? self::userCanConnectAny($user) : self::userCanUseProduct($slug, $user),
-            'clients'          => OAuth\OAuthServer::clients(self::endpointUrl()),
+            'clients'          => OAuth\OAuthServer::clients(self::endpointUrl(), self::clientServerName()),
             'manage_url'       => admin_url('admin.php?page=fluent-toolkit#mcp'),
             'profile_url'      => admin_url('profile.php#application-passwords-section'),
             'can_manage'       => current_user_can('manage_options'),
         ];
+    }
+
+    /**
+     * The name an AI app gives this site's connection, for example
+     * "fluent-community-lab". An app keeps its connections by name, and a
+     * name must be unique in the app: with one fixed name, the owner of two
+     * sites could add only the first. So the name carries the site's address.
+     *
+     * At most 28 characters. Apps build tool names as mcp__{name}__{tool}
+     * and several cap a tool name at 64 characters; the longest router tool
+     * name is 22.
+     *
+     * @param string|null $homeUrl The site address. Defaults to home_url().
+     */
+    public static function clientServerName($homeUrl = null)
+    {
+        $parts = wp_parse_url(null === $homeUrl ? home_url() : (string) $homeUrl);
+        $host = is_array($parts) && !empty($parts['host']) ? strtolower($parts['host']) : '';
+        $path = is_array($parts) && !empty($parts['path']) ? strtolower($parts['path']) : '';
+
+        // A site in a subdirectory shares its host with its neighbours.
+        $key = trim((string) preg_replace('/[^a-z0-9]+/', '-', preg_replace('/^www\./', '', $host) . $path), '-');
+
+        if ('' === $key) {
+            $name = 'fluent-hub';
+        } elseif (strlen($key) <= 21) {
+            $name = 'fluent-' . $key;
+        } else {
+            // Long addresses keep their start and get a short hash, so two
+            // sites that share a long prefix still differ.
+            $name = 'fluent-' . rtrim(substr($key, 0, 14), '-') . '-' . substr(md5($key), 0, 6);
+        }
+
+        /**
+         * Filter the name AI apps use for this site's FluentHub connection.
+         * Letters, digits and hyphens; keep it at 28 characters or fewer.
+         *
+         * @since 2.2.0
+         *
+         * @param string $name    The default name.
+         * @param string $homeUrl The site address it was built from.
+         */
+        $filtered = (string) apply_filters('fluent_kit/mcp_hub_client_name', $name, null === $homeUrl ? home_url() : (string) $homeUrl);
+        $filtered = trim((string) preg_replace('/[^A-Za-z0-9_-]+/', '-', $filtered), '-');
+
+        return '' !== $filtered ? $filtered : $name;
     }
 
     public static function endpointUrl()
@@ -1278,6 +1325,7 @@ class HubServer
             'reason'             => $reason,
             'min_adapter'        => self::MIN_ADAPTER_VERSION,
             'endpoint_url'       => self::endpointUrl(),
+            'server_name'        => self::clientServerName(),
             'products'           => $products,
             'actions_count'      => $toolsCount,
         ];
