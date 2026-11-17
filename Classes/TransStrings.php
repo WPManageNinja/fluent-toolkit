@@ -14,12 +14,11 @@ class TransStrings
     public static function getStrings()
     {
         return [
+            "\x00plural_index" => self::pluralRule('fluent-toolkit')['index'],
             /* translators: %1$s is the plugin name, %2$s the reason it was not updated */
             '%1$s: %2$s' => __('%1$s: %2$s', 'fluent-toolkit'),
             /* translators: %s is the number of MCP actions, for example 28 */
-            '%s action' => __('%s action', 'fluent-toolkit'),
-            /* translators: %s is the number of MCP actions, for example 28 */
-            '%s actions' => __('%s actions', 'fluent-toolkit'),
+            "%s action\x00%s actions" => self::pluralForms(_n_noop('%s action', '%s actions', 'fluent-toolkit')),
             /* translators: %s is the plugin name, for example FluentCRM */
             '%s only' => __('%s only', 'fluent-toolkit'),
             'A FluentHub update is available' => __('A FluentHub update is available', 'fluent-toolkit'),
@@ -212,5 +211,61 @@ class TransStrings
             /* translators: %s is the installed FluentHub version, for example v2.1.3 */
             'You\'re running %s. Update to get the latest features and fixes.' => __('You\'re running %s. Update to get the latest features and fixes.', 'fluent-toolkit'),
         ];
+    }
+
+    /**
+     * Every translated form of a $_n() string, in the order of the site language's plural rule.
+     *
+     * @param array $noop From _n_noop()
+     * @return string[]
+     */
+    private static function pluralForms($noop)
+    {
+        $samples = self::pluralRule($noop['domain'])['samples'];
+        $forms = [];
+        foreach ($samples as $count) {
+            $forms[] = translate_nooped_plural($noop, $count, $noop['domain']);
+        }
+        return $forms;
+    }
+
+    /**
+     * The plural form index for counts 0..199 (`index`) and the first count of each form (`samples`).
+     *
+     * @param string $domain Text domain
+     * @return array{index: int[], samples: int[]}
+     */
+    public static function pluralRule($domain)
+    {
+        static $rules = [];
+        if (isset($rules[$domain])) {
+            return $rules[$domain];
+        }
+
+        $expression = 'n != 1';
+        $translations = get_translations_for_domain($domain);
+        foreach ((array) $translations->headers as $name => $value) {
+            if (strtolower($name) === 'plural-forms' && preg_match('/plural\s*=\s*(.+)$/', (string) $value, $match)) {
+                $expression = rtrim(trim($match[1]), ';');
+            }
+        }
+        try {
+            $rule = new \Plural_Forms($expression);
+        } catch (\Exception $e) {
+            $rule = new \Plural_Forms('n != 1');
+        }
+
+        $index = [];
+        $samples = [];
+        for ($count = 0; $count < 200; $count++) {
+            $form = (int) $rule->get($count);
+            $index[] = $form;
+            if (!isset($samples[$form])) {
+                $samples[$form] = $count;
+            }
+        }
+        ksort($samples);
+
+        return $rules[$domain] = ['index' => $index, 'samples' => array_values($samples)];
     }
 }
