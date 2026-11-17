@@ -62,7 +62,6 @@ class FluentToolkitBootstrap
         add_action('wp_ajax_fluent_toolkit_mcp_create_app_password', array($this, 'createMcpAppPassword'));
         add_action('wp_ajax_fluent_toolkit_mcp_hub_toggle', array($this, 'toggleMcpHub'));
         add_action('wp_ajax_fluent_toolkit_mcp_hub_products', array($this, 'saveMcpHubProducts'));
-        add_action('wp_ajax_fluent_toolkit_mcp_hub_roles', array($this, 'saveMcpHubRoles'));
         add_action('wp_ajax_fluent_toolkit_mcp_oauth_toggle', array($this, 'toggleMcpOAuth'));
         add_action('wp_ajax_fluent_toolkit_mcp_oauth_revoke', array($this, 'revokeMcpOAuthApp'));
 
@@ -395,20 +394,6 @@ class FluentToolkitBootstrap
 
         wp_send_json([
             'message' => __('FluentHub MCP server updated.', 'fluent-toolkit'),
-            'status'  => \FluentToolkit\Classes\McpManager::status(),
-        ], 200);
-    }
-
-    public function saveMcpHubRoles()
-    {
-        $this->verifySettingsAjaxRequest();
-
-        $roles = isset($_POST['roles']) && is_array($_POST['roles']) ? array_map('sanitize_key', wp_unslash($_POST['roles'])) : [];
-
-        \FluentToolkit\Mcp\HubServer::setAllowedRoles($roles);
-
-        wp_send_json([
-            'message' => __('Saved who can connect apps.', 'fluent-toolkit'),
             'status'  => \FluentToolkit\Classes\McpManager::status(),
         ], 200);
     }

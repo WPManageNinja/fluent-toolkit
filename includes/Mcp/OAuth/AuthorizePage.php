@@ -70,7 +70,7 @@ class AuthorizePage
         }
 
         if (!\FluentToolkit\Mcp\HubServer::userCanConnectAny($user)) {
-            self::fail(__('Your account is not allowed to connect apps to this site. Ask the site admin.', 'fluent-toolkit'));
+            self::fail(__('Your account has no access to the AI tools of any Fluent plugin on this site. Ask the site admin for access to the plugin you need.', 'fluent-toolkit'));
         }
 
         if (!OAuthServer::appPasswordsAvailable()) {

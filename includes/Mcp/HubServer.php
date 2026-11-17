@@ -120,41 +120,12 @@ class HubServer
     }
 
     /**
-     * Roles whose users may connect an app to the FluentHub MCP server. The
-     * administrator role is always in the list.
-     */
-    public static function allowedRoles()
-    {
-        $settings = get_option('_fluent_kit_settings', []);
-        $roles = is_array($settings) && isset($settings['mcp_hub_roles']) && is_array($settings['mcp_hub_roles']) ? $settings['mcp_hub_roles'] : [];
-        $roles = array_filter(array_map('sanitize_key', $roles));
-
-        return array_values(array_unique(array_merge(['administrator'], $roles)));
-    }
-
-    public static function setAllowedRoles($roles)
-    {
-        $roles = array_filter(array_map('sanitize_key', (array) $roles));
-
-        if (function_exists('wp_roles')) {
-            $roles = array_intersect($roles, array_keys(wp_roles()->roles));
-        }
-
-        $settings = get_option('_fluent_kit_settings', []);
-        if (!is_array($settings)) {
-            $settings = [];
-        }
-
-        $settings['mcp_hub_roles'] = array_values(array_unique(array_merge(['administrator'], $roles)));
-        update_option('_fluent_kit_settings', $settings);
-
-        return $settings['mcp_hub_roles'];
-    }
-
-    /**
-     * Whether this user may use the FluentHub MCP server at all, with sign-in
-     * or with an application password. It comes before the product gates and
-     * the permission check of each action, which still apply.
+     * Whether this user may use EVERY served product on the FluentHub MCP
+     * server: a site administrator. Anyone else connects through the product
+     * that admits them (productVouchesFor()) and reaches that product only.
+     * There is no role setting: each product knows its own people.
+     *
+     * Kept under this name for the filter below.
      *
      * @param \WP_User|null $user Defaults to the current user.
      */
@@ -168,25 +139,24 @@ class HubServer
 
         // A network admin may have no role on this site.
         $allowed = (is_multisite() && is_super_admin($user->ID))
-            || (bool) array_intersect(self::allowedRoles(), (array) $user->roles);
+            || in_array('administrator', (array) $user->roles, true);
 
         /**
-         * Filter whether a user may connect to the FluentHub MCP server.
-         *
-         * Use it for a rule that roles cannot express, for example to let in
-         * the support agents of a site whatever their role is.
+         * Filter whether a user may use every served product on the
+         * FluentHub MCP server. A product that admits its own people uses
+         * fluent_kit/mcp_hub_product_user_can_connect instead.
          *
          * @since 2.2.0
          *
-         * @param bool     $allowed Whether one of the user's roles is allowed.
+         * @param bool     $allowed Whether the user is a site administrator.
          * @param \WP_User $user    The user.
          */
         return (bool) apply_filters('fluent_kit/mcp_hub_user_can_connect', $allowed, $user);
     }
 
     /**
-     * Whether a product lets this user use ITS tools on the hub, although no
-     * role of the user is ticked under "Who can connect apps".
+     * Whether a product lets this user use ITS tools on the hub. This is how
+     * everyone who is not a site administrator connects.
      *
      * For a product whose managers are not WordPress administrators: a
      * FluentCommunity moderator or a support agent is often a subscriber. The
@@ -1430,23 +1400,8 @@ class HubServer
             $reason = 'adapter_outdated';
         }
 
-        $allowedRoles = self::allowedRoles();
-        $roles = [];
-
-        if (function_exists('wp_roles')) {
-            foreach (wp_roles()->roles as $slug => $role) {
-                $roles[] = [
-                    'slug'    => (string) $slug,
-                    'name'    => translate_user_role($role['name']),
-                    'allowed' => in_array($slug, $allowedRoles, true),
-                    'locked'  => 'administrator' === $slug,
-                ];
-            }
-        }
-
         return [
             'enabled'            => self::enabled(),
-            'roles'              => $roles,
             'available'          => '' === $reason,
             'reason'             => $reason,
             'min_adapter'        => self::MIN_ADAPTER_VERSION,

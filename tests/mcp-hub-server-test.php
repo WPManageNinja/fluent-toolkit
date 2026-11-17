@@ -620,27 +620,19 @@ namespace {
         fail('Expected an excluded product to drop out of the hub: ' . implode(', ', $names));
     }
 
-    // Who may connect: administrators always, other roles when the admin
-    // ticks them. The check comes before the product gates.
+    // Who may connect: a site administrator reaches every product. There is
+    // no role setting; anyone else needs a product to admit them.
     $GLOBALS['user_caps'] = ['read' => true];
-    if (HubServer::allowedRoles() !== ['administrator'] || true !== HubServer::transportPermission(null)) {
-        fail('Expected an administrator to connect by default.');
+    if (true !== HubServer::transportPermission(null)) {
+        fail('Expected an administrator to connect.');
     }
 
     $GLOBALS['user_roles'] = ['editor'];
+    $GLOBALS['options']['_fluent_kit_settings']['mcp_hub_roles'] = ['administrator', 'editor'];
     if (false !== HubServer::transportPermission(null)) {
-        fail('Expected a role that is not ticked to be refused, although it passes a product gate.');
+        fail('Expected a user no product admits to be refused, whatever an old role setting says.');
     }
-
-    HubServer::setAllowedRoles(['editor']);
-    if (HubServer::allowedRoles() !== ['administrator', 'editor'] || true !== HubServer::transportPermission(null)) {
-        fail('Expected a ticked role to connect, and administrator to stay in the list.');
-    }
-
-    HubServer::setAllowedRoles([]);
-    if (HubServer::allowedRoles() !== ['administrator']) {
-        fail('Expected the administrator role to stay when every role is unticked.');
-    }
+    unset($GLOBALS['options']['_fluent_kit_settings']['mcp_hub_roles']);
 
     $GLOBALS['user_id'] = 0;
     if (HubServer::userCanConnect()) {

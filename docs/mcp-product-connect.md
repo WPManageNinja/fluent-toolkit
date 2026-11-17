@@ -32,7 +32,7 @@ $state = apply_filters('fluent_kit/mcp_hub_state', null, 'fluent-community');
 | `user_can_connect` | The current user may use this product through the hub. |
 | `products` | The active Fluent plugins with an MCP server: `slug`, `name`, `active`, `mcp_enabled` (its own switch), `included` (not left out of the hub), `served` (the hub is on, its MCP is on, and it is included), `tools_count`, `can_enable` (the current user can turn it on from here). Plugins that are not installed are left out. |
 | `clients` | The per-app instructions: `key`, `label`, `note`, `snippet`. Print them as given. |
-| `manage_url` | The FluentHub MCP page: the switches, who can connect, connected apps. |
+| `manage_url` | The FluentHub MCP page: the switches and the connected apps. |
 | `profile_url` | The user's own application passwords, where they can revoke an app. |
 | `can_manage` | The current user can change FluentHub's settings. |
 
@@ -56,8 +56,9 @@ $state = apply_filters('fluent_kit/mcp_hub_state', null, 'fluent-community');
    false). Say why in one line, link to `manage_url`, and open the application-password section.
 4. **`null`.** As the product does today.
 
-When `user_can_connect` is false, do not show the one URL as usable: say that the site admin
-decides who can connect, with the link to `manage_url` for an admin.
+When `user_can_connect` is false, do not show the one URL as usable. Say: "Your account has no
+access to this plugin's AI tools." FluentHub has no setting for it, so do not send the user
+there: access comes from the plugin's own permissions.
 
 ## Turning the hub on
 
@@ -95,9 +96,10 @@ The second argument is the calling product, the third is the target. There is no
 
 ## Letting a product's own managers connect
 
-By default only the roles ticked under "Who can connect apps" (administrator always) may use
-the hub. A product whose managers are not administrators, such as a community moderator or a
-support agent who is a WordPress subscriber, admits them to its own tools:
+A site administrator reaches every plugin on the hub. FluentHub has no role setting: everyone
+else connects through the plugin that admits them, and reaches that plugin only. A user with
+access to two plugins reaches both. So every product wires this filter, with the same rule its
+own endpoint uses, or its people who are not administrators cannot use the one URL:
 
 ```php
 add_filter('fluent_kit/mcp_hub_product_user_can_connect', function ($allowed, $slug, $user) {
