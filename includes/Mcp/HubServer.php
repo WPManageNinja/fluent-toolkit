@@ -220,6 +220,10 @@ class HubServer
                 'title'   => 'FluentBooking',
                 'summary' => 'FluentBooking: calendars, event types, bookings, availability, open time slots and booking reports. Use it for appointments and meetings.',
             ],
+            'fluent-community' => [
+                'title'   => 'FluentCommunity',
+                'summary' => 'FluentCommunity: spaces, posts and comments in the feeds, reactions, members and their profiles, courses and lessons, and community insights. Use it for the community, its content and its members. Posts and comments are read by real members.',
+            ],
             'fluentform'     => [
                 'title'   => 'Fluent Forms',
                 'summary' => 'Fluent Forms: forms, form fields and styling, submissions (entries) and their notes, email notifications, integrations, payments and form reports. Use it for forms and what people submitted.',
