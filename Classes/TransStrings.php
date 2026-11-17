@@ -162,6 +162,7 @@ class TransStrings
             "Release candidate badge\x04RC" => _x('RC', 'Release candidate badge', 'fluent-toolkit'),
             'Resource metadata does not load.' => __('Resource metadata does not load.', 'fluent-toolkit'),
             'Resource metadata loads.' => __('Resource metadata loads.', 'fluent-toolkit'),
+            'Run this in your terminal. It adds the server to Claude Code with your application password.' => __('Run this in your terminal. It adds the server to Claude Code with your application password.', 'fluent-toolkit'),
             'Runs the first steps an AI app takes to sign in, from this browser.' => __('Runs the first steps an AI app takes to sign in, from this browser.', 'fluent-toolkit'),
             'Saving…' => __('Saving…', 'fluent-toolkit'),
             'Server' => __('Server', 'fluent-toolkit'),

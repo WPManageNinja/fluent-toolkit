@@ -410,10 +410,14 @@ export default {
             generatedName: '',
             username: window.fluentToolkitVars.current_user_login || '',
             appPassword: '',
+            // Application password way. The order matches the sign-in list:
+            // Claude first. Claude on the web has no tab here: its connectors
+            // cannot send a password header, so it connects with sign-in only.
             clients: [
+                { key: 'claude-code', label: 'Claude Code', note: this.$t('Run this in your terminal. It adds the server to Claude Code with your application password.') },
+                { key: 'claude-desktop', label: 'Claude Desktop', note: this.$t('Paste this JSON into claude_desktop_config.json and restart Claude Desktop.') },
                 { key: 'codex', label: 'Codex', note: this.$t('Paste these fields into the Codex custom MCP settings.') },
                 { key: 'copilot', label: 'GitHub Copilot', note: this.$t('Paste this JSON into the GitHub Copilot MCP configuration in VS Code.') },
-                { key: 'claude-desktop', label: 'Claude Desktop', note: this.$t('Paste this JSON into claude_desktop_config.json and restart Claude Desktop.') },
                 { key: 'cursor', label: 'Cursor', note: this.$t('Paste this JSON into the Cursor MCP settings and restart Cursor.') },
                 { key: 'generic', label: this.$_x('Generic', 'MCP client type'), note: this.$t('Use this URL and Basic Auth header with any HTTP MCP client.') },
             ],
@@ -631,6 +635,12 @@ export default {
 
             const user = this.username || '<your-username>';
             const password = this.appPassword || '<your-application-password>';
+
+            if (client === 'claude-code') {
+                return entries.map(product => (
+                    `claude mcp add --transport http ${product.client_name || product.slug} ${product.endpoint_url} --header "Authorization: Basic ${this.authHeader}"`
+                )).join('\n');
+            }
 
             if (client === 'codex') {
                 const blocks = entries.map(product => [
