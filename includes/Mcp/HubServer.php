@@ -70,7 +70,9 @@ class HubServer
         add_filter('mcp_adapter_tools_list', [__CLASS__, 'filterToolsList'], 10, 2);
         add_filter('mcp_adapter_prompts_list', [__CLASS__, 'filterPromptsList'], 10, 2);
         add_filter('mcp_adapter_pre_prompt_get', [__CLASS__, 'gatePrompt'], 10, 4);
-        add_filter('rest_post_dispatch', [__CLASS__, 'sendResultOnce'], 20, 3);
+        // Hooks the REST response only for a request that ran a hub tool, so
+        // every other REST request on the site pays nothing.
+        add_filter('mcp_adapter_tool_call_result', [__CLASS__, 'armSingleResultCopy'], 999, 5);
     }
 
     public static function supported()
@@ -842,6 +844,21 @@ class HubServer
          * @param string $instructions Plain-text instructions.
          */
         return (string) apply_filters('fluent_kit/mcp_hub_instructions', implode("\n", $lines));
+    }
+
+    /**
+     * Runs when the adapter has a tool result. For a tool of the hub server,
+     * hook the REST response so sendResultOnce() can drop the second copy.
+     * A product tool run by the router passes the product's server here, not
+     * the hub's, so only the router tool's own result arms it.
+     */
+    public static function armSingleResultCopy($result, $args = [], $toolName = '', $tool = null, $server = null)
+    {
+        if (self::isHubServer($server) && !has_filter('rest_post_dispatch', [__CLASS__, 'sendResultOnce'])) {
+            add_filter('rest_post_dispatch', [__CLASS__, 'sendResultOnce'], 20, 3);
+        }
+
+        return $result;
     }
 
     /**

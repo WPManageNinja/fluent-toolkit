@@ -68,7 +68,14 @@ namespace {
 
     function add_filter($hook, $callback, $priority = 10, $acceptedArgs = 1)
     {
+        $GLOBALS['added_filters'][$hook][] = $callback;
+
         return true;
+    }
+
+    function has_filter($hook, $callback = false)
+    {
+        return !empty($GLOBALS['added_filters'][$hook]) && (false === $callback || in_array($callback, $GLOBALS['added_filters'][$hook], true));
     }
 
     function apply_filters($hook, $value, ...$args)
@@ -626,6 +633,19 @@ namespace {
     $sent = json_encode(HubServer::sendResultOnce(new StubRestResponse($payload), null, new StubRestRequest('/fluent-hub/mcp'))->get_data());
     if (false !== strpos($sent, 'structuredContent') || false === strpos($sent, '"text":"{\\"summary\\":\\"x\\",\\"data\\":{}}"') || false === strpos($sent, '"isError":false')) {
         fail('Expected the hub to send the text block only: ' . $sent);
+    }
+
+    // The REST response is hooked only after a hub tool ran, and only once.
+    $GLOBALS['added_filters'] = [];
+    HubServer::armSingleResultCopy(['x' => 1], [], 'fluent-crm-list-tags', null, new StubServer('fluent-crm', []));
+    if (has_filter('rest_post_dispatch')) {
+        fail('Expected a product server tool result not to hook the hub response.');
+    }
+
+    HubServer::armSingleResultCopy(['x' => 1], [], 'fluent-crm-read', null, new StubServer('fluent-hub', []));
+    HubServer::armSingleResultCopy(['x' => 1], [], 'fluent-crm-read', null, new StubServer('fluent-hub', []));
+    if (count($GLOBALS['added_filters']['rest_post_dispatch'] ?? []) !== 1) {
+        fail('Expected a hub tool result to hook the REST response once.');
     }
 
     // Other routes, and results without a text block, are left alone.
