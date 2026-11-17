@@ -53,9 +53,9 @@ class FluentToolkitBootstrap
 
         // Lets a product's settings screen turn the hub on for a user who can
         // manage the site. The product's own route checks the nonce.
-        add_filter('fluent_kit/mcp_hub_enable', function ($result, $slug = '') {
-            return class_exists('\\FluentToolkit\\Mcp\\HubServer') ? \FluentToolkit\Mcp\HubServer::enableFromProduct($slug) : $result;
-        }, 10, 2);
+        add_filter('fluent_kit/mcp_hub_enable', function ($result, $slug = '', $target = 'hub') {
+            return class_exists('\\FluentToolkit\\Mcp\\HubServer') ? \FluentToolkit\Mcp\HubServer::enableFromProduct($slug, $target) : $result;
+        }, 10, 3);
 
         add_action('wp_ajax_fluent_toolkit_mcp_overview', array($this, 'fetchMcpOverview'));
         add_action('wp_ajax_fluent_toolkit_mcp_toggle', array($this, 'toggleMcpAccess'));

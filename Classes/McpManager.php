@@ -23,6 +23,29 @@ class McpManager
             'source'          => AdapterBootstrap::sourceName(),
             'outdated'        => AdapterBootstrap::outdated(),
         ];
+        $products = self::products($adapter);
+
+        return [
+            'adapter'      => $adapter,
+            'hub'          => \FluentToolkit\Mcp\HubServer::status($products),
+            'oauth'        => \FluentToolkit\Mcp\OAuth\OAuthServer::status(),
+            'products'     => $products,
+            'app_password' => self::appPasswordSupport(),
+        ];
+    }
+
+    /**
+     * The active Fluent plugins that have an MCP server, with the state of
+     * each one's own switch.
+     *
+     * @param array|null $adapter Adapter status; only `available` is needed.
+     */
+    public static function products($adapter = null)
+    {
+        if (null === $adapter) {
+            $adapter = ['available' => self::adapterAvailable()];
+        }
+
         $products = [];
 
         if (self::fluentCrmExposesMcp()) {
@@ -49,15 +72,7 @@ class McpManager
          * @param array $adapter  Adapter status details.
          */
         $products = apply_filters('fluent_kit/mcp_products', $products, $adapter);
-        $products = array_values(array_filter(array_map([__CLASS__, 'normalizeProduct'], (array) $products)));
-
-        return [
-            'adapter'      => $adapter,
-            'hub'          => \FluentToolkit\Mcp\HubServer::status($products),
-            'oauth'        => \FluentToolkit\Mcp\OAuth\OAuthServer::status(),
-            'products'     => $products,
-            'app_password' => self::appPasswordSupport(),
-        ];
+        return array_values(array_filter(array_map([__CLASS__, 'normalizeProduct'], (array) $products)));
     }
 
     /**

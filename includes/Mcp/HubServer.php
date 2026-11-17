@@ -301,6 +301,7 @@ class HubServer
             // Sign-in works, and this product is served: lead with the one URL.
             'ready'            => $signInReady && $included,
             'user_can_connect' => '' === $slug ? self::userCanConnectAny($user) : self::userCanUseProduct($slug, $user),
+            'products'         => self::connectProducts(),
             'clients'          => OAuth\OAuthServer::clients(self::endpointUrl(), self::clientServerName()),
             'manage_url'       => admin_url('admin.php?page=fluent-toolkit#mcp'),
             'profile_url'      => admin_url('profile.php#application-passwords-section'),
@@ -320,14 +321,17 @@ class HubServer
      * method checks the user's capability, not the request.
      *
      * @param string $slug The calling product's server id, for the state.
+     * @param string $target "hub" for the hub's switch, or a product's server
+     *                       id for that product's MCP switch.
      * @return array{status: string, reason: string, state: array} status is
      *         "done", "forbidden" (the user cannot manage the site) or
      *         "unavailable" (no adapter, or one too old for the hub).
      */
-    public static function enableFromProduct($slug = '')
+    public static function enableFromProduct($slug = '', $target = 'hub')
     {
-        $result = function ($status, $reason = '') use ($slug) {
-            return ['status' => $status, 'reason' => $reason, 'state' => self::connectState($slug)];
+        $target = sanitize_key((string) $target);
+        $result = function ($status, $reason = '', $message = '') use ($slug, $target) {
+            return ['status' => $status, 'reason' => $reason, 'message' => $message, 'target' => $target, 'state' => self::connectState($slug)];
         };
 
         if (!current_user_can('manage_options')) {
@@ -338,15 +342,96 @@ class HubServer
             return $result('unavailable', 'adapter_missing');
         }
 
-        if (!self::supported()) {
-            return $result('unavailable', 'adapter_outdated');
+        if ('' === $target || 'hub' === $target) {
+            if (!self::supported()) {
+                return $result('unavailable', 'adapter_outdated');
+            }
+
+            if (!self::enabled()) {
+                self::setEnabled(true);
+            }
+
+            return $result('done');
         }
 
-        if (!self::enabled()) {
-            self::setEnabled(true);
+        // A product: its own MCP switch on, and back into the hub if it was
+        // left out. The hub's own switch is not touched.
+        if (!array_key_exists($target, self::products())) {
+            return $result('unavailable', 'unknown_product');
         }
+
+        $product = null;
+        foreach (self::connectProducts() as $row) {
+            if ($row['slug'] === $target) {
+                $product = $row;
+            }
+        }
+
+        if (!$product) {
+            return $result('unavailable', 'not_active');
+        }
+
+        if (!$product['mcp_enabled']) {
+            if (!$product['can_enable']) {
+                return $result('unavailable', 'no_handler');
+            }
+
+            // The product's own handler runs, with its own permission rule.
+            $set = \FluentToolkit\Classes\McpManager::setProductMcpEnabled($target, true);
+
+            if (is_wp_error($set)) {
+                return $result('forbidden', 'product_refused', $set->get_error_message());
+            }
+        }
+
+        self::setProductIncluded($target, true);
 
         return $result('done');
+    }
+
+    /**
+     * The active Fluent plugins with an MCP server that the hub knows, for a
+     * product screen that offers to turn the others on.
+     *
+     * `served` reads the settings: the hub is on, the product's MCP is on and
+     * the product is not left out. Each MCP request builds the servers again,
+     * so a product turned on now is in the next request an app sends.
+     */
+    public static function connectProducts()
+    {
+        if (!class_exists('\FluentToolkit\Classes\McpManager')) {
+            return [];
+        }
+
+        $known = self::products();
+        $excluded = self::excludedProducts();
+        $hubOn = self::supported() && self::enabled();
+        $canManage = current_user_can('manage_options');
+        $rows = [];
+
+        foreach (\FluentToolkit\Classes\McpManager::products() as $product) {
+            if (!isset($known[$product['slug']])) {
+                continue;
+            }
+
+            $included = !in_array($product['slug'], $excluded, true);
+            $on = !empty($product['mcp_enabled']);
+
+            $rows[] = [
+                'slug'        => $product['slug'],
+                'name'        => $product['name'],
+                'active'      => true,
+                'mcp_enabled' => $on,
+                'included'    => $included,
+                'served'      => $hubOn && $on && $included,
+                'tools_count' => (int) $product['tools_count'],
+                // Turning on is possible: the product gave a switch handler,
+                // or its switch is on and it only needs to come back in.
+                'can_enable'  => $canManage && (!empty($product['toggleable']) || $on),
+            ];
+        }
+
+        return $rows;
     }
 
     /**

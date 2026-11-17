@@ -30,6 +30,7 @@ $state = apply_filters('fluent_kit/mcp_hub_state', null, 'fluent-community');
 | `product.included` | The admin has not left this product out of the hub. |
 | `ready` | Sign-in works and this product is served. Lead with the one URL. |
 | `user_can_connect` | The current user may use this product through the hub. |
+| `products` | The active Fluent plugins with an MCP server: `slug`, `name`, `active`, `mcp_enabled` (its own switch), `included` (not left out of the hub), `served` (the hub is on, its MCP is on, and it is included), `tools_count`, `can_enable` (the current user can turn it on from here). Plugins that are not installed are left out. |
 | `clients` | The per-app instructions: `key`, `label`, `note`, `snippet`. Print them as given. |
 | `manage_url` | The FluentHub MCP page: the switches, who can connect, connected apps. |
 | `profile_url` | The user's own application passwords, where they can revoke an app. |
@@ -61,14 +62,30 @@ decides who can connect, with the link to `manage_url` for an admin.
 ## Turning the hub on
 
 ```php
-$result = apply_filters('fluent_kit/mcp_hub_enable', null, 'fluent-community');
+// The hub's own switch.
+$result = apply_filters('fluent_kit/mcp_hub_enable', null, 'fluent-community', 'hub');
+// Another Fluent plugin's MCP: its own switch on, and back into the hub if it was left out.
+$result = apply_filters('fluent_kit/mcp_hub_enable', null, 'fluent-community', 'fluent-crm');
 ```
+
+The second argument is the calling product, the third is the target. There is no way to pass
+"off": the call only turns things on.
 
 - Call it only from a POST route of your own that has checked a nonce. The hook checks the
   user's capability (`manage_options`), not the request.
 - `null`: FluentHub is not active.
-- `status`: `done` (the hub is on; also when it was on already), `forbidden` (the user cannot
-  manage the site) or `unavailable` (`reason` is `adapter_missing` or `adapter_outdated`).
+- `status`: `done` (it is on; also when it was on already), `forbidden` (`reason` is
+  `capability`: the user cannot manage the site, or `product_refused`: the product's own switch
+  handler refused, with its `message`) or `unavailable` (`reason` is `adapter_missing`,
+  `adapter_outdated`, `unknown_product`, `not_active` or `no_handler`).
+- A product target runs that product's own `fluent_kit/mcp_toggle_handlers` `set_enabled`, so
+  the product's permission rule runs too. It does not touch the hub's own switch.
+- `served` reads the settings. Each MCP request builds the servers again, so a plugin turned on
+  now is in the next request an app sends. An app that keeps its tool list must reload it. Say:
+  "On. Your AI app sees it the next time it loads its tools."
+- Under a "Turn on" button, every product screen says the same sentence: "Connected AI apps
+  can then read and change this plugin's data, for the users the plugin allows."
+- Do not offer to install a plugin, and list a plugin only when it is in `products`.
 - `state`: the fresh state, in the same shape as `fluent_kit/mcp_hub_state`, to redraw the card
   from one response.
 - It does what the switch on the FluentHub page does: the hub goes on, and sign-in goes on with
