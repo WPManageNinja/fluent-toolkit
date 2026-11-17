@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-17T08:53:28+00:00\n"
+"POT-Creation-Date: 2026-11-17T08:54:09+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: fluent-toolkit\n"
@@ -694,7 +694,7 @@ msgid "Sign-in needs pretty permalinks, because an OAuth address cannot contain 
 msgstr ""
 
 #: Classes/TransStrings.php:139
-msgid "Users with a ticked role can connect an AI app to the FluentHub MCP server and reach every plugin above. Each plugin still applies its own permissions to what a connected user can do, and a plugin can let its own managers reach that plugin alone."
+msgid "Users with a ticked role can connect an AI app to the FluentHub MCP server and reach every plugin that is on. Each plugin still applies its own permissions to what a connected user can do, and a plugin can let its own managers reach that plugin alone."
 msgstr ""
 
 #: Classes/TransStrings.php:140

@@ -136,7 +136,7 @@ class TransStrings
             'MCP_OAuth_Desc' => __('When this is on, an AI app connects with the server address only: it opens the WordPress login, the user approves the app, and WordPress gives the app its own password. When this is off, apps connect with an application password that you copy by hand.', 'fluent-toolkit'),
             'MCP_OAuth_No_Https' => __('This site does not use HTTPS. Most AI clients refuse to sign in over plain HTTP, except on localhost.', 'fluent-toolkit'),
             'MCP_OAuth_Plain_Permalinks' => __('Sign-in needs pretty permalinks, because an OAuth address cannot contain a query string. Choose any setting other than Plain in Settings > Permalinks, or use an application password.', 'fluent-toolkit'),
-            'MCP_Roles_Desc' => __('Users with a ticked role can connect an AI app to the FluentHub MCP server and reach every plugin above. Each plugin still applies its own permissions to what a connected user can do, and a plugin can let its own managers reach that plugin alone.', 'fluent-toolkit'),
+            'MCP_Roles_Desc' => __('Users with a ticked role can connect an AI app to the FluentHub MCP server and reach every plugin that is on. Each plugin still applies its own permissions to what a connected user can do, and a plugin can let its own managers reach that plugin alone.', 'fluent-toolkit'),
             'Manage MCP' => __('Manage MCP', 'fluent-toolkit'),
             'Manage passwords' => __('Manage passwords', 'fluent-toolkit'),
             'Merge admin menus' => __('Merge admin menus', 'fluent-toolkit'),
