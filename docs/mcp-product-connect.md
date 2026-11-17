@@ -45,8 +45,9 @@ $state = apply_filters('fluent_kit/mcp_hub_state', null, 'fluent-community');
    application password.
 2. **FluentHub is active and the hub is off** (`hub.reason` is `off`). When `can_manage` is
    true, a primary button "Turn on FluentHub sign-in" with one line that says what it does for
-   the whole site: every Fluent plugin on the site becomes reachable through one URL, for the
-   users FluentHub allows. See "Turning the hub on" below. Then the collapsed
+   the whole site: every Fluent plugin that has MCP switched on becomes reachable through one
+   URL. A site administrator reaches all of them; anyone else reaches only the plugins that
+   give them access. See "Turning the hub on" below. Then the collapsed
    application-password section.
 
    **The hub is on and sign-in is off** (`sign_in.reason` is `off`): an admin turned sign-in
