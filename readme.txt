@@ -31,6 +31,7 @@ Upload the zip from your WordPress dashboard, activate Fluent Toolkit, then open
 * New: Connected apps list on the MCP page; revoke a connection there or on the user's profile
 * New: Fluent plugins can show a "connect with one URL" card on their own MCP screens and turn the FluentHub MCP server on from there
 * New: FluentCommunity in the FluentHub MCP server
+* Improved: The FluentHub dashboard and MCP page now look like the other Fluent apps, in light and dark mode
 * Improved: A simpler MCP page around one "FluentHub MCP server" switch, with a logo and a short description for each plugin
 * Improved: Each tool result is sent once, so AI apps that read both copies use fewer tokens
 * Fixed: Dashboard notifications had no background and sat on the top bar; they now show at the bottom right
