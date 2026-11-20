@@ -4,7 +4,7 @@ Tags: fluent plugins, toolkit
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.2.0
+Stable tag: 2.2.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -24,6 +24,10 @@ https://static.wpmanageninja.com/fluent-toolkit.zip
 Upload the zip from your WordPress dashboard, activate FluentHub, then open FluentHub in the admin menu.
 
 == Changelog ==
+
+= 2.2.1 (Date: 20 Nov, 2026) =
+* New: FluentAffiliate in the FluentHub MCP server: affiliates, referrals, visits, payouts and reports
+* Improved: The FluentHub MCP server shows each user only the actions they can run, as each plugin's own MCP server does. A manager who can only read no longer sees the plugin's write tool
 
 = 2.2.0 (Date: 17 Nov, 2026) =
 * New: FluentHub MCP server: one URL gives AI apps every Fluent plugin whose MCP is on, with one read tool and one write tool per plugin
