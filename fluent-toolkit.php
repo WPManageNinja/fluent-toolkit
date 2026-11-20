@@ -2,7 +2,7 @@
 /**
  * Plugin Name: FluentHub
  * Description: One place for all your Fluent plugins: install and update them, move between them in one workspace, and connect AI apps to them through one MCP server.
- * Version: 2.2.0
+ * Version: 2.2.1
  * Author: WPManageNinja
  * Text Domain: fluent-toolkit
  * Domain Path: /language
@@ -14,7 +14,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('FLUENT_TOOLKIT_VERSION', '2.2.0');
+define('FLUENT_TOOLKIT_VERSION', '2.2.1');
 define('FLUENT_TOOLKIT_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('FLUENT_TOOLKIT_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('FLUENT_TOOLKIT_PLUGIN_FILE', __FILE__);
