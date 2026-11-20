@@ -833,6 +833,7 @@ export default {
                 'fluentform': 'fluentforms_icon.svg',
                 'fluent-community': 'fluentcommunity_icon.svg',
                 'fluent-support': 'fluentsupport_icon.svg',
+                'fluent-affiliate': 'fluentaffiliate_icon.svg',
             };
             const vars = window.fluentToolkitVars || {};
             const base = vars.plugin_url || vars.pluginUrl || '';
@@ -849,6 +850,7 @@ export default {
                 'fluentform': this.$t('Forms, submissions, notifications and form reports.'),
                 'fluent-community': this.$t('Spaces, posts, comments, members and courses.'),
                 'fluent-support': this.$t('Tickets, replies, customers and support reports.'),
+                'fluent-affiliate': this.$t('Affiliates, referrals, commissions and payouts.'),
             };
 
             return lines[product.slug] || '';

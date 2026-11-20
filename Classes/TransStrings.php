@@ -28,6 +28,7 @@ class TransStrings
             'Activate' => __('Activate', 'fluent-toolkit'),
             'Adapter required' => __('Adapter required', 'fluent-toolkit'),
             'Advanced' => __('Advanced', 'fluent-toolkit'),
+            'Affiliates, referrals, commissions and payouts.' => __('Affiliates, referrals, commissions and payouts.', 'fluent-toolkit'),
             'All Fluent plugins' => __('All Fluent plugins', 'fluent-toolkit'),
             'All plugins are up to date.' => __('All plugins are up to date.', 'fluent-toolkit'),
             'All plugins through one address (recommended)' => __('All plugins through one address (recommended)', 'fluent-toolkit'),

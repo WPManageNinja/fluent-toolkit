@@ -498,6 +498,10 @@ class HubServer
                 'title'   => 'Fluent Forms',
                 'summary' => 'Fluent Forms: forms, form fields and styling, submissions (entries) and their notes, email notifications, integrations, payments and form reports. Use it for forms and what people submitted.',
             ],
+            'fluent-affiliate' => [
+                'title'   => 'FluentAffiliate',
+                'summary' => 'FluentAffiliate: affiliates and affiliate groups, referrals and their commissions, visits (clicks), payouts and affiliate reports. Use it for the affiliate program and paying affiliates. Payouts move real money.',
+            ],
         ];
 
         /**
