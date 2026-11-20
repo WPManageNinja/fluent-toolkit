@@ -116,6 +116,25 @@ Such a user can sign in, and reaches that product only. The router tools of ever
 product stay hidden and refuse a call, whatever those products' own gates say. The product's
 own gate and each tool's permission check still apply.
 
+## Showing each user only the tools they can run
+
+A product that cuts its own `tools/list` per user does it with the adapter's
+`mcp_adapter_tools_list` filter, for its own server only, at request time. Since FluentHub
+2.2.1 the hub applies that same filter to the product's tools, with the product's server, so
+the hub and the product's own endpoint list the same actions:
+
+- `{slug}-read` or `{slug}-write` is hidden when the product lists none of its actions to the
+  user. A manager who may only read sees `{slug}-read` only.
+- `help` lists only the actions the product lists. An action the user asks for by name that the
+  product hides comes back in `not_allowed_actions`, not `unknown_actions`.
+- A call to a hidden action still runs the product tool's own `check_permission()`, which
+  refuses it with the product's error.
+
+So cut the list in that filter, and nowhere else. Drop only a tool whose permission check needs
+no input: a check that needs an id fails without one and would hide a tool the user can use.
+Check `wp_has_ability()` before `wp_get_ability()`, which raises a notice for an unknown name.
+A product without the filter keeps every action listed.
+
 ## What sign-in needs
 
 - HTTPS and pretty permalinks.

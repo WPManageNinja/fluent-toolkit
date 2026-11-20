@@ -590,6 +590,71 @@ namespace {
         fail('Expected the Support tools to be hidden from a user who fails its gate.');
     }
 
+    // A product that cuts its own tools/list per user is cut on the hub too.
+    // Here FluentCRM lists only its read actions to this user.
+    $GLOBALS['filter_overrides']['mcp_adapter_tools_list'] = function ($records, $server = null) {
+        if (!is_object($server) || 'fluent-crm' !== $server->get_server_id()) {
+            return $records;
+        }
+
+        return array_values(array_filter($records, function ($record) {
+            return 'fluent-crm-delete-contact' !== $record['name'];
+        }));
+    };
+
+    $readOnly = HubServer::filterToolsList(
+        [['name' => 'fluent-crm-read'], ['name' => 'fluent-crm-write']],
+        new StubServer('fluent-hub', [])
+    );
+    if (array_column($readOnly, 'name') !== ['fluent-crm-read']) {
+        fail('Expected the write router hidden when the product lists no write action to the user: ' . json_encode($readOnly));
+    }
+
+    $readHelp = call_router($tools, 'fluent-crm-read', ['action' => 'help']);
+    if (isset($readHelp['other_tool'])) {
+        fail('Expected help to point to no write tool when the user may run no write action: ' . json_encode($readHelp));
+    }
+
+    $writeHelp = call_router($tools, 'fluent-crm-write', ['action' => 'help']);
+    if ($writeHelp['actions'] !== []) {
+        fail('Expected help on the write tool to list no action the product hides: ' . json_encode($writeHelp));
+    }
+
+    $hiddenAsked = call_router($tools, 'fluent-crm-read', ['action' => 'help', 'arguments' => ['actions' => ['delete-contact', 'list-tags']]]);
+    if (array_column($hiddenAsked['actions'], 'action') !== ['list-tags']
+        || $hiddenAsked['not_allowed_actions'] !== ['delete-contact']
+        || isset($hiddenAsked['unknown_actions'])
+    ) {
+        fail('Expected a hidden action asked for by name to be reported as not allowed, not unknown: ' . json_encode($hiddenAsked));
+    }
+
+    $hiddenAll = call_router($tools, 'fluent-crm-write', ['action' => 'help', 'arguments' => ['actions' => ['all']]]);
+    if ($hiddenAll['actions'] !== []) {
+        fail('Expected "all" to leave out actions the product hides.');
+    }
+
+    // The call itself still runs the product tool's own check, as before.
+    $deleteTool = $adapter->servers['fluent-crm']->tools['fluent-crm-delete-contact'];
+    $deleteTool->allowed = false;
+    $refused = call_router($tools, 'fluent-crm-write', ['action' => 'delete-contact', 'arguments' => ['id' => 3]]);
+    $deleteTool->allowed = true;
+    if (!is_wp_error($refused)) {
+        fail('Expected a hidden action called by name to be refused by the product check.');
+    }
+
+    // A filter that returns something other than a list leaves every action listed.
+    $GLOBALS['filter_overrides']['mcp_adapter_tools_list'] = function () {
+        return null;
+    };
+    $broken = HubServer::filterToolsList(
+        [['name' => 'fluent-crm-read'], ['name' => 'fluent-crm-write']],
+        new StubServer('fluent-hub', [])
+    );
+    if (array_column($broken, 'name') !== ['fluent-crm-read', 'fluent-crm-write']) {
+        fail('Expected every router kept when the product filter returns no list.');
+    }
+    unset($GLOBALS['filter_overrides']['mcp_adapter_tools_list']);
+
     if (true !== HubServer::transportPermission(null)) {
         fail('Expected the hub transport to let in a user who passes one product gate.');
     }

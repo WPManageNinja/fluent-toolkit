@@ -937,6 +937,8 @@ class HubServer
         $all = in_array('all', $asked, true);
         $wanted = [];
         $unknown = [];
+        $notAllowed = [];
+        $visible = self::visibleActions($slug);
 
         foreach ($asked as $name) {
             if ('all' === $name) {
@@ -968,6 +970,14 @@ class HubServer
 
         foreach ($product['actions'] as $toolName => $action) {
             if (!isset($records[$toolName])) {
+                continue;
+            }
+
+            // The product does not list this action to this user.
+            if (!isset($visible[$toolName])) {
+                if (isset($wanted[$toolName])) {
+                    $notAllowed[] = $action['short'];
+                }
                 continue;
             }
 
@@ -1006,14 +1016,26 @@ class HubServer
 
         $result['actions'] = $actions;
 
+        if ($notAllowed) {
+            $result['not_allowed_actions'] = $notAllowed;
+            $result['not_allowed'] = 'Your account cannot use these actions. A site administrator gives that access in the plugin\'s own permission settings.';
+        }
+
         if (!$all && !$wanted) {
             $result['schemas'] = 'Not included. Call help with {"actions": ["<action>", ...]} for the input schema of the actions you will use, or {"actions": ["all"]}.';
 
-            if ($product['groups'][$other]) {
+            $otherCount = 0;
+            foreach ($product['actions'] as $toolName => $action) {
+                if ($action['access'] === $other && isset($visible[$toolName])) {
+                    $otherCount++;
+                }
+            }
+
+            if ($otherCount) {
                 $result['other_tool'] = sprintf(
                     '%s runs the %d %s actions. Call its help to list them.',
                     self::routerToolName($slug, $other),
-                    count($product['groups'][$other]),
+                    $otherCount,
                     'read' === $other ? 'read-only' : 'write'
                 );
             }
@@ -1234,6 +1256,9 @@ class HubServer
     /**
      * Hide the router tools of each product whose gate the user fails, so a
      * support agent without CRM access does not see CRM tools that would fail.
+     * Within a product the user may use, a router tool stays only when the
+     * product lists at least one of its actions to this user: a manager who may
+     * only read does not see {slug}-write.
      */
     public static function filterToolsList($tools, $server)
     {
@@ -1241,19 +1266,61 @@ class HubServer
             return $tools;
         }
 
-        $allowed = self::allowedProducts();
-
-        return array_values(array_filter($tools, function ($tool) use ($allowed) {
-            $name = self::recordName($tool);
-
-            foreach ($allowed as $slug) {
-                if ($name === self::routerToolName($slug, 'read') || $name === self::routerToolName($slug, 'write')) {
-                    return true;
-                }
+        $keep = [];
+        foreach (self::allowedProducts() as $slug) {
+            foreach (array_keys(self::visibleActions($slug)) as $toolName) {
+                $keep[self::routerToolName($slug, self::$catalog[$slug]['actions'][$toolName]['access'])] = true;
             }
+        }
 
-            return false;
+        return array_values(array_filter($tools, function ($tool) use ($keep) {
+            return isset($keep[self::recordName($tool)]);
         }));
+    }
+
+    /**
+     * The product's actions this user may see, by the product's own answer.
+     *
+     * A product cuts the tool list of its own server per user with the adapter's
+     * mcp_adapter_tools_list filter (FluentBooking, FluentCommunity, FluentCart,
+     * Fluent Forms, FluentAffiliate). The hub applies that filter to the product's
+     * tools with the product's server, so it lists what the product's own
+     * endpoint lists. A product without such a filter keeps every action. Every
+     * call still runs the product tool's own check_permission().
+     *
+     * @param string $slug
+     * @return array<string, true> Product tool names.
+     */
+    private static function visibleActions($slug)
+    {
+        $product = self::$catalog[$slug];
+        $all = array_fill_keys(array_keys($product['actions']), true);
+        $server = $product['server'];
+
+        try {
+            $records = $server->get_tools($server->get_schemas()->forVersion(self::DEFAULT_REVISION));
+        } catch (\Throwable $e) {
+            return $all;
+        }
+
+        // The product's own filter, asked about its own server. The hub's
+        // callback on the same filter passes other servers through.
+        $listed = apply_filters('mcp_adapter_tools_list', array_values((array) $records), $server);
+
+        if (!is_array($listed)) {
+            return $all;
+        }
+
+        $visible = [];
+        foreach ($listed as $record) {
+            $name = self::recordName($record);
+
+            if (isset($all[$name])) {
+                $visible[$name] = true;
+            }
+        }
+
+        return $visible;
     }
 
     public static function filterPromptsList($prompts, $server)
