@@ -24,7 +24,7 @@ $state = apply_filters('fluent_kit/mcp_hub_state', null, 'fluent-community');
 | `hub.server_name` | The name an AI app gives this site's connection, for example `fluent-community-lab`. It carries the site's address, because an app refuses a second connection with a name it already has. The snippets in `clients` already use it. |
 | `sign_in.enabled` | Sign-in with WordPress is switched on. |
 | `sign_in.available` | Sign-in works on this site now. |
-| `sign_in.reason` | `''`, `off`, `hub_off`, `hub_unavailable`, `plain_permalinks` or `app_passwords_off`. |
+| `sign_in.reason` | `''`, `off`, `hub_off`, `hub_unavailable`, `plain_permalinks` or `app_passwords_off`. A host with its own token store (`fluent_kit/mcp_token_store`) can add its own code; treat an unknown one like `app_passwords_off`. |
 | `sign_in.https` | The site uses HTTPS. Most AI apps refuse sign-in over plain HTTP. |
 | `product.known` | FluentHub knows this product slug. |
 | `product.included` | Always true for a known product. FluentHub serves every plugin whose MCP is on; a plugin cannot be left out any more. The key stays for version 1. |

@@ -10,7 +10,8 @@
  * - a signed client_id round-trips, and a changed one is refused;
  * - an access token seals the application password and never contains it;
  * - FluentHub's application passwords work only while a Bearer token is
- *   checked, and then only this site's FluentHub passwords work.
+ *   checked, and then only this site's FluentHub passwords work;
+ * - a TokenStore from `fluent_kit/mcp_token_store` replaces the default store.
  *
  * The full flow (registration, consent, application passwords, revocation,
  * Bearer tokens on the MCP route) needs a WordPress site and HTTP; it is not
@@ -49,6 +50,11 @@ namespace {
         return $text;
     }
 
+    function apply_filters($hook, $value, ...$args)
+    {
+        return isset($GLOBALS['filter_overrides'][$hook]) ? call_user_func($GLOBALS['filter_overrides'][$hook], $value, ...$args) : $value;
+    }
+
     class WP_Error
     {
         public $codes = [];
@@ -67,7 +73,10 @@ namespace {
 
     require dirname(__DIR__) . '/includes/Mcp/OAuth/OAuthServer.php';
     require dirname(__DIR__) . '/includes/Mcp/OAuth/Store.php';
+    require dirname(__DIR__) . '/includes/Mcp/OAuth/TokenStore.php';
+    require dirname(__DIR__) . '/includes/Mcp/OAuth/ApplicationPasswordStore.php';
 
+    use FluentToolkit\Mcp\OAuth\ApplicationPasswordStore;
     use FluentToolkit\Mcp\OAuth\OAuthServer;
     use FluentToolkit\Mcp\OAuth\Store;
 
@@ -225,7 +234,7 @@ namespace {
     $other = ['uuid' => 'u3', 'app_id' => ''];
 
     $restrict = function ($item, $bearer) {
-        $flag = new ReflectionProperty(OAuthServer::class, 'checkingBearer');
+        $flag = new ReflectionProperty(ApplicationPasswordStore::class, 'checking');
         $flag->setAccessible(true);
         $flag->setValue(null, $bearer);
 
@@ -290,6 +299,42 @@ namespace {
     if ($pruned !== ['old', 'u10']) {
         fail('Expected the stale connection to go first and the limit to apply to the rest: ' . implode(',', $pruned));
     }
+
+    // A host's token store replaces the application passwords; anything that
+    // is not a TokenStore keeps the default.
+    $resetStore = function () {
+        $prop = new ReflectionProperty(OAuthServer::class, 'store');
+        $prop->setAccessible(true);
+        $prop->setValue(null, null);
+    };
+
+    $custom = new class implements \FluentToolkit\Mcp\OAuth\TokenStore {
+        public function unavailableReason($user = null) { return ''; }
+        public function issue($userId, $clientName) { return 'tok_' . $userId; }
+        public function authenticate($token) { return null; }
+        public function revoke($token) {}
+        public function connections($limit = 200) { return []; }
+        public function forget($userId, $id) { return false; }
+        public function consentNote() { return ''; }
+    };
+
+    $GLOBALS['filter_overrides']['fluent_kit/mcp_token_store'] = function () use ($custom) {
+        return $custom;
+    };
+    $resetStore();
+    if (OAuthServer::store() !== $custom || !OAuthServer::appPasswordsAvailable()) {
+        fail('Expected the filtered token store to be used.');
+    }
+
+    $GLOBALS['filter_overrides']['fluent_kit/mcp_token_store'] = function () {
+        return new stdClass();
+    };
+    $resetStore();
+    if (!(OAuthServer::store() instanceof ApplicationPasswordStore)) {
+        fail('Expected a value that is not a TokenStore to keep the application password store.');
+    }
+    unset($GLOBALS['filter_overrides']['fluent_kit/mcp_token_store']);
+    $resetStore();
 
     echo 'MCP OAuth server test passed.' . PHP_EOL;
 }

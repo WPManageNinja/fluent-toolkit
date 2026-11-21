@@ -30,6 +30,7 @@ defined('ABSPATH') || exit;
 class HubServer
 {
     const SERVER_ID = 'fluent-hub';
+    // The default REST namespace; see routeNamespace().
     const ROUTE_NAMESPACE = 'fluent-hub';
     const ROUTE = 'mcp';
 
@@ -73,6 +74,52 @@ class HubServer
         // Hooks the REST response only for a request that ran a hub tool, so
         // every other REST request on the site pays nothing.
         add_filter('mcp_adapter_tool_call_result', [__CLASS__, 'armSingleResultCopy'], 999, 5);
+    }
+
+    /**
+     * The names this server shows: the product name in its title and in the
+     * OAuth metadata, its REST namespace (the MCP route is {namespace}/mcp, the
+     * OAuth routes {namespace}/oauth/...), and the wp-login.php action of the
+     * consent screen. A host that offers the server under its own name filters
+     * `fluent_kit/mcp_hub_identity`. A value that is not valid keeps the
+     * default. Apps that connected under the old names must connect again.
+     *
+     * @return array{name: string, namespace: string, authorize_action: string}
+     */
+    public static function identity()
+    {
+        $defaults = [
+            'name'             => 'FluentHub',
+            'namespace'        => self::ROUTE_NAMESPACE,
+            'authorize_action' => 'fluent_hub_authorize', // OAuthServer::LOGIN_ACTION
+        ];
+
+        $filtered = apply_filters('fluent_kit/mcp_hub_identity', $defaults);
+        $identity = $defaults;
+
+        if (is_array($filtered)) {
+            if (isset($filtered['name']) && is_string($filtered['name']) && $filtered['name'] !== $defaults['name']) {
+                $name = trim(wp_strip_all_tags($filtered['name']));
+                $identity['name'] = '' !== $name ? $name : $defaults['name'];
+            }
+
+            // Like core's REST namespaces: lowercase segments, no leading or
+            // trailing slash.
+            if (isset($filtered['namespace']) && is_string($filtered['namespace']) && preg_match('#^[a-z0-9][a-z0-9-]*(/[a-z0-9][a-z0-9-]*)*$#', $filtered['namespace'])) {
+                $identity['namespace'] = $filtered['namespace'];
+            }
+
+            if (isset($filtered['authorize_action']) && is_string($filtered['authorize_action']) && preg_match('/^[a-z0-9_]{3,64}$/', $filtered['authorize_action'])) {
+                $identity['authorize_action'] = $filtered['authorize_action'];
+            }
+        }
+
+        return $identity;
+    }
+
+    public static function routeNamespace()
+    {
+        return self::identity()['namespace'];
     }
 
     public static function supported()
@@ -456,7 +503,7 @@ class HubServer
 
     public static function endpointUrl()
     {
-        return get_rest_url(null, trailingslashit(self::ROUTE_NAMESPACE) . self::ROUTE);
+        return get_rest_url(null, trailingslashit(self::routeNamespace()) . self::ROUTE);
     }
 
     /**
@@ -570,9 +617,9 @@ class HubServer
 
         $adapter->create_server(
             self::SERVER_ID,
-            self::ROUTE_NAMESPACE,
+            self::routeNamespace(),
             self::ROUTE,
-            'FluentHub MCP Server',
+            self::identity()['name'] . ' MCP Server',
             self::serverInstructions(),
             defined('FLUENT_TOOLKIT_VERSION') ? FLUENT_TOOLKIT_VERSION : '1.0.0',
             ['\WP\MCP\Transport\HttpTransport'],
@@ -754,7 +801,7 @@ class HubServer
     public static function runAction($slug, $access, $args, $callContext = null)
     {
         if (!isset(self::$catalog[$slug])) {
-            return self::error('unknown_product', 'This product is not available on the FluentHub MCP server.');
+            return self::error('unknown_product', 'This product is not available on this MCP server.');
         }
 
         $product = self::$catalog[$slug];
@@ -1072,7 +1119,7 @@ class HubServer
         }
 
         $lines = array_merge([
-            'FluentHub: one server for the Fluent plugins on this WordPress site.',
+            self::identity()['name'] . ': one server for the Fluent plugins on this WordPress site.',
             '',
             'Products and their tools:',
         ], $products, [
@@ -1131,7 +1178,7 @@ class HubServer
     public static function sendResultOnce($response, $server = null, $request = null)
     {
         if (!is_object($response) || !method_exists($response, 'get_data') || !is_object($request) || !method_exists($request, 'get_route')
-            || '/' . self::ROUTE_NAMESPACE . '/' . self::ROUTE !== untrailingslashit((string) $request->get_route())
+            || '/' . self::routeNamespace() . '/' . self::ROUTE !== untrailingslashit((string) $request->get_route())
         ) {
             return $response;
         }
@@ -1232,7 +1279,7 @@ class HubServer
         $request = self::$request;
 
         if (!$request && class_exists('\WP_REST_Request')) {
-            $request = new \WP_REST_Request('POST', '/' . self::ROUTE_NAMESPACE . '/' . self::ROUTE);
+            $request = new \WP_REST_Request('POST', '/' . self::routeNamespace() . '/' . self::ROUTE);
         }
 
         if (null === $gate) {

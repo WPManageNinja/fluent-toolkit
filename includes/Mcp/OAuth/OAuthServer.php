@@ -12,7 +12,9 @@ defined('ABSPATH') || exit;
  * approves the app, and the client gets a token.
  *
  * Every URL lives under /wp-json/fluent-hub/oauth, plus the consent screen on
- * wp-login.php. Nothing is served from /.well-known at the site root:
+ * wp-login.php. Nothing is served from /.well-known at the site root. The
+ * namespace and the consent screen's action come from HubServer::identity(),
+ * so a host can name them (filter `fluent_kit/mcp_hub_identity`):
  *
  *   1. POST /fluent-hub/mcp without a token answers 401 with
  *      WWW-Authenticate: Bearer resource_metadata=".../oauth/resource".
@@ -24,12 +26,14 @@ defined('ABSPATH') || exit;
  *      /oauth/token and /oauth/revoke (RFC 7009) do the rest. PKCE with S256
  *      is required.
  *
- * The access token is a standard WordPress application password (see Store).
- * It does not expire and there is no refresh token: the user or an admin
- * revokes it on the user's profile or on the FluentHub MCP page. It works as a
- * Bearer token on the FluentHub MCP route only; core refuses it everywhere
- * else, including Basic auth and XML-RPC. A connection has the same
- * permissions as the user who approved it.
+ * The token store (store()) issues and checks the access tokens. By default
+ * a token stands for a standard WordPress application password
+ * (ApplicationPasswordStore). It does not expire and there is no refresh
+ * token: the user or an admin revokes it on the user's profile or on the
+ * FluentHub MCP page. It works as a Bearer token on the FluentHub MCP route
+ * only; core refuses it everywhere else, including Basic auth and XML-RPC. A
+ * host can supply another store with the filter `fluent_kit/mcp_token_store`.
+ * A connection has the same permissions as the user who approved it.
  */
 class OAuthServer
 {
@@ -37,6 +41,7 @@ class OAuthServer
     const APPS_SHOWN = 200;
 
     const ROUTE_BASE = 'oauth';
+    // The default consent screen action; see loginAction().
     const LOGIN_ACTION = 'fluent_hub_authorize';
 
     // Not client_secret_basic: WordPress reads every Basic auth header as an
@@ -51,11 +56,8 @@ class OAuthServer
      */
     private static $tokenRejected = false;
 
-    /**
-     * True while this class checks a Bearer token. FluentHub's application
-     * passwords work only then.
-     */
-    private static $checkingBearer = false;
+    /** @var TokenStore|null */
+    private static $store = null;
 
     private static $registered = false;
 
@@ -89,7 +91,7 @@ class OAuthServer
         add_action('rest_api_init', [__CLASS__, 'registerRoutes']);
         add_filter('rest_post_dispatch', [__CLASS__, 'addChallenge'], 10, 3);
         add_filter('rest_authentication_errors', [__CLASS__, 'allowClientBasicAuth'], 101);
-        add_action('login_form_' . self::LOGIN_ACTION, [AuthorizePage::class, 'handle']);
+        add_action('login_form_' . self::loginAction(), [AuthorizePage::class, 'handle']);
     }
 
     /**
@@ -134,7 +136,7 @@ class OAuthServer
      * routes would then vanish. The consent page and the token endpoint check
      * them instead.
      */
-    public static function unavailableReason($checkAppPasswords = true)
+    public static function unavailableReason($checkStore = true)
     {
         if (!HubServer::supported()) {
             return 'hub_unavailable';
@@ -151,13 +153,10 @@ class OAuthServer
             return 'plain_permalinks';
         }
 
-        // WordPress turns them off on sites without HTTPS (except local
-        // environments), and security plugins can turn them off too.
-        if ($checkAppPasswords && !self::appPasswordsAvailable()) {
-            return 'app_passwords_off';
-        }
-
-        return '';
+        // The default store needs application passwords: WordPress turns them
+        // off on sites without HTTPS (except local environments), and
+        // security plugins can turn them off too.
+        return $checkStore ? (string) self::store()->unavailableReason() : '';
     }
 
     public static function available()
@@ -165,14 +164,42 @@ class OAuthServer
         return self::enabled() && '' === self::unavailableReason(false);
     }
 
+    /**
+     * Whether the token store can issue tokens on this site. Kept under its
+     * old name: with the default store it means application passwords work.
+     */
     public static function appPasswordsAvailable()
     {
-        return class_exists('\WP_Application_Passwords') && wp_is_application_passwords_available();
+        return '' === self::store()->unavailableReason();
+    }
+
+    /**
+     * The token store: the default ApplicationPasswordStore, or the one the
+     * filter `fluent_kit/mcp_token_store` returns. Read once per request.
+     *
+     * @return TokenStore
+     */
+    public static function store()
+    {
+        if (null === self::$store) {
+            $store = apply_filters('fluent_kit/mcp_token_store', null);
+            self::$store = $store instanceof TokenStore ? $store : new ApplicationPasswordStore();
+        }
+
+        return self::$store;
+    }
+
+    /**
+     * The consent screen's wp-login.php action.
+     */
+    public static function loginAction()
+    {
+        return HubServer::identity()['authorize_action'];
     }
 
     public static function issuer()
     {
-        return untrailingslashit(get_rest_url(null, HubServer::ROUTE_NAMESPACE . '/' . self::ROUTE_BASE));
+        return untrailingslashit(get_rest_url(null, HubServer::routeNamespace() . '/' . self::ROUTE_BASE));
     }
 
     public static function resource()
@@ -192,12 +219,12 @@ class OAuthServer
 
     public static function authorizeUrl()
     {
-        return add_query_arg('action', self::LOGIN_ACTION, site_url('wp-login.php', 'login'));
+        return add_query_arg('action', self::loginAction(), site_url('wp-login.php', 'login'));
     }
 
     public static function registerRoutes()
     {
-        $namespace = HubServer::ROUTE_NAMESPACE;
+        $namespace = HubServer::routeNamespace();
         $base = '/' . self::ROUTE_BASE;
 
         register_rest_route($namespace, $base . '/resource', [
@@ -251,7 +278,7 @@ class OAuthServer
             'resource'                 => self::resource(),
             'authorization_servers'    => [self::issuer()],
             'bearer_methods_supported' => ['header'],
-            'resource_name'            => 'FluentHub MCP: ' . wp_specialchars_decode((string) get_option('blogname'), ENT_QUOTES),
+            'resource_name'            => HubServer::identity()['name'] . ' MCP: ' . wp_specialchars_decode((string) get_option('blogname'), ENT_QUOTES),
         ], 200, ['Cache-Control' => 'public, max-age=300']);
     }
 
@@ -487,15 +514,15 @@ class OAuthServer
 
         $user = get_userdata((int) $row['user_id']);
 
-        if (!$user || !wp_is_application_passwords_available_for_user($user)) {
-            return self::error('invalid_grant', 'This user cannot use application passwords.');
+        if (!$user || '' !== self::store()->unavailableReason($user)) {
+            return self::error('invalid_grant', 'This site cannot issue a token to this user.');
         }
 
         if (!HubServer::userCanConnectAny($user)) {
             return self::error('invalid_grant', 'This user is not allowed to connect apps to this site.');
         }
 
-        $token = Store::createToken($user->ID, $row['name']);
+        $token = self::store()->issue($user->ID, $row['name']);
 
         if (is_wp_error($token)) {
             return self::error('server_error', $token->get_error_message(), 500);
@@ -520,10 +547,10 @@ class OAuthServer
             return $client;
         }
 
-        $checked = self::checkToken(self::param($params, 'token'));
+        $token = self::param($params, 'token');
 
-        if ($checked) {
-            Store::deleteToken($checked[0]->ID, $checked[1]['uuid']);
+        if ('' !== $token) {
+            self::store()->revoke($token);
         }
 
         // RFC 7009: answer 200 for unknown tokens too.
@@ -607,7 +634,7 @@ class OAuthServer
      */
     public static function authenticate($result)
     {
-        if (!empty($result) || '/' . HubServer::ROUTE_NAMESPACE . '/' . HubServer::ROUTE !== self::restRoute()) {
+        if (!empty($result) || '/' . HubServer::routeNamespace() . '/' . HubServer::ROUTE !== self::restRoute()) {
             return $result;
         }
 
@@ -617,15 +644,15 @@ class OAuthServer
             return $result;
         }
 
-        $checked = self::checkToken(trim(substr($header, 7)));
+        $user = self::store()->authenticate(trim(substr($header, 7)));
 
-        if (!$checked) {
+        if (!($user instanceof \WP_User)) {
             self::$tokenRejected = true;
 
             return new \WP_Error('invalid_token', 'The access token is invalid or was revoked.', ['status' => 401]);
         }
 
-        wp_set_current_user($checked[0]->ID);
+        wp_set_current_user($user->ID);
 
         // True, not the untouched null: it ends the chain. Core's cookie check
         // (priority 100) would otherwise set the user back to 0 when the
@@ -633,35 +660,6 @@ class OAuthServer
         return true;
     }
 
-    /**
-     * [user, application password item] for a valid access token, or null.
-     * Core checks the password, so the site's application password rules,
-     * the usage record and the failed-login hooks of security plugins apply.
-     */
-    private static function checkToken($token)
-    {
-        $parsed = Store::parseToken($token);
-        $user = $parsed ? get_userdata($parsed[0]) : null;
-
-        if (!$user) {
-            return null;
-        }
-
-        $item = null;
-        $capture = function ($authed, $used) use (&$item) {
-            $item = $used;
-        };
-
-        add_action('application_password_did_authenticate', $capture, 10, 2);
-        self::$checkingBearer = true;
-
-        $authed = wp_authenticate_application_password(null, $user->user_login, $parsed[1]);
-
-        self::$checkingBearer = false;
-        remove_action('application_password_did_authenticate', $capture, 10);
-
-        return $authed instanceof \WP_User && Store::isSitePassword($item) ? [$authed, $item] : null;
-    }
 
     /**
      * FluentHub's application passwords work only as a Bearer token on the
@@ -674,7 +672,7 @@ class OAuthServer
      */
     public static function restrictPasswords($error, $user, $item)
     {
-        if (self::$checkingBearer) {
+        if (ApplicationPasswordStore::checking()) {
             if (!Store::isSitePassword($item)) {
                 $error->add('fluent_hub_not_connected_app', __('This application password was not created by FluentHub sign-in on this site.', 'fluent-toolkit'));
             }
@@ -717,7 +715,7 @@ class OAuthServer
             return $result;
         }
 
-        $base = '/' . HubServer::ROUTE_NAMESPACE . '/' . self::ROUTE_BASE . '/';
+        $base = '/' . HubServer::routeNamespace() . '/' . self::ROUTE_BASE . '/';
 
         return in_array(self::restRoute(), [$base . 'token', $base . 'revoke'], true) ? null : $result;
     }
@@ -734,7 +732,7 @@ class OAuthServer
 
     private static function isHubRoute(\WP_REST_Request $request)
     {
-        return '/' . HubServer::ROUTE_NAMESPACE . '/' . HubServer::ROUTE === untrailingslashit($request->get_route());
+        return '/' . HubServer::routeNamespace() . '/' . HubServer::ROUTE === untrailingslashit($request->get_route());
     }
 
     /**
@@ -874,25 +872,23 @@ class OAuthServer
         $enabled = self::enabled();
         $apps = [];
 
-        // Listed also while sign-in is off: the passwords still exist, and the
+        // Listed also while sign-in is off: the tokens still exist, and the
         // admin may want to remove them.
-        if (class_exists('\WP_Application_Passwords')) {
-            $tokens = Store::tokens(self::APPS_SHOWN + 1);
-            $truncated = count($tokens) > self::APPS_SHOWN;
+        $tokens = self::store()->connections(self::APPS_SHOWN + 1);
+        $truncated = count($tokens) > self::APPS_SHOWN;
 
-            foreach (array_slice($tokens, 0, self::APPS_SHOWN) as $token) {
-                $user = get_userdata($token['user_id']);
+        foreach (array_slice($tokens, 0, self::APPS_SHOWN) as $token) {
+            $user = get_userdata($token['user_id']);
 
-                $apps[] = [
-                    'id'           => (string) $token['uuid'],
-                    'user_id'      => $token['user_id'],
-                    'name'         => (string) $token['name'],
-                    'user'         => $user ? $user->display_name : '#' . $token['user_id'],
-                    'user_login'   => $user ? $user->user_login : '',
-                    'created_at'   => (int) $token['created'],
-                    'last_used_at' => (int) $token['last_used'],
-                ];
-            }
+            $apps[] = [
+                'id'           => (string) $token['id'],
+                'user_id'      => (int) $token['user_id'],
+                'name'         => (string) $token['name'],
+                'user'         => $user ? $user->display_name : '#' . $token['user_id'],
+                'user_login'   => $user ? $user->user_login : '',
+                'created_at'   => (int) $token['created_at'],
+                'last_used_at' => (int) $token['last_used_at'],
+            ];
         }
 
         return [
