@@ -5,7 +5,8 @@ namespace FluentToolkit\Mcp\OAuth;
 defined('ABSPATH') || exit;
 
 /**
- * The OAuth authorization endpoint: wp-login.php?action=fluent_hub_authorize.
+ * The OAuth authorization endpoint: wp-login.php?action=fluent_hub_authorize
+ * (the action comes from HubServer::identity()).
  *
  * It lives on wp-login.php, not the REST API, because the REST API ignores the
  * login cookie without a nonce. The user signs in with the normal WordPress
@@ -73,12 +74,18 @@ class AuthorizePage
             self::fail(__('Your account has no access to the AI tools of any Fluent plugin on this site. Ask the site admin for access to the plugin you need.', 'fluent-toolkit'));
         }
 
-        if (!OAuthServer::appPasswordsAvailable()) {
+        $reason = OAuthServer::store()->unavailableReason($user);
+
+        if ('app_passwords_off' === $reason) {
             self::fail(__('Application passwords are turned off on this site, so apps cannot connect. Ask the site admin.', 'fluent-toolkit'));
         }
 
-        if (!wp_is_application_passwords_available_for_user($user)) {
+        if ('app_passwords_off_for_user' === $reason) {
             self::fail(__('Application passwords are turned off for your account, so this app cannot connect.', 'fluent-toolkit'));
+        }
+
+        if ('' !== $reason) {
+            self::fail(__('Apps cannot connect to this site right now. Ask the site admin.', 'fluent-toolkit'));
         }
 
         if ('POST' === strtoupper(isset($_SERVER['REQUEST_METHOD']) ? (string) $_SERVER['REQUEST_METHOD'] : '')) {
@@ -176,7 +183,10 @@ class AuthorizePage
                 /* translators: %s: the host the browser returns to after approval, for example claude.ai */
                 echo wp_kses(sprintf(__('The app chose its own name. After you approve, you return to %s.', 'fluent-toolkit'), '<code>' . esc_html($destination) . '</code>'), ['code' => []]);
             ?></p>
-            <p class="description"><?php esc_html_e('Approving creates an application password on your profile that works only for FluentHub MCP. Revoke it there to disconnect the app.', 'fluent-toolkit'); ?></p>
+            <?php $note = (string) OAuthServer::store()->consentNote(); ?>
+            <?php if ('' !== $note) : ?>
+                <p class="description"><?php echo esc_html($note); ?></p>
+            <?php endif; ?>
 
             <?php wp_nonce_field(self::nonceAction($client['client_id'])); ?>
 
@@ -223,7 +233,7 @@ class AuthorizePage
 
         $url = $redirect . (false === strpos($redirect, '?') ? '?' : '&') . http_build_query($args, '', '&', PHP_QUERY_RFC3986);
 
-        wp_redirect($url, 302, 'FluentHub');
+        wp_redirect($url, 302, \FluentToolkit\Mcp\HubServer::identity()['name']);
         exit;
     }
 }

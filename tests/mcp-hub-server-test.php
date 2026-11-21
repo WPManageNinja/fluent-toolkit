@@ -77,6 +77,11 @@ namespace {
         return !empty($GLOBALS['added_filters'][$hook]) && (false === $callback || in_array($callback, $GLOBALS['added_filters'][$hook], true));
     }
 
+    function wp_strip_all_tags($text)
+    {
+        return trim(strip_tags($text));
+    }
+
     function apply_filters($hook, $value, ...$args)
     {
         $GLOBALS['applied_filters'][] = [$hook, isset($args[0]) ? $args[0] : null, isset($args[1]) ? $args[1] : null];
@@ -428,6 +433,28 @@ namespace {
     if ($server['namespace'] !== 'fluent-hub' || $server['route'] !== 'mcp') {
         fail('Expected the hub at /fluent-hub/mcp.');
     }
+
+    // A host names the server: name, namespace and consent action. A value
+    // that is not valid keeps the default.
+    $GLOBALS['filter_overrides']['fluent_kit/mcp_hub_identity'] = function ($identity) {
+        return ['name' => '<b>Acme</b>', 'namespace' => 'ai', 'authorize_action' => 'acme_ai_connect'];
+    };
+    if (HubServer::identity() !== ['name' => 'Acme', 'namespace' => 'ai', 'authorize_action' => 'acme_ai_connect'] || HubServer::routeNamespace() !== 'ai') {
+        fail('Expected the identity filter to rename the server: ' . json_encode(HubServer::identity()));
+    }
+    $GLOBALS['filter_overrides']['fluent_kit/mcp_hub_identity'] = function ($identity) {
+        return ['name' => '  ', 'namespace' => '/ai/', 'authorize_action' => 'bad action'];
+    };
+    if (HubServer::identity() !== ['name' => 'FluentHub', 'namespace' => 'fluent-hub', 'authorize_action' => 'fluent_hub_authorize']) {
+        fail('Expected invalid identity values to keep the defaults: ' . json_encode(HubServer::identity()));
+    }
+    $GLOBALS['filter_overrides']['fluent_kit/mcp_hub_identity'] = function ($identity) {
+        return 'not an array';
+    };
+    if (HubServer::routeNamespace() !== 'fluent-hub') {
+        fail('Expected a non-array identity to keep the defaults.');
+    }
+    unset($GLOBALS['filter_overrides']['fluent_kit/mcp_hub_identity']);
 
     $tools = router_tools();
     $names = array_keys($tools);

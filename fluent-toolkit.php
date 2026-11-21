@@ -400,14 +400,14 @@ class FluentToolkitBootstrap
         $uuid = isset($_POST['id']) ? sanitize_text_field(wp_unslash($_POST['id'])) : '';
 
         // Not edit_user: on multisite only a network admin has it for other
-        // users. A token opens this site only, and Store::deleteToken() removes
-        // nothing but this site's FluentHub passwords, so the site admin
+        // users. A token opens this site only, and the token store's forget()
+        // removes nothing but this site's connections, so the site admin
         // (checked above) decides.
         if (!$userId) {
             wp_send_json(['message' => __('This app is already disconnected.', 'fluent-toolkit')], 404);
         }
 
-        if (!$uuid || !\FluentToolkit\Mcp\OAuth\Store::deleteToken($userId, $uuid)) {
+        if (!$uuid || !\FluentToolkit\Mcp\OAuth\OAuthServer::store()->forget($userId, $uuid)) {
             wp_send_json(['message' => __('This app is already disconnected.', 'fluent-toolkit')], 404);
         }
 
@@ -536,6 +536,8 @@ class FluentToolkitBootstrap
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'includes/Mcp/AdapterBootstrap.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'includes/Mcp/HubServer.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'includes/Mcp/OAuth/Store.php';
+        require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'includes/Mcp/OAuth/TokenStore.php';
+        require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'includes/Mcp/OAuth/ApplicationPasswordStore.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'includes/Mcp/OAuth/OAuthServer.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'includes/Mcp/OAuth/AuthorizePage.php';
         require_once FLUENT_TOOLKIT_PLUGIN_PATH . 'Classes/ToolkitHelper.php';
