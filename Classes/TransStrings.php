@@ -204,6 +204,7 @@ class TransStrings
             'Use this URL and header in any MCP app that connects over HTTP.' => __('Use this URL and header in any MCP app that connects over HTTP.', 'fluent-toolkit'),
             'User' => __('User', 'fluent-toolkit'),
             'Username' => __('Username', 'fluent-toolkit'),
+            'Videos, playlists, captions, player presets and viewing analytics.' => __('Videos, playlists, captions, player presets and viewing analytics.', 'fluent-toolkit'),
             /* translators: %s is the installed FluentHub version, for example v2.1.3 */
             'You\'re running %s. The update has new features and fixes.' => __('You\'re running %s. The update has new features and fixes.', 'fluent-toolkit'),
         ];

@@ -603,7 +603,7 @@ body.fluent_theme_dark {
 
   .ft-list-head {
     display: grid;
-    grid-template-columns: 1fr 150px 170px;
+    grid-template-columns: minmax(0, 1fr) 150px 170px;
     gap: 16px;
     padding: 12px 24px;
     border-bottom: 1px solid var(--border);
@@ -615,7 +615,7 @@ body.fluent_theme_dark {
 
   .ft-row {
     display: grid;
-    grid-template-columns: 1fr 150px 170px;
+    grid-template-columns: minmax(0, 1fr) 150px 170px;
     gap: 16px;
     align-items: center;
     padding: 18px 24px;
@@ -754,7 +754,7 @@ body.fluent_theme_dark {
 
     &.ft-status-ok           { background: var(--ok-soft); color: var(--ok-text); }
     &.ft-status-update       { background: var(--warn-soft); color: var(--warn-text); }
-    &.ft-status-notinstalled { color: var(--text-soft); }
+    &.ft-status-notinstalled { background: var(--hover); color: var(--text-muted); }
   }
 
   .ft-dot {
@@ -762,6 +762,7 @@ body.fluent_theme_dark {
     height: 6px;
     border-radius: 50%;
     flex-shrink: 0;
+    background: var(--text-soft);
 
     &.ft-dot-ok   { background: var(--ok); }
     &.ft-dot-warn { background: var(--warn); }

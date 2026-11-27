@@ -834,6 +834,7 @@ export default {
                 'fluent-community': 'fluentcommunity_icon.svg',
                 'fluent-support': 'fluentsupport_icon.svg',
                 'fluent-affiliate': 'fluentaffiliate_icon.svg',
+                'fluent-player': 'fluentplayer_icon.svg',
             };
             const vars = window.fluentToolkitVars || {};
             const base = vars.plugin_url || vars.pluginUrl || '';
@@ -851,6 +852,7 @@ export default {
                 'fluent-community': this.$t('Spaces, posts, comments, members and courses.'),
                 'fluent-support': this.$t('Tickets, replies, customers and support reports.'),
                 'fluent-affiliate': this.$t('Affiliates, referrals, commissions and payouts.'),
+                'fluent-player': this.$t('Videos, playlists, captions, player presets and viewing analytics.'),
             };
 
             return lines[product.slug] || '';
